@@ -17,7 +17,7 @@ export class AppComponent {
                   if (account) {
                         router.navigate(['/home']);
                   } else {
-                        router.navigate(['/auth/login']);
+                        router.navigate(['/auth/login'], {replaceUrl: true});
                   }
                   this.ready = true;
             })

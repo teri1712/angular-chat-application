@@ -86,7 +86,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
             this.authenticator.logout().subscribe(
                     (success) => {
                           if (success) {
-                                this.router.navigate(['/auth/login']);
+                                this.router.navigate(['/auth/login'], {replaceUrl: true});
                           }
                           ref.close();
                     }

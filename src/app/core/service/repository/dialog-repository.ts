@@ -50,6 +50,7 @@ export class DialogRepository implements Repository<Conversation, Dialog>,
 
       ngOnDestroy(): void {
             this.accountManager.eventChannel.unsubscribe(this.sub)
+
       }
 
       list(index?: Conversation): Observable<Dialog[]> {

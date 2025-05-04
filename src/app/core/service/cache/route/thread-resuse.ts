@@ -1,4 +1,4 @@
-import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from "@angular/router";
+import {ActivatedRouteSnapshot, DetachedRouteHandle, PRIMARY_OUTLET, RouteReuseStrategy} from "@angular/router";
 import {Injectable} from "@angular/core";
 import {LoginComponent} from "../../../../auth/login/login.component";
 
@@ -8,7 +8,7 @@ export class ReuseThreadStrategy implements RouteReuseStrategy {
       private cached?: DetachedRouteHandle
 
       private isThreadList(route: ActivatedRouteSnapshot): boolean {
-            return route.outlet === 'side-bar' &&
+            return route.outlet === PRIMARY_OUTLET &&
                     route.routeConfig?.path === 'list'
       }
 

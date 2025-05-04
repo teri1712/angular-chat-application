@@ -39,6 +39,9 @@ export class DevelopmentModeInterceptor implements HttpInterceptor {
                           .set('Cache-Control', 'no-cache, no-store, must-revalidate')
                           .set('Pragma', 'no-cache')
                           .set('Expires', '0')
+                  req = req.clone({
+                        headers: headers,
+                  })
             }
             if (!environment.testing) {
                   return next.handle(req);
