@@ -1,0 +1,20 @@
+<div class="left-container" [ngStyle]="{
+    'width': textEmpty? '40px' : '0px',
+}">
+    <button class="left-button" mat-icon-button
+            [ngStyle]="{
+    'scale': textEmpty? '1' : '0',
+}" (click)="imageInput.click()">
+        <mat-icon>imagesmode</mat-icon>
+        <input #imageInput type="file" hidden (change)="sendImage($event)">
+    </button>
+
+</div>
+<input matInput placeholder="Type something"
+       [(ngModel)]="textContent"
+       (ngModelChange)="onChange($event)"
+       (keydown.enter)="onSendClicked()"
+>
+<button class="right-button" mat-icon-button (click)="onSendClicked()">
+    <mat-icon [svgIcon]="textEmpty? 'like' : 'send'" color="primary"></mat-icon>
+</button>

@@ -1,0 +1,10 @@
+<mat-form-field appearance="outline">
+    <mat-icon matPrefix>search</mat-icon>
+    <button *ngIf="query.length != 0" mat-icon-button matSuffix class="me-1" (click)="clear()">
+        <mat-icon>close</mat-icon>
+    </button>
+    <input type="text" matInput placeholder="Search someone"
+           [(ngModel)]="query"
+           (ngModelChange)="onChange($event)"
+    >
+</mat-form-field>

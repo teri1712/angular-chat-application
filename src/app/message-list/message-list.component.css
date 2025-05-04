@@ -1,0 +1,29 @@
+:host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+
+      background-image: var(--wallpaper);
+      background-size: cover;
+      background-position: center;
+
+}
+
+app-chat-info-bar {
+      flex: 0 0 0
+}
+
+app-input-bar {
+      flex: 0 0 0
+}
+
+.list {
+      flex: 1 0 0;
+}
+
+.loading {
+      display: flex;
+      width: 100%;
+      flex-direction: row;
+      justify-content: center;
+}

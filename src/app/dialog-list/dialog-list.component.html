@@ -1,0 +1,16 @@
+<cdk-virtual-scroll-viewport #viewport itemSize="100"
+                             style="height: 100%; width: 100%;"
+                             (scrolledIndexChange)="expandIfNecessary()"
+>
+
+    <div
+            *cdkVirtualFor="let item of dialogList; let i = index"
+    >
+        <div class="loading" *ngIf="isLoading(item) && item == true">
+            <mat-spinner [diameter]="25"></mat-spinner>
+        </div>
+        <app-dialog *ngIf="isDialog(item) && item.conversation.partner.role !== 'ROLE_ADMIN'"
+                    [conversation]="item.conversation" [newest]="item.newest"
+                    [onlineAt]="item.onlineAt"></app-dialog>
+    </div>
+</cdk-virtual-scroll-viewport>

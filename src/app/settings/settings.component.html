@@ -1,0 +1,8 @@
+<h3 class="pb-3 ps-2">Settings</h3>
+<app-settings-item [icon]="themeService.theme?'light_mode':'dark_mode'" info="Light mode">
+    <mat-slide-toggle
+            setting-action
+            [(ngModel)]="themeService.theme"
+            [disabled]="false">
+    </mat-slide-toggle>
+</app-settings-item>

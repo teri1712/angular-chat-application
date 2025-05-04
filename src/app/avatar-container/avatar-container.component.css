@@ -1,0 +1,13 @@
+
+.avatar img {
+      border-radius: 50%;
+      object-fit: cover;
+      flex: 0 0 0;
+}
+
+.avatar .mat-badge-content {
+      color: black;
+      background-color: #70c1b3;
+      animation: none;
+      transition: none;
+}

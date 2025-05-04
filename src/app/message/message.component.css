@@ -1,0 +1,16 @@
+:host {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+}
+
+.time {
+      font-size: 0.8rem;
+      padding: 0.5rem 0;
+}
+
+.message-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+}

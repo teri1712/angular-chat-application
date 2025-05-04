@@ -1,0 +1,30 @@
+<div class="avatar-holder">
+    <img *ngIf="!isMessage(message)
+    || message.position === Position.Single
+    || message.position === Position.Bottom"
+         [src]="partner.avatar.uri"
+         alt="">
+</div>
+<app-icon-message *ngIf="isMessage(message) && !!message.iconEvent" [iconEvent]="message.iconEvent"/>
+<div *ngIf="!isMessage(message) || message.iconEvent === undefined"
+     [ngStyle]="{
+                  'overflow': 'hidden',
+                  'border-top-left-radius':  (
+                     !isMessage(message)
+                  || message.position === Position.Single
+                  || message.position === Position.Top) ? '20px' : '3px',
+                  'border-top-right-radius': '20px',
+                  'border-bottom-right-radius': '20px',
+                  'border-bottom-left-radius':  (
+                     !isMessage(message)
+                  || message.position === Position.Single
+                  || message.position === Position.Bottom) ? '20px' : '3px',
+                }"
+     [ngClass]="{
+                 'mt-4': isTyping(message)
+                }"
+>
+    <app-text-message *ngIf="isMessage(message) && !!message.textEvent" [textEvent]="message.textEvent"/>
+    <app-image-message *ngIf="isMessage(message) && !!message.imageEvent" [imageEvent]="message.imageEvent"/>
+    <app-type-message *ngIf="!isMessage(message)"/>
+</div>

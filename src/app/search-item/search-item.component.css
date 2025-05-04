@@ -1,0 +1,14 @@
+:host {
+      width: 100%;
+      padding: 0.5rem 0.5rem;
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
+      align-items: center;
+}
+
+
+:host(:hover) {
+      background: var(--mat-sys-neutral-variant60);
+      cursor: pointer;
+}

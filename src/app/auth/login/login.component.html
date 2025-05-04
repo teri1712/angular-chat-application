@@ -1,0 +1,51 @@
+<h1 class="pb-2">LOGIN</h1>
+<mat-spinner *ngIf="inProgress" [diameter]="30"></mat-spinner>
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <div class="authentication-error my-2" *ngIf="error">
+        <mat-icon matPrefix>error</mat-icon>
+        {{ error }}
+    </div>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Enter your username</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input
+                matInput
+                formControlName="username"
+                required
+                (blur)="updateUsernameError()"
+                placeholder="Username">
+        <mat-error *ngIf="usernameError">{{ usernameError }}</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Enter your password</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input
+                matInput
+                [type]="passwordVisibility ? 'text' : 'password'"
+                formControlName="password"
+                required
+                (blur)="updatePasswordError()"
+                placeholder="Password">
+        <button type="button" mat-icon-button matSuffix (click)="passwordVisibility = !passwordVisibility">
+            <mat-icon>{{ passwordVisibility ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="passwordError">{{ passwordError }}</mat-error>
+    </mat-form-field>
+    <button type="submit" mat-flat-button [disabled]="!form.valid || inProgress">Submit</button>
+</form>
+
+
+<a routerLink="/auth/sign-up"
+   class="sign-up link-offset-2 mt-3">
+    Don't have an account?
+</a>
+<a [href]="oauth2_url"
+   class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover mt-3">
+    <mat-icon svgIcon="google"></mat-icon>
+    Or sign in with Google
+</a>
+
+
+

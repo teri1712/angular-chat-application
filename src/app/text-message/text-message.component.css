@@ -1,0 +1,5 @@
+:host {
+      display: block;
+      padding: 0.3rem 0.75rem;
+      background-color: var(--mat-sys-neutral-variant60)
+}

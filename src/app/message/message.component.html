@@ -1,0 +1,7 @@
+<span *ngIf="isMessage(message) && message.fixedDisplayTime" class="time">
+    {{ formatTime(message.receiveTime) }}
+</span>
+<div class="message-container" [style.justify-content]="mine? 'end' : 'start'">
+    <app-left-message *ngIf="!mine" [message]="message" [partner]="partner"/>
+    <app-right-message *ngIf="mine" [message]="toOwnerMessage(message)"/>
+</div>

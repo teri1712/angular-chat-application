@@ -1,0 +1,11 @@
+.sent {
+      color: grey;
+      margin: 0.25rem 1rem;
+      font-size: 0.8rem;
+}
+
+:host {
+      display: flex;
+      flex-direction: column;
+      align-items: end;
+}

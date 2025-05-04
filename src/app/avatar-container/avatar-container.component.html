@@ -1,0 +1,15 @@
+<div class="avatar"
+     [matBadgeHidden]="diffOnline >= ONE_HOUR_SECONDS"
+     [matBadge]="diffOnline > ONE_MINUTE_SECONDS ?
+        Math.floor((diffOnline + ONE_MINUTE_SECONDS - 1) / ONE_MINUTE_SECONDS) + 'm' :
+     'o'"
+     [ngStyle]="{
+        'fontSize': diffOnline > ONE_MINUTE_SECONDS ? '0.6rem' : '0rem'
+     }"
+     matBadgePosition="below after"
+>
+    <img [src]="avatarUri" alt="" [ngStyle]="{
+        'width': size,
+        'height': size
+    }">
+</div>

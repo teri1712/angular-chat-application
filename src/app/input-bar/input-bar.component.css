@@ -1,0 +1,43 @@
+:host {
+      display: flex;
+      flex-direction: row;
+      padding: 0.5rem 0.5rem;
+      align-items: center;
+      gap: 5px;
+}
+
+input {
+      flex: 1 0 0;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 50px;
+      padding: 0.4rem 1rem;
+      color: var(--mat-sys-on-surface);
+      background-color: var(--mat-sys-neutral-variant60);
+}
+
+button {
+      color: var(--mat-sys-primary);
+}
+
+
+button.right-button {
+      padding: 0;
+}
+
+.left-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: width 0.2s ease;
+}
+
+.left-button {
+      transition: scale 0.2s ease;
+}
+
+input:focus {
+      outline: none;
+      border: none;
+      box-shadow: none;
+}

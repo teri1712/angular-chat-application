@@ -1,0 +1,17 @@
+:host {
+      height: 35px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 3px;
+      padding: 0.3rem 1rem;
+      background-color: var(--mat-sys-neutral-variant60)
+}
+
+.dot {
+      width: 6px;
+      height: 6px;
+      transition: transform 0.25s ease;
+      background: var(--mat-sys-neutral-variant60);
+      border-radius: 50%;
+}

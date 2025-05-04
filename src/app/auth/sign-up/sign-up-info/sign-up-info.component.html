@@ -1,0 +1,66 @@
+<h1 class="pb-2">SIGN UP</h1>
+<form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="fill">
+        <mat-label>Enter your username</mat-label>
+        <input
+                matInput
+                formControlName="username"
+                required
+                (blur)="updateUsernameError()"
+                placeholder="Username">
+        <mat-error *ngIf="usernameError">{{ usernameError }}</mat-error>
+
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Enter your password</mat-label>
+
+        <input
+                matInput
+                [type]="passwordVisibility ? 'text' : 'password'"
+                formControlName="password"
+                required
+                (blur)="updatePasswordError()"
+                placeholder="Password">
+        <button type="button" mat-icon-button matSuffix (click)="passwordVisibility = !passwordVisibility">
+            <mat-icon>{{ passwordVisibility ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="passwordError">{{ passwordError }}</mat-error>
+
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+        <mat-label>Enter your fullname</mat-label>
+        <input
+                matInput
+                formControlName="fullname"
+                required
+                (blur)="updateFullnameError()"
+                placeholder="Fullname">
+        <mat-error *ngIf="fullnameError">{{ fullnameError }}</mat-error>
+
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+        <mat-label>DOB</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="dob">
+        <mat-hint style="font-size: 12px">MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker>
+            <mat-datepicker-actions>
+                <button type="button" mat-button matDatepickerCancel>Cancel</button>
+                <button type="button" mat-raised-button matDatepickerApply>Apply</button>
+            </mat-datepicker-actions>
+        </mat-datepicker>
+    </mat-form-field>
+
+
+    <mat-form-field appearance="fill">
+        <mat-label>Gender</mat-label>
+        <mat-select formControlName="gender">
+            @for (g of genders; track g) {
+                <mat-option [value]="g">{{ g }}</mat-option>
+            }
+        </mat-select>
+    </mat-form-field>
+
+    <button type="submit" mat-flat-button>Next</button>
+</form>

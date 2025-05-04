@@ -1,0 +1,9 @@
+<app-avatar-container [onlineAt]="onlineAt" [avatarUri]="partner.avatar.uri" size="45px"/>
+<ng-template [ngIf]="!!newest">
+    <div class="middle">
+        <span class="partner-name" [style.font-weight]="nameWeight">{{ conversation.partner.name }}</span>
+        <span class="message"
+              [style.font-weight]="contentWeight">{{ messageText }}</span>
+    </div>
+    <img class="seen mt-2" *ngIf="seen && mine" [src]="partner.avatar.uri" alt="">
+</ng-template>

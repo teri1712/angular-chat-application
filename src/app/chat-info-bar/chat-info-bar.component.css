@@ -1,0 +1,40 @@
+:host {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      box-shadow: 0 2px 4px -1px var(--mat-float);
+}
+
+.partner-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 15px;
+}
+
+.partner-info {
+
+      display: flex;
+      flex-direction: column;
+}
+
+.partner-container img {
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      object-fit: cover;
+}
+
+.partner-name {
+      font-weight: 500;
+}
+
+.partner-status {
+      font-size: 0.9rem;
+}
+
+mat-icon {
+      color: var(--mat-sys-primary)
+}

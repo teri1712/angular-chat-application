@@ -1,0 +1,15 @@
+<app-chat-info-bar [partner]="partner" [onlineAt]="onlineAt"/>
+<cdk-virtual-scroll-viewport
+        itemSize="50"
+        #viewport class="list my-2" (scrolledIndexChange)="onScrollChanged($event)">
+    <div
+            *cdkVirtualFor="let item of renderedList;">
+        <div class="loading" *ngIf="isLoading(item) && item == true">
+            <mat-spinner [diameter]="25"></mat-spinner>
+        </div>
+        <app-message *ngIf="isTypeOrMessage(item)" class="mx-3" style="margin-top: 2px"
+                     [message]="item"
+                     [partner]="partner"/>
+    </div>
+</cdk-virtual-scroll-viewport>
+<app-input-bar [conversation]="conversation" [chatSubscription]="chatSubscription"/>

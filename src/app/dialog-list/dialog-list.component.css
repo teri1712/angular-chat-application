@@ -1,0 +1,12 @@
+:host {
+      display: block;
+      height: calc(100% - 150px);
+      width: 100%;
+}
+
+.loading {
+      display: flex;
+      width: 100%;
+      flex-direction: row;
+      justify-content: center;
+}

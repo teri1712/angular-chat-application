@@ -1,0 +1,53 @@
+:host {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 10px 0.5rem;
+      gap: 20px;
+      transition: background 0.2s ease-in-out;
+      border-radius: 5px;
+}
+
+
+:host(:hover) {
+      background: var(--mat-sys-neutral-variant60);
+      cursor: pointer;
+}
+
+
+.avatar-container .mat-badge-content {
+      background-color: #70c1b3;
+}
+
+img.avatar {
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      object-fit: cover;
+      flex: 0 0 0;
+
+}
+
+.middle {
+      flex: 1 0 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+}
+
+img.seen {
+      border-radius: 50%;
+      width: 15px;
+      object-fit: cover;
+      height: 15px;
+      flex: 0 0 0;
+}
+
+.partner-name {
+      font-size: 1rem;
+}
+
+.message {
+      font-size: 0.9rem;
+}

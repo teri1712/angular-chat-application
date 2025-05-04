@@ -1,0 +1,9 @@
+mat-icon {
+      width: 40px;
+      height: 40px;
+      color: var(--mat-sys-primary);
+}
+
+:host {
+      display: block;
+}

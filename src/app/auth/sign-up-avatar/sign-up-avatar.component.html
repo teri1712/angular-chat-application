@@ -1,0 +1,14 @@
+<h1 class="pb-2">SETTING AVATAR</h1>
+
+<div class="image-container">
+
+    <div class="mask">
+        <img [src]="uri" alt="">
+    </div>
+    <button mat-mini-fab (click)="fileInput.click()">
+        <mat-icon>add_a_photo</mat-icon>
+    </button>
+    <input #fileInput type="file" hidden (change)="onAvatarSelected($event)"/>
+
+</div>
+<button class="w-100 mt-5" type="submit" mat-flat-button (click)="onSubmit()">Finish</button>

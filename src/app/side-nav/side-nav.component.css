@@ -1,0 +1,17 @@
+:host {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+}
+
+img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      clip-path: circle(50%);
+}
+
+[mat-mini-fab].un-selected {
+      background-color: transparent;
+}

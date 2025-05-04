@@ -37,8 +37,15 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "bootstrap/dist/css/bootstrap.min.css",
+              "src/styles.css",
+              "src/styles/theme.scss"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/styles"
+              ]
+            },
             "scripts": []
           },
           "configurations": {
@@ -95,7 +102,8 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/styles/theme.scss"
             ],
             "scripts": []
           }

@@ -1,0 +1,12 @@
+<app-icon-message *ngIf="!!message.iconEvent" [iconEvent]="message.iconEvent"/>
+<div *ngIf="message.iconEvent === undefined" [ngStyle]="{
+   'overflow': 'hidden',
+  'border-top-left-radius':  '20px',
+  'border-top-right-radius': (message.position === Position.Single || message.position === Position.Top) ? '20px' : '3px',
+  'border-bottom-right-radius': (message.position === Position.Single || message.position === Position.Bottom) ? '20px' : '3px',
+  'border-bottom-left-radius':  '20px',
+}">
+    <app-text-message *ngIf="!!message.textEvent" [textEvent]="message.textEvent"/>
+    <app-image-message *ngIf="!!message.imageEvent" [imageEvent]="message.imageEvent"/>
+</div>
+<span class="sent" *ngIf="message.isLastSent">Sent</span>
