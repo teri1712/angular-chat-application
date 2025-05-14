@@ -31,7 +31,7 @@ export class AccountService implements AccountRepository, Authenticator {
                           this.onAccountLogin(accountEntry.account)
                     },
                     (error: HttpErrorResponse) => {
-                          if (error.status === 401) {
+                          if (error.status === 401 || error.status === 403) {
                                 this.accountSubject.next(null)
                           } else {
                                 //network

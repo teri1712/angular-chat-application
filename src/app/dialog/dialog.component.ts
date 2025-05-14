@@ -1,23 +1,22 @@
-import {Component, HostListener, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, HostListener, Input, OnInit} from '@angular/core';
 import {Conversation} from "../model/conversation";
 import {Router} from "@angular/router";
 import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {MatBadgeModule} from "@angular/material/badge";
-import {formatRelativeTime, ONE_HOUR_SECONDS, ONE_MINUTE_SECONDS} from "../core/utils/time";
 import {Message} from "../model/message";
 import {User} from "../model/user";
-import {announcementOf} from "../core/utils/notification";
 import {CommonModule} from "@angular/common";
 import {AvatarContainerComponent} from "../avatar-container/avatar-container.component";
+import {AnnouncementPipe} from "../core/utils/pipes/AnnouncementPipe";
 
 @Component({
       selector: 'app-dialog',
-      imports: [CommonModule, AvatarContainerComponent, MatBadgeModule, MatButtonModule, MatIconModule],
+      imports: [CommonModule, AvatarContainerComponent, MatBadgeModule, MatButtonModule, MatIconModule, AnnouncementPipe],
       templateUrl: './dialog.component.html',
       styleUrl: './dialog.component.css'
 })
-export class DialogComponent implements OnInit, OnChanges {
+export class DialogComponent implements OnInit {
 
       @Input() conversation!: Conversation;
       @Input() newest?: Message;
@@ -41,16 +40,10 @@ export class DialogComponent implements OnInit, OnChanges {
             return !this.seen && !this.mine ? 'bold' : 'normal'
       }
 
-      protected messageText!: string;
 
       constructor(private router: Router) {
       }
 
-      ngOnChanges(changes: SimpleChanges): void {
-            if (!!this.newest) {
-                  this.messageText = announcementOf(this.conversation, this.newest)
-            }
-      }
 
       ngOnInit(): void {
             this.partner = this.conversation.partner;
@@ -65,10 +58,5 @@ export class DialogComponent implements OnInit, OnChanges {
             }])
       }
 
-      protected readonly formatRelativeTime = formatRelativeTime;
       protected readonly Date = Date;
-
-      protected readonly ONE_HOUR_SECONDS = ONE_HOUR_SECONDS;
-      protected readonly ONE_MINUTE_SECONDS = ONE_MINUTE_SECONDS;
-      protected readonly Math = Math;
 }

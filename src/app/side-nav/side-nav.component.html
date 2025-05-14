@@ -14,7 +14,8 @@
     <img *ngIf="account != null" [src]="account!.avatar.uri" alt="avatar">
 </button>
 <mat-menu #user_actions="matMenu">
-    <button mat-menu-item>Profile</button>
+    <a style="display: none" [href]="environment.API_URL + '/profile'" target="_blank" #profile></a>
+    <button mat-menu-item (click)="profile.click()">Profile</button>
     <button mat-menu-item (click)="logout()">Logout</button>
 </mat-menu>
 

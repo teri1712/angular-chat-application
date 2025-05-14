@@ -3,7 +3,7 @@
     <div class="middle">
         <span class="partner-name" [style.font-weight]="nameWeight">{{ conversation.partner.name }}</span>
         <span class="message"
-              [style.font-weight]="contentWeight">{{ messageText }}</span>
+              [style.font-weight]="contentWeight">{{ newest | announcement: conversation }}</span>
     </div>
     <img class="seen mt-2" *ngIf="seen && mine" [src]="partner.avatar.uri" alt="">
 </ng-template>

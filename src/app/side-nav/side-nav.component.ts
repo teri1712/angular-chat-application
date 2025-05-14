@@ -7,6 +7,7 @@ import {filter, Subscription} from "rxjs";
 import {Authenticator} from "../core/service/auth/authenticator";
 import {AccountManager} from "../core/service/auth/account-manager";
 import {settingRoute, threadsRoute} from "../home-route.module";
+import {environment} from "../environments";
 
 enum Routes {
       THREAD, SETTINGS
@@ -94,4 +95,5 @@ export class SideNavComponent implements OnInit, OnDestroy {
       }
 
       protected readonly Routes = Routes;
+      protected readonly environment = environment;
 }

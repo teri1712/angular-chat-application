@@ -39,7 +39,7 @@ import {ThreadComponent} from "./thread/thread.component";
       declarations: [
             HomeComponent,
             SideNavComponent,
-            SettingsComponent
+            SettingsComponent,
       ]
 })
 export class HomeModule {

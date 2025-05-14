@@ -1,18 +1,19 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Message} from "../model/message";
 import {CommonModule} from "@angular/common";
-import {formatTime} from "../core/utils/time";
 import {User} from "../model/user";
 import {LeftMessageComponent} from "../left-message/left-message.component";
 import {RightMessageComponent} from "../right-message/right-message.component";
 import {TypeEvent} from "../model/type-event";
 import {isMessage, toOwnerMessage} from "../core/utils/item-type-check";
 import {AccountManager} from "../core/service/auth/account-manager";
+import {FormatTimePipe} from "../core/utils/pipes/FormatTimePipe";
 
 @Component({
       selector: 'app-message',
       imports: [
             CommonModule,
+            FormatTimePipe,
             LeftMessageComponent,
             RightMessageComponent
       ],
@@ -38,7 +39,6 @@ export class MessageComponent implements OnInit {
                     && this.user.id === this.message.sender
       }
 
-      protected readonly formatTime = formatTime;
       protected readonly isMessage = isMessage;
       protected readonly toOwnerMessage = toOwnerMessage;
 }
