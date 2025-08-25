@@ -1,4 +1,5 @@
-import {Equality} from "../core/utils/array";
+import {Equality} from "../usecases/utils/array";
+import {uuidCompare} from "../utils/uuid.utils";
 
 export class ChatIdentifier implements Equality {
       private stringValue?: string;
@@ -10,6 +11,11 @@ export class ChatIdentifier implements Equality {
       }
 
       constructor(public firstUser: string = "", public secondUser: string = "") {
+            if (uuidCompare(firstUser, secondUser) > 0) {
+                  const temp = this.firstUser;
+                  this.firstUser = this.secondUser;
+                  this.secondUser = temp;
+            }
       }
 
       equals(other: any): boolean {

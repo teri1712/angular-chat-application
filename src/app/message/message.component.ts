@@ -5,9 +5,9 @@ import {User} from "../model/user";
 import {LeftMessageComponent} from "../left-message/left-message.component";
 import {RightMessageComponent} from "../right-message/right-message.component";
 import {TypeEvent} from "../model/type-event";
-import {isMessage, toOwnerMessage} from "../core/utils/item-type-check";
-import {AccountManager} from "../core/service/auth/account-manager";
-import {FormatTimePipe} from "../core/utils/pipes/FormatTimePipe";
+import {isMessage, toOwnerMessage} from "../usecases/utils/item-type-check";
+import {AccountManager} from "../usecases/service/auth/account-manager";
+import {FormatTimePipe} from "../usecases/utils/pipes/FormatTimePipe";
 
 @Component({
       selector: 'app-message',

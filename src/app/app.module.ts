@@ -7,14 +7,14 @@ import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@ang
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {AuthGuard} from './auth.guard';
 import {SplashComponent} from './splash/splash.component';
-import {CredentialInterceptor} from "./core/service/auth/credential.interceptor";
-import {AccountService} from "./core/service/auth/account.service";
-import {AccountRepository} from "./core/service/auth/account-repository";
+import {CredentialInterceptor} from "./usecases/service/auth/credential.interceptor";
+import {AccountService} from "./usecases/service/auth/account.service";
+import {AccountRepository} from "./usecases/service/auth/account-repository";
 import {DevelopmentModeInterceptor} from "./mock/development-mode-interceptor.service";
-import {Authenticator} from "./core/service/auth/authenticator";
+import {Authenticator} from "./usecases/service/auth/authenticator";
 import {IconRegistry} from './res/IconRegistry';
 import {RouteReuseStrategy} from "@angular/router";
-import {ReuseThreadStrategy} from "./core/service/cache/route/thread-resuse";
+import {ReuseThreadStrategy} from "./usecases/service/cache/route/thread-resuse";
 
 @NgModule({
       declarations: [AppComponent, SplashComponent],

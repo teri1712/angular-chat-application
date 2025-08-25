@@ -1,0 +1,27 @@
+<h1 mat-dialog-title>Chat Settings</h1>
+<mat-dialog-content>
+    <div style="margin-bottom: 16px;">
+        <mat-form-field appearance="fill" style="width: 100%;">
+            <mat-label>Room Name</mat-label>
+            <input matInput [(ngModel)]="preference.roomName">
+        </mat-form-field>
+    </div>
+    <div style="margin-bottom: 16px;">
+        <button mat-raised-button class="d-flex justify-content-start ps-3" (click)="openIconSelectionDialog()"
+                style="width: 100%;">
+            <mat-icon [svgIcon]="getIcon(preference.resourceId)" style="height : 30px"></mat-icon>
+            Select Icon
+        </button>
+    </div>
+    <div style="margin-bottom: 16px;">
+        <button mat-raised-button class="d-flex justify-content-start ps-3" (click)="openThemeSelectionDialog()"
+                style="width: 100%;">
+            <mat-icon>palette</mat-icon>
+            Select Theme
+        </button>
+    </div>
+</mat-dialog-content>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Cancel</button>
+    <button mat-button (click)="submit()" cdkFocusInitial>Submit</button>
+</div>

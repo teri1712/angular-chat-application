@@ -1,0 +1,15 @@
+<h1 mat-dialog-title>Select a theme</h1>
+<div mat-dialog-content>
+    <div *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center; height: 50px;">
+        <mat-spinner diameter="30"></mat-spinner>
+    </div>
+    <div *ngIf="!isLoading" class="theme-grid">
+        <div *ngFor="let theme of themes" class="theme-item" (click)="selectTheme(theme)">
+            <img class="theme-preview" [src]="theme.background.uri" [alt]="theme.id">
+            <div>{{ theme.id }}</div>
+        </div>
+    </div>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Cancel</button>
+</div>

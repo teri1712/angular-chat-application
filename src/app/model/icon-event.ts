@@ -3,7 +3,7 @@ export class IconEvent {
       }
 
       static from(raw: any): IconEvent {
-            const resourceId = typeof raw.resourceId === 'number' ? raw.resourceId : 0;
+            const resourceId = raw.resourceId ?? 0;
             return new IconEvent(resourceId);
       }
 }

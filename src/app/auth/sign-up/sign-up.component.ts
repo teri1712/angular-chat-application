@@ -5,7 +5,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {MatDialog} from "@angular/material/dialog";
 import {ProgressDialogComponent} from "../../progress-dialog/progress-dialog.component";
 import {finalize} from "rxjs";
-import {Authenticator} from "../../core/service/auth/authenticator";
+import {Authenticator} from "../../usecases/service/auth/authenticator";
 
 @Component({
       selector: 'app-sign-up',

@@ -1,7 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {Conversation} from "../model/conversation";
 import {AvatarContainerComponent} from "../avatar-container/avatar-container.component";
-import {User} from "../model/user";
 
 @Component({
       selector: 'app-search-item',
@@ -14,7 +13,5 @@ import {User} from "../model/user";
 export class SearchItemComponent {
       @Input() conversation!: Conversation;
 
-      protected get partner(): User {
-            return this.conversation.partner
-      }
+      protected readonly Conversation = Conversation;
 }

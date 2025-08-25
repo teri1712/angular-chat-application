@@ -4,8 +4,8 @@ import {ActivationEnd, Router} from "@angular/router";
 import {ProgressDialogComponent} from "../progress-dialog/progress-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {filter, Subscription} from "rxjs";
-import {Authenticator} from "../core/service/auth/authenticator";
-import {AccountManager} from "../core/service/auth/account-manager";
+import {Authenticator} from "../usecases/service/auth/authenticator";
+import {AccountManager} from "../usecases/service/auth/account-manager";
 import {settingRoute, threadsRoute} from "../home-route.module";
 import {environment} from "../environments";
 

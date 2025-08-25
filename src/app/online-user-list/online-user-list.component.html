@@ -1,0 +1,7 @@
+<div class="user-list">
+    <div class="d-flex flex-column align-items-center gap-2" *ngFor="let online of onlines">
+        <app-avatar-container
+                [conversation]="online.conversation" [onlineAt]="online.at" size="60px"></app-avatar-container>
+        <span style="font-size: 0.9rem">{{ online.user.name }}</span>
+    </div>
+</div>

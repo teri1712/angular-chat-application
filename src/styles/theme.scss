@@ -42,8 +42,7 @@ body {
   color: var(--mat-sys-on-background);
 }
 
-.cdk-virtual-scroll-viewport {
-
+* {
   &::-webkit-scrollbar-track {
     background: transparent;
   }
@@ -58,4 +57,3 @@ body {
 
   scrollbar-color: #888 transparent;
 }
-

@@ -26,5 +26,6 @@
 >
     <app-text-message *ngIf="isMessage(message) && !!message.textEvent" [textEvent]="message.textEvent"/>
     <app-image-message *ngIf="isMessage(message) && !!message.imageEvent" [imageEvent]="message.imageEvent"/>
+    <app-file-message *ngIf="isMessage(message) && !!message.fileEvent" [fileEvent]="message.fileEvent"/>
     <app-type-message *ngIf="!isMessage(message)"/>
 </div>

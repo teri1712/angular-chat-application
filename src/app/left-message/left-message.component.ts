@@ -7,8 +7,9 @@ import {CommonModule} from "@angular/common";
 import {TextMessageComponent} from "../text-message/text-message.component";
 import {TypeEvent} from "../model/type-event";
 import {TypeMessageComponent} from "../type-message/type-message.component";
-import {isMessage, isTyping} from "../core/utils/item-type-check";
-import {AccountManager} from "../core/service/auth/account-manager";
+import {isMessage, isTyping} from "../usecases/utils/item-type-check";
+import {AccountManager} from "../usecases/service/auth/account-manager";
+import {FileMessageComponent} from "../file-message/file-message.component";
 
 @Component({
       selector: 'app-left-message',
@@ -17,7 +18,8 @@ import {AccountManager} from "../core/service/auth/account-manager";
             CommonModule,
             TextMessageComponent,
             ImageMessageComponent,
-            TypeMessageComponent
+            TypeMessageComponent,
+            FileMessageComponent
       ],
       templateUrl: './left-message.component.html',
       styleUrl: './left-message.component.css'

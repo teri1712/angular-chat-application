@@ -1,23 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ChatInfoBarComponent } from './chat-info-bar.component';
+import {ChatInfoBarComponent} from './chat-info-bar.component';
 
 describe('ChatInfoBarComponent', () => {
-  let component: ChatInfoBarComponent;
-  let fixture: ComponentFixture<ChatInfoBarComponent>;
+      let component: ChatInfoBarComponent;
+      let fixture: ComponentFixture<ChatInfoBarComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [ChatInfoBarComponent]
-    })
-    .compileComponents();
+      beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                  imports: [ChatInfoBarComponent]
+            })
+                    .compileComponents();
 
-    fixture = TestBed.createComponent(ChatInfoBarComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+            fixture = TestBed.createComponent(ChatInfoBarComponent);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+      });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+      it('should create', () => {
+            expect(component).toBeTruthy();
+      });
 });

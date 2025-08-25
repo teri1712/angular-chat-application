@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Select an icon</h1>
+<div mat-dialog-content>
+    <mat-grid-list cols="4" rowHeight="100px">
+        <mat-grid-tile *ngFor="let icon of icons | keyvalue" (click)="dialogRef.close(icon.key)">
+            <mat-icon [svgIcon]="icon.value"></mat-icon>
+        </mat-grid-tile>
+    </mat-grid-list>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Cancel</button>
+</div>

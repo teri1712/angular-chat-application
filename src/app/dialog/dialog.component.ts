@@ -8,7 +8,7 @@ import {Message} from "../model/message";
 import {User} from "../model/user";
 import {CommonModule} from "@angular/common";
 import {AvatarContainerComponent} from "../avatar-container/avatar-container.component";
-import {AnnouncementPipe} from "../core/utils/pipes/AnnouncementPipe";
+import {AnnouncementPipe} from "../usecases/utils/pipes/AnnouncementPipe";
 
 @Component({
       selector: 'app-dialog',

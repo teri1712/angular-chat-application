@@ -1,4 +1,8 @@
-<img [src]="imageEvent.imageSpec.uri" [ngStyle]="{
+<img [src]="imageEvent.imageSpec.uri"
+     [attr.alt]="imageEvent.imageSpec.filename || 'image'"
+     [ngStyle]="{
     'width': imageEvent.imageSpec.width+'px',
-    'height': imageEvent.imageSpec.height+'px',
-}">
+    'height': imageEvent.imageSpec.height+'px'
+}"
+     (click)="openImage()"
+     style="cursor: zoom-in; border-radius: 6px;">

@@ -1,4 +1,4 @@
-<app-avatar-container [onlineAt]="onlineAt" [avatarUri]="partner.avatar.uri" size="45px"/>
+<app-avatar-container [onlineAt]="onlineAt" [conversation]="conversation" size="45px"/>
 <ng-template [ngIf]="!!newest">
     <div class="middle">
         <span class="partner-name" [style.font-weight]="nameWeight">{{ conversation.partner.name }}</span>

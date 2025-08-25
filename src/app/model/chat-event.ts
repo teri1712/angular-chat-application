@@ -6,14 +6,18 @@ import {TextEvent} from "./text-event";
 import {Chat} from "./chat";
 import {Conversation} from "./conversation";
 import {User} from "./user";
-import {Orderable} from "../core/utils/array";
+import {Orderable} from "../usecases/utils/array";
 import {v4 as uuidv4} from 'uuid';
+import {PreferenceEvent} from "./preference-event";
+import {FileEvent} from "./file-event";
 
 export const NONE: string = "NONE"
 export const TEXT: string = "TEXT"
 export const IMAGE: string = "IMAGE"
 export const ICON: string = "ICON"
 export const SEEN: string = "SEEN"
+export const FILE: string = "FILE"
+export const PREFERENCE: string = "PREFERENCE"
 
 export class ChatEvent implements Orderable {
       [key: string]: any;
@@ -29,6 +33,8 @@ export class ChatEvent implements Orderable {
             const seenEvent = raw.seenEvent ? SeenEvent.from(raw.seenEvent) : undefined;
             const imageEvent = raw.imageEvent ? ImageEvent.from(raw.imageEvent) : undefined;
             const iconEvent = raw.iconEvent ? IconEvent.from(raw.iconEvent) : undefined;
+            const preferenceEvent = raw.preferenceEvent ? PreferenceEvent.from(raw.preferenceEvent) : undefined;
+            const fileEvent = raw.fileEvent ? FileEvent.from(raw.fileEvent) : undefined;
             const eventVersion = typeof raw.eventVersion === 'number' ? raw.eventVersion : undefined;
             const eventType = raw.eventType ?? NONE;
             const chatEvent = new ChatEvent(
@@ -40,6 +46,8 @@ export class ChatEvent implements Orderable {
                     seenEvent,
                     imageEvent,
                     iconEvent,
+                    preferenceEvent,
+                    fileEvent,
                     eventVersion,
                     eventType
             );
@@ -58,6 +66,8 @@ export class ChatEvent implements Orderable {
               public seenEvent?: SeenEvent,
               public imageEvent?: ImageEvent,
               public iconEvent?: IconEvent,
+              public preferenceEvent?: PreferenceEvent,
+              public fileEvent?: FileEvent,
               public eventVersion?: number,
               public eventType: string = NONE
       ) {
@@ -89,6 +99,6 @@ export class ChatEvent implements Orderable {
       }
 
       isMessage(): boolean {
-            return !!this.textEvent || !!this.imageEvent || !!this.iconEvent;
+            return !!this.textEvent || !!this.imageEvent || !!this.iconEvent || !!this.fileEvent;
       }
 }

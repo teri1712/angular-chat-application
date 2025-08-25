@@ -13,6 +13,15 @@ export class Conversation {
             return new Conversation(chat, owner, partner);
       }
 
+      static fromPartner(owner: User, partner: User): Conversation {
+            const chat = new Chat(new ChatIdentifier(owner.id, partner.id), owner.id, partner.id);
+            return new Conversation(
+                    chat,
+                    owner,
+                    partner
+            )
+      }
+
       constructor(
               public chat: Chat = new Chat(),
               public owner: User = new User(),
@@ -44,7 +53,7 @@ export class Conversation {
                         } else {
                               ownerSeen = event.seenEvent;
                         }
-                  } else {
+                  } else if (event.isMessage()) {
                         let message: Message;
                         if (ofOwner) {
                               message = new OwnerMessage(event);

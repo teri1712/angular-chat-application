@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {HttpErrorResponse} from "@angular/common/http";
 import {environment} from "../../environments";
-import {Authenticator} from "../../core/service/auth/authenticator";
+import {Authenticator} from "../../usecases/service/auth/authenticator";
 import {Router} from "@angular/router";
 
 @Component({

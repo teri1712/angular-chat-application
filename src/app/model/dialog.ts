@@ -1,8 +1,8 @@
 import {Conversation} from "./conversation";
 import {Message} from "./message";
-import {Equality} from "../core/utils/array";
+import {Equality} from "../usecases/utils/array";
 import {ChatIdentifier} from "./chat-identifier";
-import {EventCache} from "../core/service/cache/domain/event-cache";
+import {EventCache} from "../usecases/service/cache/domain/event-cache";
 
 export abstract class Dialog implements Equality {
 

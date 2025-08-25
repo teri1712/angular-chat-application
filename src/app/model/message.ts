@@ -2,6 +2,7 @@ import {TextEvent} from "./text-event";
 import {ImageEvent} from "./image-event";
 import {IconEvent} from "./icon-event";
 import {ChatEvent} from "./chat-event";
+import {FileEvent} from "./file-event";
 
 export enum Position {
       Top, Center, Bottom, Single
@@ -20,6 +21,7 @@ export abstract class Message {
       public textEvent?: TextEvent
       public imageEvent?: ImageEvent
       public iconEvent?: IconEvent
+      public fileEvent?: FileEvent
 
       protected constructor(chatEvent: ChatEvent) {
             console.assert(chatEvent.isMessage())
@@ -29,6 +31,7 @@ export abstract class Message {
             this.textEvent = chatEvent.textEvent
             this.imageEvent = chatEvent.imageEvent
             this.iconEvent = chatEvent.iconEvent
+            this.fileEvent = chatEvent.fileEvent
             this.eventVersion = chatEvent.eventVersion
       }
 

@@ -5,4 +5,5 @@ img {
       min-height: 200px;
       max-height: 250px;
       object-fit: cover;
+      cursor: pointer;
 }

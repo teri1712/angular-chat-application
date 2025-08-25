@@ -1,4 +1,4 @@
-import {AfterViewChecked, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewChecked, Component, HostBinding, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChatInfoBarComponent} from "../chat-info-bar/chat-info-bar.component";
 import {Dialog} from "../model/dialog";
 import {InputBarComponent} from "../input-bar/input-bar.component";
@@ -6,35 +6,30 @@ import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} fr
 import {Message, OwnerMessage, SendState} from "../model/message";
 import {MessageComponent} from "../message/message.component";
 import {User} from "../model/user";
-import {RollInFormatter} from "../core/format/RollinFormatter";
-import {Formatter} from "../core/format/Formatter";
+import {RollInFormatter} from "../usecases/format/RollinFormatter";
+import {Formatter} from "../usecases/format/Formatter";
 import {CommonModule} from "@angular/common";
-import {isLoading, isTypeOrMessage} from "../core/utils/item-type-check";
+import {isLoading, isTypeOrMessage} from "../usecases/utils/item-type-check";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {ReactiveFormsModule} from "@angular/forms";
 import {ActivatedRoute} from "@angular/router";
-import {DialogRepository} from "../core/service/repository/dialog-repository";
-import {ChannelSubscriber} from "../core/service/event/subscribable-channel";
+import {DialogRepository} from "../usecases/service/repository/dialog-repository";
+import {ChannelSubscriber} from "../usecases/service/event/subscribable-channel";
 import {ChatEvent} from "../model/chat-event";
 import {Observable, Subscription, tap, timer} from "rxjs";
 import {Conversation} from "../model/conversation";
 import {Chat} from "../model/chat";
-import {MessageQuery, MessageRepository} from "../core/service/repository/message-repository";
+import {MessageQuery, MessageRepository} from "../usecases/service/repository/message-repository";
 import {ChatIdentifier} from "../model/chat-identifier";
 import {TypeEvent} from "../model/type-event";
-import {AccountManager} from "../core/service/auth/account-manager";
-import {MessageService} from "../core/service/message-service";
+import {AccountManager} from "../usecases/service/auth/account-manager";
+import {MessageService} from "../usecases/service/message-service";
 import {SeenEvent} from "../model/seen-event";
-import {ChatSubscription} from "../core/service/websocket/chat-subscription";
-import {StompClient} from "../core/service/websocket/stomp-client";
-import {ChatSubscriber} from "../core/service/websocket/chat-subscriber";
-import {AutoSizeVirtualScrollStrategy} from "@angular/cdk-experimental/scrolling";
-
-export function autoSizeStrategyFactory() {
-      const minBufferPx = 0;
-      const maxBufferPx = 0;
-      return new AutoSizeVirtualScrollStrategy(minBufferPx, maxBufferPx);
-}
+import {ChatSubscription} from "../usecases/service/websocket/chat-subscription";
+import {StompClient} from "../usecases/service/websocket/stomp-client";
+import {ChatSubscriber} from "../usecases/service/websocket/chat-subscriber";
+import {DomSanitizer, SafeStyle} from "@angular/platform-browser";
+import {SeenEventHandlerStrategy} from "../usecases/service/event-handler.strategy";
 
 @Component({
       selector: 'app-message-list',
@@ -62,6 +57,16 @@ export function autoSizeStrategyFactory() {
 export class MessageListComponent implements OnInit, OnDestroy, AfterViewChecked {
 
       @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
+
+      @HostBinding('style')
+      get hostStyle(): SafeStyle {
+            const url = this.chat.preference?.theme?.background?.uri;
+            if (url) {
+                  return this.sanitizer.bypassSecurityTrustStyle(`background-image: url('${url}')`);
+            }
+            // fallback to the one from theme.scss
+            return this.sanitizer.bypassSecurityTrustStyle(``);
+      }
 
       private scrollToBeginning(): void {
             setTimeout(() => {
@@ -124,6 +129,7 @@ export class MessageListComponent implements OnInit, OnDestroy, AfterViewChecked
               private readonly accountManager: AccountManager,
               private readonly messageService: MessageService,
               private readonly stompClient: StompClient,
+              private readonly sanitizer: DomSanitizer,
       ) {
       }
 
@@ -135,7 +141,7 @@ export class MessageListComponent implements OnInit, OnDestroy, AfterViewChecked
                   return;
             if (event.isMessage()) {
                   this.prepend(event);
-            } else {
+            } else if (event.seenEvent) {
                   const at = event.seenEvent!.at;
                   const ofOwner = event.sender === this.owner.id
 
@@ -186,7 +192,7 @@ export class MessageListComponent implements OnInit, OnDestroy, AfterViewChecked
             const fromPartner = !this.conversation.isOfOwner(message)
 
             if (fromPartner && message !== this.ownerSeen) {
-                  this.messageService.send(this.conversation, new SeenEvent(Date.now()))
+                  this.messageService.send(this.conversation, new SeenEventHandlerStrategy(new SeenEvent(Date.now())))
             }
       }
 

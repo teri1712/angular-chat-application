@@ -1,7 +1,7 @@
 import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {Subscription} from "rxjs";
-import {UserRepository} from "../core/service/repository/user-repository";
+import {UserRepository} from "../usecases/service/repository/user-repository";
 import {SearchItemComponent} from "../search-item/search-item.component";
 import {CommonModule} from "@angular/common";
 import {Dialog} from "../model/dialog";

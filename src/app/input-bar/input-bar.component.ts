@@ -5,14 +5,22 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {FormsModule} from "@angular/forms";
 import {NgStyle} from "@angular/common";
-import {MessageService} from "../core/service/message-service";
+import {MessageService} from "../usecases/service/message-service";
 import {Conversation} from "../model/conversation";
 import {TextEvent} from "../model/text-event";
 import {IconEvent} from "../model/icon-event";
 import {ImageEvent} from "../model/image-event";
 import {ImageSpec} from "../model/image-spec";
-import {ChatSubscription} from "../core/service/websocket/chat-subscription";
+import {ChatSubscription} from "../usecases/service/websocket/chat-subscription";
 import {Subscription, timer} from "rxjs";
+import {getIcon} from "../res/icons";
+import {FileEvent} from "../model/file-event";
+import {
+      FileEventHandlerStrategy,
+      IconEventHandlerStrategy,
+      ImageEventHandlerStrategy,
+      TextEventHandlerStrategy
+} from "../usecases/service/event-handler.strategy";
 
 @Component({
       selector: 'app-input-bar',
@@ -56,21 +64,28 @@ export class InputBarComponent implements OnInit, OnDestroy {
             }
       }
 
+      get isPreferenceDefined(): boolean {
+            return !!this.conversation.chat.preference;
+      }
+
       protected onSendClicked(): void {
             if (!this.textEmpty) {
-                  this.messageService.send(this.conversation, new TextEvent(this.textContent))
+                  this.messageService.send(this.conversation, new TextEventHandlerStrategy(new TextEvent(this.textContent)))
             } else {
-                  this.messageService.send(this.conversation, new IconEvent(1))
+                  this.messageService.send(this.conversation, new IconEventHandlerStrategy(new IconEvent(this.conversation.chat.preference!.resourceId)))
             }
             this.textContent = ""
             this.textEmpty = true
       }
 
-      protected sendText(): void {
-            if (!this.textEmpty) {
-                  this.messageService.send(this.conversation, new TextEvent(this.textContent))
-                  this.textContent = ""
-                  this.textEmpty = true
+      protected sendFile(event: Event) {
+            const files = (event.target as HTMLInputElement)?.files
+            if (files?.length) {
+                  const file = files[0];
+                  const fileUrl = URL.createObjectURL(file)
+                  const fileEvent = new FileEvent(fileUrl, file.name, file.size)
+                  fileEvent.file = file
+                  this.messageService.send(this.conversation, new FileEventHandlerStrategy(fileEvent))
             }
       }
 
@@ -82,7 +97,10 @@ export class InputBarComponent implements OnInit, OnDestroy {
                   const fileUrl = URL.createObjectURL(file)
                   const imageEvent = new ImageEvent(new ImageSpec(fileUrl, file.name))
                   imageEvent.file = file
-                  this.messageService.send(this.conversation, imageEvent)
+                  this.messageService.send(this.conversation, new ImageEventHandlerStrategy(imageEvent))
             }
       }
+
+
+      protected readonly getIcon = getIcon;
 }

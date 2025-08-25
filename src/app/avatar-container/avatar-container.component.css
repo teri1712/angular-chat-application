@@ -1,3 +1,6 @@
+:host {
+      cursor: pointer;
+}
 
 .avatar img {
       border-radius: 50%;

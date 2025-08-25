@@ -1,0 +1,10 @@
+.user-list {
+      display: flex;
+      overflow-x: auto;
+      padding: 8px 0;
+      gap: 10px;
+}
+
+app-avatar-container {
+      margin: 0 4px;
+}

@@ -1,17 +1,17 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {StompClient} from "../core/service/websocket/stomp-client";
-import {AccountManager} from "../core/service/auth/account-manager";
+import {StompClient} from "../usecases/service/websocket/stomp-client";
+import {AccountManager} from "../usecases/service/auth/account-manager";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {getAuthenticationChannel, UN_AUTHORIZED} from "../core/service/event/commons";
+import {getAuthenticationChannel, UN_AUTHORIZED} from "../usecases/service/event/commons";
 import {Router} from "@angular/router";
-import {ChatRepository} from "../core/service/repository/chat-repository";
-import {EventCache} from "../core/service/cache/domain/event-cache";
-import {DialogRepository} from "../core/service/repository/dialog-repository";
-import {EventRepository} from "../core/service/repository/event-repository";
-import {UserRepository} from "../core/service/repository/user-repository";
-import {OnlineRepository} from "../core/service/repository/online-repository";
-import {MessageRepository} from "../core/service/repository/message-repository";
-import {MessageService} from "../core/service/message-service";
+import {ChatRepository} from "../usecases/service/repository/chat-repository";
+import {EventCache} from "../usecases/service/cache/domain/event-cache";
+import {DialogRepository} from "../usecases/service/repository/dialog-repository";
+import {EventRepository} from "../usecases/service/repository/event-repository";
+import {UserRepository} from "../usecases/service/repository/user-repository";
+import {OnlineRepository} from "../usecases/service/repository/online-repository";
+import {MessageRepository} from "../usecases/service/repository/message-repository";
+import {MessageService} from "../usecases/service/message-service";
 
 @Component({
       selector: 'app-home',

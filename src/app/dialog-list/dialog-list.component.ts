@@ -3,14 +3,14 @@ import {CdkVirtualScrollViewport, ScrollingModule} from "@angular/cdk/scrolling"
 import {CommonModule} from "@angular/common";
 import {DialogComponent} from "../dialog/dialog.component";
 import {Dialog} from "../model/dialog";
-import {union} from "../core/utils/array";
-import {ChannelSubscriber} from "../core/service/event/subscribable-channel";
+import {union} from "../usecases/utils/array";
+import {ChannelSubscriber} from "../usecases/service/event/subscribable-channel";
 import {ChatEvent} from "../model/chat-event";
-import {DialogRepository} from "../core/service/repository/dialog-repository";
+import {DialogRepository} from "../usecases/service/repository/dialog-repository";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {isDialog, isLoading} from "../core/utils/item-type-check";
+import {isDialog, isLoading} from "../usecases/utils/item-type-check";
 import {tap} from "rxjs";
-import {AccountManager} from "../core/service/auth/account-manager";
+import {AccountManager} from "../usecases/service/auth/account-manager";
 
 @Component({
       selector: 'app-dialog-list',

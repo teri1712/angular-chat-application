@@ -1,5 +1,5 @@
 <div class="left-container" [ngStyle]="{
-    'width': textEmpty? '40px' : '0px',
+    'width': textEmpty? '80px' : '0px',
 }">
     <button class="left-button" mat-icon-button
             [ngStyle]="{
@@ -9,12 +9,21 @@
         <input #imageInput type="file" hidden (change)="sendImage($event)">
     </button>
 
+    <button class="left-button" mat-icon-button
+            [ngStyle]="{
+    'scale': textEmpty? '1' : '0',
+}" (click)="fileInput.click()">
+        <mat-icon>attach_file</mat-icon>
+        <input #fileInput type="file" hidden (change)="sendFile($event)">
+    </button>
+
 </div>
 <input matInput placeholder="Type something"
        [(ngModel)]="textContent"
        (ngModelChange)="onChange($event)"
        (keydown.enter)="onSendClicked()"
 >
-<button class="right-button" mat-icon-button (click)="onSendClicked()">
-    <mat-icon [svgIcon]="textEmpty? 'like' : 'send'" color="primary"></mat-icon>
+<button class="right-button" mat-icon-button [disabled]="!isPreferenceDefined" (click)="onSendClicked()">
+    <mat-icon [svgIcon]="textEmpty? getIcon(conversation.chat.preference?.resourceId??1) : 'send'"
+              color="primary"></mat-icon>
 </button>
