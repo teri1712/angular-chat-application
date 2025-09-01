@@ -6,7 +6,7 @@ const envConfigFile = `
 export const environment = {
       production: true,
       testing: false,
-      API_URL: '${process.env.API_URL}'
+      API_URL: '${process.env.API_URL}',
       WEBSOCKET_HOST: '${process.env.WEBSOCKET_HOST}'
 };
 `;
