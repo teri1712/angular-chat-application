@@ -5,6 +5,7 @@ import {AccountRepository} from "../auth/account-repository";
 import {ChatSubscriber} from "./chat-subscriber";
 import {ChatSubscription} from "./chat-subscription";
 import {environment} from "../../../environments";
+import {TokenStore} from "../auth/token.store";
 
 @Injectable()
 export class StompClient implements OnDestroy {
@@ -12,11 +13,13 @@ export class StompClient implements OnDestroy {
       private readonly client: Client;
       private broadcastChannel: BroadcastChannel;
 
-      constructor(accountRepository: AccountRepository) {
+      constructor(accountRepository: AccountRepository, private tokenStore: TokenStore) {
             this.broadcastChannel = new BroadcastChannel("MESSAGE_CHANNEL_" + accountRepository.account?.id)
             this.client = new Client({
                   brokerURL: environment.WEBSOCKET_HOST + '/handshake',
-                  connectHeaders: {},
+                  connectHeaders: {
+                        'Authorization': `Bearer ${tokenStore.accessToken}`
+                  },
 
                   reconnectDelay: 5000,
                   heartbeatIncoming: 5000,
