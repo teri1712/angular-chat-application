@@ -4,6 +4,7 @@ import {ChatIdentifier} from "../../../model/chat-identifier";
 import {AccountRepository} from "../auth/account-repository";
 import {ChatSubscriber} from "./chat-subscriber";
 import {ChatSubscription} from "./chat-subscription";
+import {environment} from "../../../environments";
 
 @Injectable()
 export class StompClient implements OnDestroy {
@@ -14,7 +15,7 @@ export class StompClient implements OnDestroy {
       constructor(accountRepository: AccountRepository) {
             this.broadcastChannel = new BroadcastChannel("MESSAGE_CHANNEL_" + accountRepository.account?.id)
             this.client = new Client({
-                  brokerURL: 'ws://localhost:8080/handshake',
+                  brokerURL: 'ws://' + environment.API_URL + '/handshake',
                   connectHeaders: {},
 
                   reconnectDelay: 5000,

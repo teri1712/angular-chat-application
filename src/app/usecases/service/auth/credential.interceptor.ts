@@ -113,12 +113,6 @@ export class CredentialInterceptor implements HttpInterceptor {
               req: HttpRequest<any>,
               next: HttpHandler
       ): Observable<HttpEvent<any>> {
-
-            const authenticationReq = req.url.includes('authentication');
-            if (authenticationReq) {
-                  return next.handle(req);
-            }
-
             req = req.clone({
                   headers: req.headers,
                   withCredentials: true

@@ -90,6 +90,7 @@ export class DialogRepository implements Repository<Conversation, Dialog>,
                   this.sync(dialog)
                   return dialog;
             }
+            console.log(this.dialogMap)
             const id = conversation.toString();
             const dialog = this.dialogMap.get(id)
             if (!dialog) {

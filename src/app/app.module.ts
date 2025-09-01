@@ -14,7 +14,7 @@ import {DevelopmentModeInterceptor} from "./mock/development-mode-interceptor.se
 import {Authenticator} from "./usecases/service/auth/authenticator";
 import {IconRegistry} from './res/IconRegistry';
 import {RouteReuseStrategy} from "@angular/router";
-import {ReuseThreadStrategy} from "./usecases/service/cache/route/thread-resuse";
+import {ReuseDialogListStrategy} from "./usecases/service/cache/route/dialog-list-route-resuse";
 
 @NgModule({
       declarations: [AppComponent, SplashComponent],
@@ -43,7 +43,7 @@ import {ReuseThreadStrategy} from "./usecases/service/cache/route/thread-resuse"
             },
             {
                   provide: RouteReuseStrategy,
-                  useClass: ReuseThreadStrategy
+                  useClass: ReuseDialogListStrategy
             },],
 })
 export class AppModule {

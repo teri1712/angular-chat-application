@@ -8,10 +8,9 @@ const REFRESH_TOKEN_KEY = 'JWT_REFRESH_TOKEN';
 })
 export class TokenStore {
 
-      constructor() {
-            //TODO
-            window.localStorage.removeItem(TOKEN_KEY);
-      }
+      // constructor() {
+      //       window.localStorage.removeItem(TOKEN_KEY);
+      // }
 
       get accessToken(): string | null {
             return window.localStorage.getItem(TOKEN_KEY);
