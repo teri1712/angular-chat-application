@@ -15,7 +15,7 @@ export class StompClient implements OnDestroy {
       constructor(accountRepository: AccountRepository) {
             this.broadcastChannel = new BroadcastChannel("MESSAGE_CHANNEL_" + accountRepository.account?.id)
             this.client = new Client({
-                  brokerURL: 'ws://' + environment.API_URL + '/handshake',
+                  brokerURL: 'ws://' + environment.WEBSOCKET_HOST + '/handshake',
                   connectHeaders: {},
 
                   reconnectDelay: 5000,
