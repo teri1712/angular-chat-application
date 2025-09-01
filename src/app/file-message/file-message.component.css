@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+
+.file-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background-color: var(--mat-sys-neutral-variant60);
+  border-radius: 12px;
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0; /* allow truncation */
+}
+
+.file-icon {
+  color: var(--mat-sys-primary);
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* allow truncation */
+}
+
+.name {
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.size {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.download {
+  white-space: nowrap;
+}

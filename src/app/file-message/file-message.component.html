@@ -1,0 +1,18 @@
+<div class="file-card" *ngIf="fileEvent">
+    <div class="file-info">
+        <mat-icon class="file-icon">insert_drive_file</mat-icon>
+        <div class="meta">
+            <div class="name" [title]="fileEvent.filename">{{ fileEvent.filename }}</div>
+            <div class="size"
+                 *ngIf="fileEvent.size !== undefined && fileEvent.size !== null">{{ readableSize(fileEvent.size) }}
+            </div>
+        </div>
+    </div>
+    <a class="download" mat-button color="primary"
+       [href]="fileEvent.mediaUrl"
+       [attr.download]="fileEvent.filename || true"
+       target="_blank" rel="noopener noreferrer">
+        <mat-icon>download</mat-icon>
+        <span>Download</span>
+    </a>
+</div>
