@@ -64,7 +64,6 @@ export class MessageListComponent implements OnInit, OnDestroy, AfterViewChecked
             if (url) {
                   return this.sanitizer.bypassSecurityTrustStyle(`background-image: url('${url}')`);
             }
-            // fallback to the one from theme.scss
             return this.sanitizer.bypassSecurityTrustStyle(``);
       }
 

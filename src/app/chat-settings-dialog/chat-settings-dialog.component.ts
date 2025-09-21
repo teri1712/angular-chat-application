@@ -43,7 +43,6 @@ export class ChatSettingsDialogComponent {
                     data.preference.roomName,
                     data.preference.theme
             );
-            console.log(this.preference)
       }
 
       onNoClick(): void {

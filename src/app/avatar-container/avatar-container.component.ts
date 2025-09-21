@@ -1,4 +1,4 @@
-import {Component, HostListener, Input} from '@angular/core';
+import {Component, HostListener, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {ONE_HOUR_SECONDS, ONE_MINUTE_SECONDS} from "../usecases/utils/time";
 import {CommonModule} from "@angular/common";
 import {MatBadgeModule} from "@angular/material/badge";
@@ -14,7 +14,7 @@ import {DialogRepository} from "../usecases/service/repository/dialog-repository
       templateUrl: './avatar-container.component.html',
       styleUrl: './avatar-container.component.css'
 })
-export class AvatarContainerComponent {
+export class AvatarContainerComponent implements OnChanges {
 
       protected readonly ONE_HOUR_SECONDS = ONE_HOUR_SECONDS;
       protected readonly ONE_MINUTE_SECONDS = ONE_MINUTE_SECONDS;
@@ -23,14 +23,18 @@ export class AvatarContainerComponent {
       @Input() size!: string;
       @Input() conversation!: Conversation;
 
+      protected diffOnline!: number;
+
       constructor(private router: Router, private dialogRepository: DialogRepository) {
 
       }
 
-
-      protected get diffOnline(): number {
-            return Date.now() / 1000 - this.onlineAt
+      ngOnChanges(changes: SimpleChanges): void {
+            if (changes['onlineAt']) {
+                  this.diffOnline = Date.now() / 1000 - this.onlineAt;
+            }
       }
+
 
       @HostListener('click', ['$event'])
       onClick(event: MouseEvent) {

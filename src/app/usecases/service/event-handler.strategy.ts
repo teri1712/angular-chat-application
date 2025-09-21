@@ -49,7 +49,7 @@ export class TextEventHandlerStrategy implements EventHandlerStrategy {
                                         onConnectionLost();
                                   }
                                   console.error(error);
-                                  window.alert(error.message);
+
                             }
                     );
       }
@@ -84,7 +84,7 @@ export class IconEventHandlerStrategy implements EventHandlerStrategy {
                                         onConnectionLost();
                                   }
                                   console.error(error);
-                                  window.alert(error.message);
+
                             }
                     );
       }
@@ -119,7 +119,7 @@ export class SeenEventHandlerStrategy implements EventHandlerStrategy {
                                         onConnectionLost();
                                   }
                                   console.error(error);
-                                  window.alert(error.message);
+
                             }
                     );
       }
@@ -159,7 +159,7 @@ export class ImageEventHandlerStrategy implements EventHandlerStrategy {
                                         onConnectionLost();
                                   }
                                   console.error(error);
-                                  window.alert(error.message);
+
                             }
                     );
       }
@@ -200,7 +200,7 @@ export class FileEventHandlerStrategy implements EventHandlerStrategy {
                                         onConnectionLost();
                                   }
                                   console.error(error);
-                                  window.alert(error.message);
+
                             }
                     );
       }
