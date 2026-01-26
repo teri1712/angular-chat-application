@@ -3,7 +3,7 @@ export class AccessToken {
               public accessToken: string,
               public refreshToken: string,
               public expiresIn: number,
-              public createdAt: Date,
+              public createdAt: number,
       ) {
       }
 }

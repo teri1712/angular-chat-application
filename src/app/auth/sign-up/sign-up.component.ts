@@ -60,13 +60,17 @@ export class SignUpComponent {
                   }
             })
             console.log(this.body)
+            const gender = this.body.gender === 'MALE'
+                    ? 1
+                    : this.body.gender === 'FEMALE'
+                            ? 2
+                            : 3;
             this.authenticator.signUp({
                   username: this.body.username!,
                   password: this.body.password!,
-                  gender: this.body.gender!,
+                  gender: gender,
                   dob: this.body.dob!,
                   name: this.body.fullname!,
-                  file: this.body.file
             }).pipe(finalize(() => {
                   ref.close()
             })).subscribe(

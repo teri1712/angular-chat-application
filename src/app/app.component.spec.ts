@@ -1,16 +1,29 @@
 import {TestBed} from '@angular/core/testing';
-import {RouterModule} from '@angular/router';
+import {RouterTestingModule} from '@angular/router/testing';
+import {BehaviorSubject} from 'rxjs';
 import {AppComponent} from './app.component';
+import {AccountService} from './usecases/service/auth/account.service';
 
 describe('AppComponent', () => {
+      let accountSubject: BehaviorSubject<any>;
+
       beforeEach(async () => {
+            accountSubject = new BehaviorSubject<any>(null);
             await TestBed.configureTestingModule({
                   imports: [
-                        RouterModule.forRoot([])
+                        RouterTestingModule
                   ],
                   declarations: [
                         AppComponent
                   ],
+                  providers: [
+                        {
+                              provide: AccountService,
+                              useValue: {
+                                    accountObservable: accountSubject
+                              }
+                        }
+                  ]
             }).compileComponents();
       });
 
@@ -20,16 +33,10 @@ describe('AppComponent', () => {
             expect(app).toBeTruthy();
       });
 
-      it(`should have as title 'web-app'`, () => {
+      it('should mark ready after account observable emits', () => {
             const fixture = TestBed.createComponent(AppComponent);
             const app = fixture.componentInstance;
-            expect(app.title).toEqual('web-app');
-      });
-
-      it('should render title', () => {
-            const fixture = TestBed.createComponent(AppComponent);
             fixture.detectChanges();
-            const compiled = fixture.nativeElement as HTMLElement;
-            expect(compiled.querySelector('h1')?.textContent).toContain('Hello, web-app');
+            expect(app.ready).toBeTrue();
       });
 });

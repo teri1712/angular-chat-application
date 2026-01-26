@@ -24,7 +24,7 @@ export class AccountService implements AccountRepository, Authenticator {
 
       private init() {
             // this.accountSubject.next(null)
-            this.httpClient.get<AccountEntry>(environment.API_URL + "/account/principal", {
+            this.httpClient.get<AccountEntry>(environment.API_URL + "/accounts/me", {
                   observe: 'body'
             }).subscribe(
                     (accountEntry) => {
@@ -67,12 +67,15 @@ export class AccountService implements AccountRepository, Authenticator {
             if (this.account) {
                   throw new Error('There is already a user.');
             }
-            const formData = new FormData()
-            formData.append("information", new Blob([JSON.stringify(body)], {type: 'application/json'}))
-            if (body.file)
-                  formData.append("file", body.file)
+            const payload = {
+                  username: body.username,
+                  password: body.password,
+                  name: body.name,
+                  gender: body.gender,
+                  dob: body.dob
+            };
 
-            return this.httpClient.post(environment.API_URL + "/users", formData, {
+            return this.httpClient.post(environment.API_URL + "/users", payload, {
                   observe: 'response',
                   responseType: 'text'
             }).pipe(

@@ -12,10 +12,12 @@ export class Account {
       }
 
       static from(account: any): Account {
+            const user = User.from(account.user);
+            const id = account.id ?? user.id ?? "";
             return new Account(
-                    account.id,
-                    User.from(account.user),
-                    new SyncContext(account.syncContext.eventVersion)
+                    id,
+                    user,
+                    new SyncContext(account.syncContext?.eventVersion ?? 0)
             );
       }
 }

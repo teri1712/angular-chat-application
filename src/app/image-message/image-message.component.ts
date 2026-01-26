@@ -17,11 +17,11 @@ export class ImageMessageComponent {
       }
 
       openImage(): void {
-            if (!this.imageEvent?.imageSpec?.uri) return;
+            if (!this.imageEvent?.downloadUrl) return;
             this.dialog.open(ImageViewerDialogComponent, {
                   data: {
-                        uri: this.imageEvent.imageSpec.uri,
-                        filename: this.imageEvent.imageSpec.filename
+                        uri: this.imageEvent.downloadUrl,
+                        filename: this.imageEvent.filename
                   },
                   width: '95vw',
                   maxWidth: '95vw',

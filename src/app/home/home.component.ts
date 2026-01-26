@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {StompClient} from "../usecases/service/websocket/stomp-client";
+import {RealtimeClient} from "../usecases/service/websocket/realtime-client.service";
 import {AccountManager} from "../usecases/service/auth/account-manager";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {getAuthenticationChannel, UN_AUTHORIZED} from "../usecases/service/event/commons";
@@ -28,7 +28,7 @@ import {MessageService} from "../usecases/service/message-service";
             UserRepository,
             OnlineRepository,
             MessageRepository,
-            StompClient,
+            RealtimeClient,
             MessageService
       ]
 })
@@ -47,7 +47,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       constructor(
               accountManager: AccountManager,
-              stompClient: StompClient,
+              stompClient: RealtimeClient,
               private readonly router: Router,
               private readonly snackBar: MatSnackBar) {
       }

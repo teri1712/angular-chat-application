@@ -146,14 +146,13 @@ export class CredentialInterceptor implements HttpInterceptor {
                           throw err;
                     }),
                     tap((res: HttpEvent<any>) => {
-                          if (res instanceof HttpResponse
-                                  && !!res.body.account
-                                  && !!res.body.account.credential
-                          ) {
-                                const account = res.body.account
-                                if (account.credential) {
-                                      this.saveToken(account.credential)
-                                      account.credential = undefined
+                          if (res instanceof HttpResponse && res.body) {
+                                const tokenCredential = res.body.tokenCredential ?? res.body.account?.credential;
+                                if (tokenCredential) {
+                                      this.saveToken(tokenCredential)
+                                      if (res.body.account?.credential) {
+                                            res.body.account.credential = undefined
+                                      }
                                 }
                           }
                     })

@@ -18,10 +18,11 @@ export class OnlineRepository implements GetRepository<string, Online>, ListRepo
       }
 
       list(): Observable<Online[]> {
-            return this.httpClient.get<Online[]>(environment.API_URL + "/presences", {
+            return this.httpClient.get<any[]>(environment.API_URL + "/presences", {
                   observe: 'body',
-            }).pipe(map((res: Online[]) => {
-                  return res.map((online: Online) => {
+            }).pipe(map((res: any[]) => {
+                  return res.map((raw: any) => {
+                        const online = Online.from(raw);
                         online.conversation = Conversation.fromPartner(this.user, online.user)
                         return online;
                   });
@@ -29,9 +30,10 @@ export class OnlineRepository implements GetRepository<string, Online>, ListRepo
       }
 
       get(username: string): Observable<Online> {
-            return this.httpClient.get<Online>(environment.API_URL + "/presences/" + encodeURIComponent(username), {
+            return this.httpClient.get<any>(environment.API_URL + "/presences/" + encodeURIComponent(username), {
                   observe: 'body',
-            }).pipe(map((online: Online) => {
+            }).pipe(map((raw: any) => {
+                  const online = Online.from(raw);
                   online.conversation = Conversation.fromPartner(this.user, online.user)
                   return online;
             }));

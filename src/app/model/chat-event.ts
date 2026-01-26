@@ -24,8 +24,9 @@ export class ChatEvent implements Orderable {
 
       static from(raw: any): ChatEvent {
             const id = raw.id ?? "";
-            const chatIdentifier = raw.chatIdentifier
-                    ? ChatIdentifier.from(raw.chatIdentifier)
+            const chatIdentifierRaw = raw.chatIdentifier ?? raw.chat?.identifier;
+            const chatIdentifier = chatIdentifierRaw
+                    ? ChatIdentifier.from(chatIdentifierRaw)
                     : new ChatIdentifier();
             const sender = raw.sender ?? "";
             const createdTime = typeof raw.createdTime === 'number' ? raw.createdTime : Date.now();

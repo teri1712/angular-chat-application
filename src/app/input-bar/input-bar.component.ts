@@ -10,7 +10,6 @@ import {Conversation} from "../model/conversation";
 import {TextEvent} from "../model/text-event";
 import {IconEvent} from "../model/icon-event";
 import {ImageEvent} from "../model/image-event";
-import {ImageSpec} from "../model/image-spec";
 import {ChatSubscription} from "../usecases/service/websocket/chat-subscription";
 import {Subscription, timer} from "rxjs";
 import {getIcon} from "../res/icons";
@@ -95,9 +94,21 @@ export class InputBarComponent implements OnInit, OnDestroy {
             if (files?.length) {
                   const file = files[0];
                   const fileUrl = URL.createObjectURL(file)
-                  const imageEvent = new ImageEvent(new ImageSpec(fileUrl, file.name))
-                  imageEvent.file = file
-                  this.messageService.send(this.conversation, new ImageEventHandlerStrategy(imageEvent))
+                  const format = file.type?.split('/')?.[1] ?? 'jpg'
+                  const image = new Image();
+                  image.onload = () => {
+                        const width = image.naturalWidth || 0;
+                        const height = image.naturalHeight || 0;
+                        const imageEvent = new ImageEvent(fileUrl, file.name, width, height, format)
+                        imageEvent.file = file
+                        this.messageService.send(this.conversation, new ImageEventHandlerStrategy(imageEvent))
+                  };
+                  image.onerror = () => {
+                        const imageEvent = new ImageEvent(fileUrl, file.name, 0, 0, format)
+                        imageEvent.file = file
+                        this.messageService.send(this.conversation, new ImageEventHandlerStrategy(imageEvent))
+                  };
+                  image.src = fileUrl;
             }
       }
 

@@ -3,7 +3,11 @@ export class SeenEvent {
       }
 
       static from(raw: any): SeenEvent {
-            const at = typeof raw.at === 'number' ? raw.at : Date.now();
+            const at = typeof raw.at === 'number'
+                    ? raw.at
+                    : (typeof raw.at === 'string'
+                            ? Date.parse(raw.at)
+                            : Date.now());
             return new SeenEvent(at);
       }
 }

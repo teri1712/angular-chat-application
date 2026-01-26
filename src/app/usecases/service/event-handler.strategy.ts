@@ -7,6 +7,11 @@ import {ImageEvent} from '../../model/image-event';
 import {SeenEvent} from '../../model/seen-event';
 import {FileEvent} from '../../model/file-event';
 
+type PresignedUpload = {
+      presignedUploadUrl: string;
+      downloadUrl: string;
+};
+
 export interface EventHandlerStrategy {
       configureEvent(event: ChatEvent): void;
 
@@ -34,10 +39,12 @@ export class TextEventHandlerStrategy implements EventHandlerStrategy {
       }
 
       send(http: HttpClient, event: ChatEvent, onSent: () => void, onConnectionLost: () => void): void {
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(event.chatIdentifier.toString()) + '/text-events';
             http
-                    .post(environment.API_URL + '/events', event, {
+                    .post(url, event.textEvent, {
                           headers: {
                                 'Content-Type': 'application/json',
+                                'Idempotency-key': event.id
                           },
                     })
                     .subscribe(
@@ -69,10 +76,12 @@ export class IconEventHandlerStrategy implements EventHandlerStrategy {
       }
 
       send(http: HttpClient, event: ChatEvent, onSent: () => void, onConnectionLost: () => void): void {
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(event.chatIdentifier.toString()) + '/icon-events';
             http
-                    .post(environment.API_URL + '/events', event, {
+                    .post(url, event.iconEvent, {
                           headers: {
                                 'Content-Type': 'application/json',
+                                'Idempotency-key': event.id
                           },
                     })
                     .subscribe(
@@ -104,10 +113,16 @@ export class SeenEventHandlerStrategy implements EventHandlerStrategy {
       }
 
       send(http: HttpClient, event: ChatEvent, onSent: () => void, onConnectionLost: () => void): void {
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(event.chatIdentifier.toString()) + '/seen-events';
+            const atValue = event.seenEvent?.at ?? Date.now();
+            const body = {
+                  at: new Date(atValue).toISOString()
+            };
             http
-                    .post(environment.API_URL + '/events', event, {
+                    .post(url, body, {
                           headers: {
                                 'Content-Type': 'application/json',
+                                'Idempotency-key': event.id
                           },
                     })
                     .subscribe(
@@ -135,33 +150,81 @@ export class ImageEventHandlerStrategy implements EventHandlerStrategy {
       }
 
       prepare(event: ChatEvent): void {
-            event['image'] = event.imageEvent?.imageSpec;
+            event['image'] = event.imageEvent;
       }
 
       send(http: HttpClient, event: ChatEvent, onSent: () => void, onConnectionLost: () => void): void {
-            const formData = new FormData();
-            formData.append('event', new Blob([JSON.stringify(event)], {
-                  type: 'application/json',
-            }));
-            formData.append('file', this.message.file!);
-            http
-                    .post(environment.API_URL + '/events', formData, {
-                          headers: {
-                                'X-File-Type': 'image',
-                          },
-                    })
-                    .subscribe(
-                            (res) => {
-                                  onSent();
-                            },
-                            (error) => {
-                                  if (error.status === 0) {
-                                        onConnectionLost();
-                                  }
-                                  console.error(error);
+            const imageEvent = event.imageEvent;
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(event.chatIdentifier.toString()) + '/image-events';
+            const sendEvent = (downloadUrl: string) => {
+                  if (imageEvent) {
+                        imageEvent.downloadUrl = downloadUrl;
+                  }
+                  const body = {
+                        downloadUrl: downloadUrl,
+                        filename: imageEvent?.filename ?? '',
+                        width: imageEvent?.width ?? 0,
+                        height: imageEvent?.height ?? 0,
+                        format: imageEvent?.format ?? ''
+                  };
+                  http
+                          .post(url, body, {
+                                headers: {
+                                      'Content-Type': 'application/json',
+                                      'Idempotency-key': event.id
+                                },
+                          })
+                          .subscribe(
+                                  () => {
+                                        onSent();
+                                  },
+                                  (error) => {
+                                        if (error.status === 0) {
+                                              onConnectionLost();
+                                        }
+                                        console.error(error);
 
-                            }
-                    );
+                                  }
+                          );
+            };
+
+            const file = event.imageEvent?.file;
+            if (!file) {
+                  sendEvent(imageEvent?.downloadUrl ?? '');
+                  return;
+            }
+
+            const filename = imageEvent?.filename || file.name;
+            const presignUrl = environment.API_URL + '/files/upload-urls?filename=' + encodeURIComponent(filename);
+            http.get<PresignedUpload>(presignUrl, {observe: 'body'}).subscribe(
+                    (presigned) => {
+                          fetch(presigned.presignedUploadUrl, {
+                                method: 'PUT',
+                                body: file,
+                                headers: {
+                                      'Content-Type': 'application/octet-stream'
+                                }
+                          })
+                                  .then((response) => {
+                                        if (!response.ok) {
+                                              throw new Error(`Upload failed: ${response.status}`);
+                                        }
+                                        sendEvent(presigned.downloadUrl ?? '');
+                                  })
+                                  .catch((error) => {
+                                        if (!navigator.onLine) {
+                                              onConnectionLost();
+                                        }
+                                        console.error(error);
+                                  });
+                    },
+                    (error) => {
+                          if (error.status === 0) {
+                                onConnectionLost();
+                          }
+                          console.error(error);
+                    }
+            );
       }
 }
 
@@ -180,28 +243,73 @@ export class FileEventHandlerStrategy implements EventHandlerStrategy {
       }
 
       send(http: HttpClient, event: ChatEvent, onSent: () => void, onConnectionLost: () => void): void {
-            const formData = new FormData();
-            formData.append('event', new Blob([JSON.stringify(event)], {
-                  type: 'application/json',
-            }));
-            formData.append('file', this.message.file!);
-            http
-                    .post(environment.API_URL + '/events', formData, {
-                          headers: {
-                                'X-File-Type': 'file',
-                          },
-                    })
-                    .subscribe(
-                            (res) => {
-                                  onSent();
-                            },
-                            (error) => {
-                                  if (error.status === 0) {
-                                        onConnectionLost();
-                                  }
-                                  console.error(error);
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(event.chatIdentifier.toString()) + '/file-events';
+            const sendEvent = (downloadUrl: string) => {
+                  if (event.fileEvent) {
+                        event.fileEvent.mediaUrl = downloadUrl;
+                  }
+                  const body = {
+                        filename: event.fileEvent?.filename ?? '',
+                        size: event.fileEvent?.size ?? 0,
+                        mediaUrl: downloadUrl
+                  };
+                  http
+                          .post(url, body, {
+                                headers: {
+                                      'Content-Type': 'application/json',
+                                      'Idempotency-key': event.id
+                                },
+                          })
+                          .subscribe(
+                                  () => {
+                                        onSent();
+                                  },
+                                  (error) => {
+                                        if (error.status === 0) {
+                                              onConnectionLost();
+                                        }
+                                        console.error(error);
 
-                            }
-                    );
+                                  }
+                          );
+            };
+
+            const file = event.fileEvent?.file;
+            if (!file) {
+                  sendEvent(event.fileEvent?.mediaUrl ?? '');
+                  return;
+            }
+
+            const filename = event.fileEvent?.filename || file.name;
+            const presignUrl = environment.API_URL + '/files/upload-urls?filename=' + encodeURIComponent(filename);
+            http.get<PresignedUpload>(presignUrl, {observe: 'body'}).subscribe(
+                    (presigned) => {
+                          fetch(presigned.presignedUploadUrl, {
+                                method: 'PUT',
+                                body: file,
+                                headers: {
+                                      'Content-Type': 'application/octet-stream'
+                                }
+                          })
+                                  .then((response) => {
+                                        if (!response.ok) {
+                                              throw new Error(`Upload failed: ${response.status}`);
+                                        }
+                                        sendEvent(presigned.downloadUrl ?? '');
+                                  })
+                                  .catch((error) => {
+                                        if (!navigator.onLine) {
+                                              onConnectionLost();
+                                        }
+                                        console.error(error);
+                                  });
+                    },
+                    (error) => {
+                          if (error.status === 0) {
+                                onConnectionLost();
+                          }
+                          console.error(error);
+                    }
+            );
       }
 }

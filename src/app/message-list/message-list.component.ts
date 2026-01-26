@@ -26,7 +26,7 @@ import {AccountManager} from "../usecases/service/auth/account-manager";
 import {MessageService} from "../usecases/service/message-service";
 import {SeenEvent} from "../model/seen-event";
 import {ChatSubscription} from "../usecases/service/websocket/chat-subscription";
-import {StompClient} from "../usecases/service/websocket/stomp-client";
+import {RealtimeClient} from "../usecases/service/websocket/realtime-client.service";
 import {ChatSubscriber} from "../usecases/service/websocket/chat-subscriber";
 import {DomSanitizer, SafeStyle} from "@angular/platform-browser";
 import {SeenEventHandlerStrategy} from "../usecases/service/event-handler.strategy";
@@ -127,7 +127,7 @@ export class MessageListComponent implements OnInit, OnDestroy, AfterViewChecked
               private readonly activatedRoute: ActivatedRoute,
               private readonly accountManager: AccountManager,
               private readonly messageService: MessageService,
-              private readonly stompClient: StompClient,
+              private readonly stompClient: RealtimeClient,
               private readonly sanitizer: DomSanitizer,
       ) {
       }
@@ -233,7 +233,7 @@ export class MessageListComponent implements OnInit, OnDestroy, AfterViewChecked
             this.formatter.format(this.messages);
             this.scrollToBeginning()
             this.expendIfNecessary()
-            this.chatSubscription = this.stompClient.subscribe(this.chat.identifier, this.chatSub)
+            this.chatSubscription = this.stompClient.subscribeChat(this.chat.identifier, this.chatSub)
       }
 
 

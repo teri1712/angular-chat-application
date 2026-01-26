@@ -1,13 +1,9 @@
 export const UN_AUTHORIZED = "UN_AUTHORIZED";
-export const LOGIN = "LOGIN";
-export const LOGOUT = "LOGOUT";
-
-export type AuthenticationEvent = {
-      type: string
-      data?: any
-}
-
 
 export function getAuthenticationChannel(): BroadcastChannel {
       return new BroadcastChannel("AUTHENTICATION_CHANNEL")
+}
+
+export function getMessageChannel(username: string): BroadcastChannel {
+      return new BroadcastChannel("MESSAGE_CHANNEL_" + username)
 }

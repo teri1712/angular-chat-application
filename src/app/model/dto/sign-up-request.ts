@@ -2,7 +2,7 @@ export type SignUpRequest = {
       username: string,
       password: string,
       name: string,
-      gender: string,
+      gender: number,
       dob: string,
       file?: File,
 }
