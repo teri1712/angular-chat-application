@@ -1,0 +1,17 @@
+<ng-container [ngSwitch]="message.messageType">
+    <app-icon-message *ngSwitchCase="'ICON'" [iconEvent]="message.iconEvent!"/>
+
+    <div *ngSwitchDefault [ngSwitch]="message.messageType" [ngStyle]="{
+          'overflow': 'hidden',
+          'border-top-left-radius':  '20px',
+          'border-top-right-radius': (message.position === Position.Single || message.position === Position.Top) ? '20px' : '3px',
+          'border-bottom-right-radius': (message.position === Position.Single || message.position === Position.Bottom) ? '20px' : '3px',
+          'border-bottom-left-radius':  '20px',
+}">
+        <app-text-message *ngSwitchCase="'TEXT'" [textEvent]="message.textEvent!"/>
+        <app-image-message *ngSwitchCase="'IMAGE'" [imageEvent]="message.imageEvent!"/>
+        <app-file-message *ngSwitchCase="'FILE'" [fileEvent]="message.fileEvent!"/>
+    </div>
+</ng-container>
+
+<span class="sent" *ngIf="message.isLastSent">Sent</span>

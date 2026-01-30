@@ -11,6 +11,6 @@ export const iconBundles: { [key: number]: string } = {
       6: 'send',
 }
 
-export function getIcon(resourceId: number): string {
-      return iconBundles[resourceId];
+export function getIcon(iconId: number): string {
+      return iconBundles[iconId];
 }

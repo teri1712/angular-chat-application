@@ -1,0 +1,7 @@
+<div class="user-list">
+    <div class="d-flex flex-column align-items-center gap-2" *ngFor="let dialog of dialogs">
+        <app-avatar-container
+                [conversation]="dialog.conversation" [onlineAt]="dialog.onlineAt" size="60px"></app-avatar-container>
+        <span style="font-size: 0.9rem">{{ dialog.conversation.partner.name }}</span>
+    </div>
+</div>
