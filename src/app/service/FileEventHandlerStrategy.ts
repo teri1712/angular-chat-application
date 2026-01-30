@@ -1,6 +1,6 @@
 import {EventHandlerStrategy} from "./event-handler.strategy";
 import {FileEvent} from "../model/dto/file-event";
-import {ChatEvent} from "../model/dto/chat-event";
+import {ChatEvent, FILE} from "../model/dto/chat-event";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../environments";
 import {Conversation} from "../model/dto/conversation";
@@ -18,7 +18,7 @@ export class FileEventHandlerStrategy implements EventHandlerStrategy {
             this.fileEvent = new FileEvent(URL.createObjectURL(this.file), this.file.name, this.file.size);
       }
 
-      send(http: HttpClient, onSent: () => void, onConnectionLost: () => void): void {
+      send(http: HttpClient, onSent: () => void, onError: () => void, onConnectionLost: () => void): void {
             const chatIdentifier = this.conversation.chat.identifier;
 
             const url = environment.API_URL + '/chats/' + encodeURIComponent(toIdString(chatIdentifier)) + '/file-events';
@@ -45,6 +45,8 @@ export class FileEventHandlerStrategy implements EventHandlerStrategy {
                             (error) => {
                                   if (error.status === 0) {
                                         onConnectionLost();
+                                  } else {
+                                        onError();
                                   }
                                   console.error(error);
 
@@ -53,13 +55,14 @@ export class FileEventHandlerStrategy implements EventHandlerStrategy {
       }
 
       create(): ChatEvent {
-            const event = new ChatEvent(this.idempotencyKey);
-            event.chat = this.conversation.chat;
-            event.sender = this.conversation.owner.id;
-            event.owner = this.conversation.owner;
-            event.partner = this.conversation.partner;
-            event.eventType = 'FILE'
-            event.fileEvent = this.fileEvent;
-            return event;
+            return ChatEvent.builder()
+                    .idempotencyKey(this.idempotencyKey)
+                    .chat(this.conversation.chat)
+                    .sender(this.conversation.owner.id)
+                    .owner(this.conversation.owner)
+                    .partner(this.conversation.partner)
+                    .eventType(FILE)
+                    .fileEvent(this.fileEvent)
+                    .build();
       }
 }

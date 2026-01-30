@@ -191,7 +191,7 @@ export class MessageListComponent implements OnInit, OnDestroy {
             if (!first.seenAt) {
                   const seenStrategy = new SeenEventHandlerStrategy(this.dialog.conversation, new Date())
                   this.seenKey = seenStrategy.idempotencyKey
-                  this.messageService.send(this.dialog.conversation, seenStrategy)
+                  this.messageService.send(seenStrategy)
             }
       }
 
@@ -385,9 +385,11 @@ export class MessageListComponent implements OnInit, OnDestroy {
                   const thePendingIdx = this.pending.findIndex(pending =>
                           pending.idempotencyKey === message.idempotencyKey
                   );
+
                   if (thePendingIdx >= 0) {
                         this.pending.splice(thePendingIdx, 1);
                   }
+
                   this.myMessages.unshift(message as MyMessage);
                   this.updateMessageState(0, true);
 

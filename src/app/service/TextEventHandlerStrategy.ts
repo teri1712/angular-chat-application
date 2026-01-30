@@ -15,7 +15,7 @@ export class TextEventHandlerStrategy implements EventHandlerStrategy {
             this.textEvent = new TextEvent(textContent);
       }
 
-      send(http: HttpClient, onSent: () => void, onConnectionLost: () => void): void {
+      send(http: HttpClient, onSent: () => void, onError: () => void, onConnectionLost: () => void): void {
             const chatIdentifier = this.conversation.chat.identifier;
             const url = environment.API_URL + '/chats/' + encodeURIComponent(toIdString(chatIdentifier)) + '/text-events';
             http
@@ -24,29 +24,31 @@ export class TextEventHandlerStrategy implements EventHandlerStrategy {
                                 'Content-Type': 'application/json',
                                 'Idempotency-key': this.idempotencyKey
                           },
-                    })
-                    .subscribe(
-                            (res) => {
-                                  onSent();
-                            },
-                            (error) => {
-                                  if (error.status === 0) {
-                                        onConnectionLost();
-                                  }
-                                  console.error(error);
+                    }).subscribe(
+                    (res) => {
+                          onSent();
+                    },
+                    (error) => {
+                          if (error.status === 0) {
+                                onConnectionLost();
+                          } else {
+                                onError();
+                          }
+                          console.error(error);
 
-                            }
-                    );
+                    }
+            );
       }
 
       create(): ChatEvent {
-            const event = new ChatEvent(this.idempotencyKey);
-            event.chat = this.conversation.chat;
-            event.sender = this.conversation.owner.id;
-            event.owner = this.conversation.owner;
-            event.partner = this.conversation.partner;
-            event.textEvent = this.textEvent;
-            event.eventType = TEXT;
-            return event;
+            return ChatEvent.builder()
+                    .idempotencyKey(this.idempotencyKey)
+                    .chat(this.conversation.chat)
+                    .sender(this.conversation.owner.id)
+                    .owner(this.conversation.owner)
+                    .partner(this.conversation.partner)
+                    .textEvent(this.textEvent)
+                    .eventType(TEXT)
+                    .build();
       }
 }

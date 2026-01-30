@@ -1,9 +1,9 @@
 import {Injectable, OnDestroy} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Conversation} from "../model/dto/conversation";
 import {EventHandlerStrategy} from "./event-handler.strategy";
 import {AccountRepository} from "./auth/account-repository";
 import {getMyMessageChannel} from "./event/commons";
+import {ChatEvent} from "../model/dto/chat-event";
 
 @Injectable()
 export class MessageService implements OnDestroy {
@@ -28,10 +28,19 @@ export class MessageService implements OnDestroy {
             }
       }
 
-      private onSent() {
+      private continue() {
             this.queueState = 'idle';
             this.queue.shift()
             this.schedule()
+      }
+
+      private onSent() {
+            this.continue();
+      }
+
+      private onErrorMessage(errorEvent: ChatEvent) {
+            this.messageChannel.postMessage(errorEvent);
+            this.continue();
       }
 
       constructor(private httpClient: HttpClient, private accountRepository: AccountRepository) {
@@ -50,16 +59,23 @@ export class MessageService implements OnDestroy {
             this.queueState = 'sending';
             const strategy = this.queue.at(0)!;
 
-            strategy.send(this.httpClient, () => this.onSent(), () => this.onConnectionLost());
+            strategy.send(this.httpClient,
+                    () => this.onSent(),
+                    () => {
+                          const event = ChatEvent.from(strategy.create())
+                                  .eventVersion(-1)
+                                  .build();
+                          this.onErrorMessage(event);
+                    },
+                    () => this.onConnectionLost());
       }
 
-      send(conversation: Conversation, strategy: EventHandlerStrategy): void {
+      send(strategy: EventHandlerStrategy): void {
 
             const event = strategy.create();
-
             this.queue.push(strategy);
-            this.schedule()
             this.messageChannel.postMessage(event);
+            this.schedule()
       }
 
 }

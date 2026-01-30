@@ -70,10 +70,10 @@ export class InputBarComponent implements OnInit, OnDestroy {
 
       protected onSendClicked(): void {
             if (!this.textEmpty) {
-                  this.messageService.send(this.conversation, new TextEventHandlerStrategy(this.conversation, this.textContent))
+                  this.messageService.send(new TextEventHandlerStrategy(this.conversation, this.textContent))
             } else {
                   const iconId = this.dialog.preference?.iconId ?? 1
-                  this.messageService.send(this.conversation, new IconEventHandlerStrategy(this.conversation, iconId))
+                  this.messageService.send(new IconEventHandlerStrategy(this.conversation, iconId))
             }
             this.textContent = ""
             this.textEmpty = true
@@ -83,7 +83,7 @@ export class InputBarComponent implements OnInit, OnDestroy {
             const files = (event.target as HTMLInputElement)?.files
             if (files?.length) {
                   const file = files[0];
-                  this.messageService.send(this.conversation, new FileEventHandlerStrategy(this.uploadService, this.conversation, file))
+                  this.messageService.send(new FileEventHandlerStrategy(this.uploadService, this.conversation, file))
             }
       }
 
@@ -98,12 +98,12 @@ export class InputBarComponent implements OnInit, OnDestroy {
                   image.onload = () => {
                         const width = image.naturalWidth || 0;
                         const height = image.naturalHeight || 0;
-                        this.messageService.send(this.conversation, new ImageEventHandlerStrategy(this.uploadService, this.conversation, file, width, height, format))
+                        this.messageService.send(new ImageEventHandlerStrategy(this.uploadService, this.conversation, file, width, height, format))
                   };
                   image.onerror = () => {
                         const imageEvent = new ImageEvent(fileUrl, file.name, 0, 0, format)
                         imageEvent.file = file
-                        this.messageService.send(this.conversation, new ImageEventHandlerStrategy(this.uploadService, this.conversation, file, 200, 200, format))
+                        this.messageService.send(new ImageEventHandlerStrategy(this.uploadService, this.conversation, file, 200, 200, format))
                   };
                   image.src = fileUrl;
             }

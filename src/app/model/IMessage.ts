@@ -38,6 +38,10 @@ export interface IMyMessage extends IMessage {
 
 }
 
+export interface IErrorMessage extends IMyMessage {
+      readonly reason: string
+}
+
 export interface IYourMessage extends IMessage {
 }
 

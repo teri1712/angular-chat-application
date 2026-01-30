@@ -1,5 +1,5 @@
-import {ChatEvent} from "../../model/dto/chat-event";
-import {IMessage, IMyMessage, IYourMessage, Position, SendState} from "../../model/IMessage";
+import {ChatEvent, isErrorEvent} from "../../model/dto/chat-event";
+import {IErrorMessage, IMessage, IMyMessage, IYourMessage, Position, SendState} from "../../model/IMessage";
 import {FileEvent} from "../../model/dto/file-event";
 import {IconEvent} from "../../model/dto/icon-event";
 import {ImageEvent} from "../../model/dto/image-event";
@@ -55,8 +55,8 @@ export class YourMessage extends Message implements IYourMessage {
       }
 }
 
-export class ErrorMessage extends MyMessage {
-      constructor(chatEvent: ChatEvent, public readonly error: string) {
+export class ErrorMessage extends MyMessage implements IErrorMessage {
+      constructor(chatEvent: ChatEvent, public readonly reason: string) {
             super(chatEvent);
       }
 }
@@ -64,7 +64,10 @@ export class ErrorMessage extends MyMessage {
 export function toMessage(event: ChatEvent): IMessage {
       const mine = event.sender === event.owner.id;
       if (mine) {
-            return new MyMessage(event);
+            if (isErrorEvent(event))
+                  return new ErrorMessage(event, "Error occurred while sending message.")
+            else
+                  return new MyMessage(event);
       } else {
             return new YourMessage(event)
       }

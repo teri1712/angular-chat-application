@@ -4,7 +4,7 @@ import {EventHandlerStrategy} from "./event-handler.strategy";
 import {IconEvent} from "../model/dto/icon-event";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../environments";
-import {ChatEvent} from "../model/dto/chat-event";
+import {ChatEvent, ICON} from "../model/dto/chat-event";
 import {toIdString} from "../model/dto/chat-identifier";
 
 export class IconEventHandlerStrategy implements EventHandlerStrategy {
@@ -16,7 +16,7 @@ export class IconEventHandlerStrategy implements EventHandlerStrategy {
       }
 
 
-      send(http: HttpClient, onSent: () => void, onConnectionLost: () => void): void {
+      send(http: HttpClient, onSent: () => void, onError: () => void, onConnectionLost: () => void): void {
             const chatIdentifier = this.conversation.chat.identifier;
             const url = environment.API_URL + '/chats/' + encodeURIComponent(toIdString(chatIdentifier)) + '/icon-events';
             http
@@ -33,6 +33,8 @@ export class IconEventHandlerStrategy implements EventHandlerStrategy {
                             (error) => {
                                   if (error.status === 0) {
                                         onConnectionLost();
+                                  } else {
+                                        onError();
                                   }
                                   console.error(error);
 
@@ -41,13 +43,14 @@ export class IconEventHandlerStrategy implements EventHandlerStrategy {
       }
 
       create(): ChatEvent {
-            const event = new ChatEvent(this.idempotencyKey);
-            event.chat = this.conversation.chat;
-            event.sender = this.conversation.owner.id;
-            event.owner = this.conversation.owner;
-            event.partner = this.conversation.partner;
-            event.eventType = 'ICON';
-            event.iconEvent = this.iconEvent;
-            return event;
+            return ChatEvent.builder()
+                    .idempotencyKey(this.idempotencyKey)
+                    .chat(this.conversation.chat)
+                    .sender(this.conversation.owner.id)
+                    .owner(this.conversation.owner)
+                    .partner(this.conversation.partner)
+                    .eventType(ICON)
+                    .iconEvent(this.iconEvent)
+                    .build();
       }
 }

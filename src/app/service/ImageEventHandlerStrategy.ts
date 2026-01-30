@@ -1,5 +1,5 @@
 import {EventHandlerStrategy} from "./event-handler.strategy";
-import {ChatEvent} from "../model/dto/chat-event";
+import {ChatEvent, IMAGE} from "../model/dto/chat-event";
 import {ImageEvent} from "../model/dto/image-event";
 import {environment} from "../environments";
 import {HttpClient} from "@angular/common/http";
@@ -26,7 +26,7 @@ export class ImageEventHandlerStrategy implements EventHandlerStrategy {
       }
 
 
-      send(http: HttpClient, onSent: () => void, onConnectionLost: () => void): void {
+      send(http: HttpClient, onSent: () => void, onError: () => void, onConnectionLost: () => void): void {
             const url = environment.API_URL + '/chats/' + encodeURIComponent(toIdString(this.conversation.chat.identifier)) + '/image-events';
             const sendEvent = (downloadUrl: string) => {
                   this.imageEvent.downloadUrl = downloadUrl;
@@ -49,21 +49,23 @@ export class ImageEventHandlerStrategy implements EventHandlerStrategy {
                             (error) => {
                                   if (error.status === 0) {
                                         onConnectionLost();
+                                  } else {
+                                        onError();
                                   }
                                   console.error(error);
-
                             }
                     )
       }
 
       create(): ChatEvent {
-            const event = new ChatEvent(this.idempotencyKey);
-            event.chat = this.conversation.chat;
-            event.sender = this.conversation.owner.id;
-            event.owner = this.conversation.owner;
-            event.partner = this.conversation.partner;
-            event.eventType = 'IMAGE'
-            event.imageEvent = this.imageEvent;
-            return event;
+            return ChatEvent.builder()
+                    .idempotencyKey(this.idempotencyKey)
+                    .chat(this.conversation.chat)
+                    .sender(this.conversation.owner.id)
+                    .owner(this.conversation.owner)
+                    .partner(this.conversation.partner)
+                    .eventType(IMAGE)
+                    .imageEvent(this.imageEvent)
+                    .build();
       }
 }

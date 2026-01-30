@@ -7,6 +7,7 @@ export interface EventHandlerStrategy {
       send(
               http: HttpClient,
               onSent: () => void,
+              onError: () => void,
               onConnectionLost: () => void
       ): void;
 

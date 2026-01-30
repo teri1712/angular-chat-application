@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {IMessage, IMyMessage} from "../../model/IMessage";
+import {IMessage} from "../../model/IMessage";
 import {CommonModule} from "@angular/common";
 import {User} from "../../model/dto/user";
 import {LeftMessageComponent} from "../left-message/left-message.component";
@@ -36,7 +36,4 @@ export class MessageComponent implements OnInit {
             return this.message.sender === this.me.id
       }
 
-      protected toOwnerMessage(): IMyMessage {
-            return this.message as IMyMessage
-      };
 }

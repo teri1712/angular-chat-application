@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, HostBinding, Input} from '@angular/core';
 import {IMyMessage, Position} from "../../model/IMessage";
 import {IconMessageComponent} from "../icon-message/icon-message.component";
 import {CommonModule} from "@angular/common";
@@ -22,6 +22,24 @@ export class RightMessageComponent {
 
       @Input({required: true,}) message!: IMyMessage
 
+      protected get hasError(): boolean {
+            return 'reason' in this.message
+      }
+
+      @HostBinding('style.--mat-sys-primary')
+      get primaryOverride() {
+            return this.hasError ? 'var(--mat-sys-error)' : null;
+      }
+
+      @HostBinding('style.color')
+      get textOverride() {
+            return this.hasError ? 'var(--mat-sys-on-error)' : null;
+      }
+
+      @HostBinding('style.--mat-sys-neutral-variant60')
+      get neutralOverride() {
+            return this.hasError ? 'var(--mat-sys-error)' : null;
+      }
 
       protected readonly Position = Position;
 }

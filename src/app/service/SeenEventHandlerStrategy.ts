@@ -4,7 +4,7 @@ import {SeenEvent} from "../model/dto/seen-event";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../environments";
 import {EventHandlerStrategy} from "./event-handler.strategy";
-import {ChatEvent} from "../model/dto/chat-event";
+import {ChatEvent, SEEN} from "../model/dto/chat-event";
 import {toIdString} from "../model/dto/chat-identifier";
 
 export class SeenEventHandlerStrategy implements EventHandlerStrategy {
@@ -16,19 +16,20 @@ export class SeenEventHandlerStrategy implements EventHandlerStrategy {
       }
 
       create(): ChatEvent {
-            const event = new ChatEvent(this.idempotencyKey);
-            event.chat = this.conversation.chat;
-            event.sender = this.conversation.owner.id;
-            event.owner = this.conversation.owner;
-            event.partner = this.conversation.partner;
-            event.eventType = 'SEEN';
-            event.message = false;
-            event.seenEvent = this.seenEvent;
-            return event;
+            return ChatEvent.builder()
+                    .idempotencyKey(this.idempotencyKey)
+                    .chat(this.conversation.chat)
+                    .sender(this.conversation.owner.id)
+                    .owner(this.conversation.owner)
+                    .partner(this.conversation.partner)
+                    .eventType(SEEN)
+                    .message(false)
+                    .seenEvent(this.seenEvent)
+                    .build();
       }
 
 
-      send(http: HttpClient, onSent: () => void, onConnectionLost: () => void): void {
+      send(http: HttpClient, onSent: () => void, onError: () => void, onConnectionLost: () => void): void {
             const chatIdentifier = this.conversation.chat.identifier;
             const url = environment.API_URL + '/chats/' + encodeURIComponent(toIdString(chatIdentifier)) + '/seen-events';
             http
@@ -45,6 +46,8 @@ export class SeenEventHandlerStrategy implements EventHandlerStrategy {
                             (error) => {
                                   if (error.status === 0) {
                                         onConnectionLost();
+                                  } else {
+                                        onError();
                                   }
                                   console.error(error);
 

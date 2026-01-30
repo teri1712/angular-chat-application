@@ -13,5 +13,5 @@
         <app-file-message *ngSwitchCase="'FILE'" [fileEvent]="message.fileEvent!"/>
     </div>
 </ng-container>
-
-<span class="sent" *ngIf="message.isLastSent">Sent</span>
+<span class="error" *ngIf="hasError">{{ $any(message).reason }}</span>
+<span class="sent" *ngIf="message.isLastSent && !hasError">Sent</span>
