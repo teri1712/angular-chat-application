@@ -55,6 +55,11 @@ export class YourMessage extends Message implements IYourMessage {
       }
 }
 
+export class ErrorMessage extends MyMessage {
+      constructor(chatEvent: ChatEvent, public readonly error: string) {
+            super(chatEvent);
+      }
+}
 
 export function toMessage(event: ChatEvent): IMessage {
       const mine = event.sender === event.owner.id;

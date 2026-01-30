@@ -9,6 +9,7 @@ import {FileEvent} from "./file-event";
 import {Conversation} from "./conversation";
 
 export const NONE: string = "NONE"
+export const ERROR: string = "ERROR"
 export const TEXT: string = "TEXT"
 export const ICON: string = "ICON"
 export const SEEN: string = "SEEN"

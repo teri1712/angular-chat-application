@@ -1,7 +1,7 @@
 <div class="partner-container">
     <app-avatar-container [onlineAt]="dialog.onlineAt" [conversation]="conversation" size="40px"/>
     <div class="partner-info">
-        <span class="partner-name">{{ conversation.partner.name }}</span>
+        <span class="partner-name">{{ dialog.preference?.roomName ?? conversation.partner.name }}</span>
         <span class="partner-status" *ngIf="diffOnline < ONE_HOUR_SECONDS">{{
                 diffOnline >= ONE_MINUTE_SECONDS ?
                     'Online ' + Math.floor((diffOnline + ONE_MINUTE_SECONDS - 1) / ONE_MINUTE_SECONDS).toString() + ' minutes ago'
