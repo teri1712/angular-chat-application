@@ -1,8 +1,7 @@
 import {Conversation} from "./dto/conversation";
-import {Equality} from "../utils/array";
 import {Preference} from "./dto/preference";
 
-export interface IDialog extends Equality {
+export interface IDialog {
       readonly conversation: Conversation;
       readonly preference: Preference | undefined;
       readonly onlineAt: Date;

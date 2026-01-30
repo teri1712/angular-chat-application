@@ -138,9 +138,5 @@ class Dialog implements IDialog {
               public ghost: boolean = true
       ) {
       }
-
-
-      equals(other: any): boolean {
-            return other === this;
-      }
+      
 }

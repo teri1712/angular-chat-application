@@ -4,7 +4,7 @@
 >
 
     <div
-            *cdkVirtualFor="let item of dialogList; let i = index"
+            *cdkVirtualFor="let item of dialogList; let i = index; trackBy: trackBy"
     >
         <ng-container [ngSwitch]="item.type">
             <div class="loading" *ngSwitchCase="'loading'">

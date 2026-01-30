@@ -7,10 +7,6 @@ export interface Orderable {
 }
 
 
-export function union<T extends Equality>(t: T[], other: T[]): T[] {
-      return [...t, ...other.filter(item => !t.find((z) => z.equals(item)))];
-}
-
 export function binary_search<T extends Orderable>(array: T[], item: Orderable): number {
       let left = 0, right = array.length;
       while (left != right) {

@@ -3,13 +3,13 @@ import {CdkVirtualScrollViewport, ScrollingModule} from "@angular/cdk/scrolling"
 import {CommonModule} from "@angular/common";
 import {DialogComponent} from "../dialog/dialog.component";
 import {IDialog} from "../../model/IDialog";
-import {union} from "../../utils/array";
 import {ChatEvent, getConversation, isPendingEvent} from "../../model/dto/chat-event";
 import {DialogRepository} from "../../service/repository/dialog-repository";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {Subscription, tap} from "rxjs";
+import {finalize, Observable, Subscription} from "rxjs";
 import {AccountRepository} from "../../service/auth/account-repository";
 import {RealtimeClient} from "../../service/websocket/realtime-client.service";
+import Expander from "../expander/expander";
 
 @Component({
       selector: 'app-dialog-list',
@@ -22,20 +22,40 @@ import {RealtimeClient} from "../../service/websocket/realtime-client.service";
       templateUrl: './dialog-list.component.html',
       styleUrl: './dialog-list.component.css'
 })
-export class DialogListComponent implements OnInit, OnDestroy {
+export class DialogListComponent implements OnInit, OnDestroy, Expander<IDialog> {
+
       @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
 
       protected expandIfNecessary() {
             const range = this.viewport.getRenderedRange();
             const lastVisible = range.end - 1;
 
-            if (lastVisible >= this.dialogs.length - 5) {
-                  this.expand()
-            }
+            if (lastVisible < this.renderedLength() - 5)
+                  return
+            if (this.expanding || this.isEnd())
+                  return;
+
+            this.expanding = true;
+            this.expand().pipe(finalize(() => {
+                  setTimeout(() => {
+                        this.expanding = false;
+                        this.expandIfNecessary()
+                  }, 200)
+            })).subscribe(dList => {
+                          if (dList.length == 0) {
+                                this.end = true;
+                          } else {
+                                this.append(dList)
+                          }
+                    },
+                    error => {
+                          console.error(error);
+                    },
+            )
       }
 
       private dialogs: IDialog[] = [];
-      private actual: IDialog[] = [];
+      private reals: IDialog[] = [];
 
       protected end: boolean = false;
       protected expanding: boolean = false;
@@ -45,8 +65,7 @@ export class DialogListComponent implements OnInit, OnDestroy {
       private eventObserver = (event: ChatEvent) => {
 
             if (event.message) {
-                  const conversation = getConversation(event);
-                  const dialog = this.repository.findAndSync(conversation)
+                  const dialog = this.repository.findAndSync(getConversation(event))
                   this.remove(dialog, !isPendingEvent(event))
                   this.prepend(dialog, !isPendingEvent(event))
             }
@@ -55,13 +74,30 @@ export class DialogListComponent implements OnInit, OnDestroy {
       constructor(private readonly repository: DialogRepository, accountRepository: AccountRepository, private readonly realtimeClient: RealtimeClient) {
       }
 
+      expand(): Observable<IDialog[]> {
+            const length = this.reals.length;
+            return length == 0 ?
+                    this.repository.list() :
+                    this.repository.list(this.reals[length - 1].conversation)
+
+
+      }
+
+      renderedLength(): number {
+            return this.dialogs.length;
+      }
+
+      isEnd(): boolean {
+            return this.end;
+      }
+
       ngOnDestroy(): void {
             this.eventSub.unsubscribe()
       }
 
       ngOnInit(): void {
             this.eventSub = this.realtimeClient.getEventChannel().subscribe(this.eventObserver)
-            this.expand()
+            this.expandIfNecessary()
       }
 
       protected get dialogList(): DialogRow[] {
@@ -71,45 +107,37 @@ export class DialogListComponent implements OnInit, OnDestroy {
             return list
       }
 
-      protected expand() {
-            if (!this.expanding && !this.end) {
-                  this.expanding = true;
-                  const res = this.actual.length == 0 ?
-                          this.repository.list() :
-                          this.repository.list(this.actual[this.actual.length - 1].conversation)
-                  res.pipe(tap(() => {
-                        this.expanding = false;
-                  })).subscribe(array => {
-                                if (array.length == 0) {
-                                      this.end = true;
-                                } else {
-                                      this.append(array)
-                                }
-                          },
-                          error => {
-                                console.error(error);
-                          },
-                  )
+
+      protected trackBy(index: number, item: DialogRow) {
+            switch (item.type) {
+                  case 'loading':
+                        return '0';
+                  default:
+                        return item.dialog
             }
       }
 
+
       private append(list: IDialog[]) {
-            this.dialogs = union(this.dialogs, list);
-            this.actual = union(this.actual, list);
-            this.expandIfNecessary()
+            this.reals.push(...list);
+            this.dialogs = this.union(this.dialogs, list);
+      }
+
+      private union(left: IDialog[], right: IDialog[]): IDialog[] {
+            return [...left, ...right.filter(r => !left.find((l) => l === r))];
       }
 
       private prepend(dialog: IDialog, real: boolean) {
             this.dialogs.unshift(dialog);
             if (real) {
-                  this.actual.unshift(dialog)
+                  this.reals.unshift(dialog)
             }
       }
 
       private remove(dialog: IDialog, real: boolean) {
-            this.dialogs = this.dialogs.filter((d) => !d.equals(dialog));
+            this.dialogs = this.dialogs.filter((d) => d != dialog);
             if (real) {
-                  this.actual = this.actual.filter((d) => !d.equals(dialog));
+                  this.reals = this.reals.filter((d) => d != dialog);
             }
       }
 }
