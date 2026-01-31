@@ -1,12 +1,12 @@
-import {GetRepository, ListRepository} from "./repository";
+import {Repository} from "./repository";
 import {Online} from "../../model/dto/online";
-import {map, Observable, of} from "rxjs";
+import {map, Observable, of, tap} from "rxjs";
 import {environment} from "../../environments";
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 
 @Injectable()
-export class OnlineRepository implements GetRepository<string, Online>, ListRepository<string, Online> {
+export class OnlineRepository implements Repository<string, Online> {
 
       private onlineMap = new Map<string, Online>();
 
@@ -14,21 +14,25 @@ export class OnlineRepository implements GetRepository<string, Online>, ListRepo
       }
 
       list(): Observable<Online[]> {
-            return this.httpClient.get<any[]>(environment.API_URL + "/presences", {
+            return this.httpClient.get<Online[]>(environment.API_URL + "/presences", {
                   observe: 'body',
-            }).pipe(map((res: any[]) => {
-                  return res.map((online: Online) => {
+            }).pipe(tap((res: Online[]) => {
+                  res.forEach((online: Online) => {
                         this.onlineMap.set(online.username, online);
                         return online;
                   });
             }))
       }
 
+      find(username: string): Online | undefined {
+            return this.onlineMap.get(username);
+      }
+
       get(username: string): Observable<Online> {
-            const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+            const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
             const online = this.onlineMap.get(username);
             if (online) {
-                  const onlineAt = new Date(online.at);
+                  const onlineAt = new Date(online.at).getTime();
                   if (onlineAt > twoMinutesAgo)
                         return of(online);
                   else

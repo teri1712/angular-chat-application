@@ -50,5 +50,5 @@ export class OnlineUserListComponent implements OnInit, OnDestroy {
                   });
             });
       }
-
 }
+

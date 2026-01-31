@@ -115,7 +115,11 @@ export class DialogRepository implements ListRepository<Conversation, IDialog>, 
       }
 
       find(conversation: Conversation): IDialog {
-            return this.getOrCreate(conversation);
+            const online = this.onlineRepo.find(conversation.partner.username);
+            const dialog = this.getOrCreate(conversation);
+            if (online)
+                  dialog.onlineAt = new Date(online.at);
+            return dialog;
       }
 
       findAndSync(conversation: Conversation): IDialog {
@@ -138,5 +142,5 @@ class Dialog implements IDialog {
               public ghost: boolean = true
       ) {
       }
-      
+
 }
