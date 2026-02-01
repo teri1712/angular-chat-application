@@ -3,7 +3,7 @@ import {User} from "../model/dto/user";
 import {AccountRepository} from "./auth/account-repository";
 import {BehaviorSubject, Observable, switchMap, tap} from "rxjs";
 import {environment} from "../environments";
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {UploadService} from "./upload-service";
 import {ImageSpec} from "../model/dto/image-spec";
 
@@ -46,18 +46,6 @@ export default class ProfileService {
                                         format: 'jpg'
                                   }
                             })));
-      }
-
-
-      changePassword(oldPassword: string, newPassword: string): Observable<any> {
-            const params = new HttpParams()
-                    .set('password', oldPassword)
-                    .set('new_password', newPassword);
-            return this.httpClient.post(environment.API_URL + "/accounts/me/profile/password", params.toString(), {
-                  headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                  }
-            });
       }
 
 }

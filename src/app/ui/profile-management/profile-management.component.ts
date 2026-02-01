@@ -13,6 +13,7 @@ import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import ProfileService from "../../service/profile-service";
+import {Authenticator} from "../../service/auth/authenticator";
 
 @Component({
       selector: 'app-profile-management',
@@ -43,6 +44,7 @@ export class ProfileManagementComponent implements OnInit {
       constructor(
               private fb: FormBuilder,
               private profileService: ProfileService,
+              private authenticator: Authenticator,
               private snackBar: MatSnackBar,
               public dialogRef: MatDialogRef<ProfileManagementComponent>
       ) {
@@ -97,7 +99,7 @@ export class ProfileManagementComponent implements OnInit {
       onPasswordSubmit(): void {
             if (this.passwordForm.valid) {
                   const {oldPassword, newPassword} = this.passwordForm.value;
-                  this.profileService.changePassword(oldPassword, newPassword).subscribe({
+                  this.authenticator.changePassword(oldPassword, newPassword).subscribe({
                         next: () => {
                               this.snackBar.open('Password changed successfully', 'Close', {duration: 3000});
                               this.passwordForm.reset();

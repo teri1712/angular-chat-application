@@ -8,6 +8,8 @@ export abstract class Authenticator {
       abstract signUp(body: SignUpRequest): Observable<Account>;
 
       abstract signIn(body: SignInRequest): Observable<Account>;
+      
+      abstract changePassword(oldPassword: string, newPassword: string): Observable<any>
 
       abstract logout(): Observable<Boolean>;
 }

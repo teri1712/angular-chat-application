@@ -12,10 +12,6 @@ import {User} from "../../model/dto/user";
 import {TokenListener, TokenStore} from "./token.store";
 import {CredentialInterceptor} from "./credential.interceptor";
 
-export type PresignedUpload = {
-      presignedUploadUrl: string;
-      downloadUrl: string;
-};
 
 @Injectable({
       providedIn: 'root',
@@ -170,6 +166,25 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
 
       get loginAtVersion(): number | null {
             return this.accountSubject.value?.syncContext.eventVersion ?? null
+      }
+
+      changePassword(oldPassword: string, newPassword: string): Observable<any> {
+
+            const refreshToken = this.tokenStore.refreshToken
+            if (!refreshToken) {
+                  this.onAccountLogout()
+                  return of(false);
+            }
+
+            const params = new HttpParams()
+                    .set('password', oldPassword)
+                    .set('new_password', newPassword)
+                    .set('refresh_token', refreshToken);
+            return this.httpClient.post(environment.API_URL + "/accounts/me/profile/password", params.toString(), {
+                  headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                  }
+            });
       }
 
 }
