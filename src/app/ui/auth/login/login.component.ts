@@ -1,9 +1,13 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {HttpErrorResponse} from "@angular/common/http";
 import {environment} from "../../../environments";
 import {Authenticator} from "../../../service/auth/authenticator";
 import {Router} from "@angular/router";
+import {ThemeService} from "../../../service/theme-service";
+import {Subscription} from "rxjs";
+
+declare var google: any;
 
 @Component({
       selector: 'app-login',
@@ -11,14 +15,55 @@ import {Router} from "@angular/router";
       templateUrl: './login.component.html',
       styleUrl: './login.component.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
 
       readonly oauth2_url = environment.API_URL + '/oauth2/authorization/google';
+      private themeSubscription?: Subscription;
 
       constructor(
               private readonly authenticator: Authenticator,
+              private readonly themeService: ThemeService,
               private router: Router,
       ) {
+      }
+
+
+      ngOnInit(): void {
+            google.accounts.id.initialize({
+                  client_id: "863552069596-2qbk9ci1jmdic6271pluqsd7snm11mof.apps.googleusercontent.com",
+                  callback: (response: any) => {
+                        this.onIdToken(response.credential);
+                  }
+            });
+
+            this.themeSubscription = this.themeService.themeObservable.subscribe(() => {
+                  this.renderGoogleButton();
+            });
+      }
+
+      ngOnDestroy(): void {
+            this.themeSubscription?.unsubscribe();
+      }
+
+      private renderGoogleButton(): void {
+            const googleBtn = document.getElementById("google-btn");
+            if (googleBtn) {
+                  google.accounts.id.renderButton(
+                          googleBtn,
+                          {theme: this.themeService.theme ? "outline" : "filled_black", size: "large"}
+                  );
+            }
+      }
+
+      onIdToken(idToken: string) {
+            this.authenticator.loginOAuth2(idToken).subscribe(
+                    (user) => {
+                          this.router.navigate(['/home']);
+                    },
+                    (error: HttpErrorResponse) => {
+                          this.error = error.error
+                    }
+            )
       }
 
       form = new FormGroup({

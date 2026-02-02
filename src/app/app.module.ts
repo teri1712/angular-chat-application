@@ -15,6 +15,7 @@ import {IconRegistry} from './res/IconRegistry';
 import {RouteReuseStrategy} from "@angular/router";
 import {ReuseDialogListStrategy} from "./service/cache/route/dialog-list-route-resuse";
 import {ITokenStore, TokenStore} from "./service/auth/token.store";
+import {UploadService} from "./service/upload-service";
 
 @NgModule({
       declarations: [AppComponent, SplashComponent],
@@ -22,6 +23,7 @@ import {ITokenStore, TokenStore} from "./service/auth/token.store";
       bootstrap: [AppComponent],
       providers: [provideAnimationsAsync(),
             AuthGuard,
+            UploadService,
             provideHttpClient(withInterceptorsFromDi()),
             {
                   provide: HTTP_INTERCEPTORS,

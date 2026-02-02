@@ -10,7 +10,6 @@ import {OnlineRepository} from "../../service/repository/online-repository";
 import {MessageService} from "../../service/message-service";
 import {AccountRepository} from "../../service/auth/account-repository";
 import EventCache from "../../service/cache/data/event-cache";
-import {UploadService} from "../../service/upload-service";
 import ProfileService from "../../service/profile-service";
 import {SearchRepository} from "../../service/repository/search-repository";
 
@@ -29,7 +28,6 @@ import {SearchRepository} from "../../service/repository/search-repository";
             OnlineRepository,
             RealtimeClient,
             MessageService,
-            UploadService,
             ProfileService,
             SearchRepository
       ]

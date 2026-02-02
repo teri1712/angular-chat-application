@@ -1,4 +1,5 @@
 import {Injectable} from "@angular/core";
+import {BehaviorSubject, Observable} from "rxjs";
 
 
 const THEME_KEY = "theme";
@@ -10,33 +11,32 @@ const LIGHT_CLASS = "dark-theme";
 })
 export class ThemeService {
 
-      private _theme: boolean = false
+      private _themeSubject: BehaviorSubject<boolean>;
 
       constructor() {
-            document.addEventListener('DOMContentLoaded', () => {
-                  this.initTheme()
-            }, {
-                  once: true
-            })
+            const localTheme = localStorage.getItem(THEME_KEY);
+            const initialTheme = localTheme ? JSON.parse(localTheme) : false;
+            this._themeSubject = new BehaviorSubject<boolean>(initialTheme);
+
+            this.applyTheme(initialTheme);
       }
 
       set theme(theme: boolean) {
-            this._theme = theme
-            localStorage.setItem(THEME_KEY, JSON.stringify(this._theme))
-            document.body.classList.toggle(DARK_CLASS, this._theme)
-            document.body.classList.toggle(LIGHT_CLASS, !this._theme)
+            localStorage.setItem(THEME_KEY, JSON.stringify(theme))
+            this._themeSubject.next(theme);
+            this.applyTheme(theme);
       }
 
       get theme() {
-            return this._theme
+            return this._themeSubject.value;
       }
 
-      private initTheme(): void {
-            const localTheme = localStorage.getItem(THEME_KEY);
-            if (localTheme) {
-                  this._theme = JSON.parse(localTheme);
-                  document.body.classList.toggle(DARK_CLASS, this._theme)
-                  document.body.classList.toggle(LIGHT_CLASS, !this._theme)
-            }
+      get themeObservable(): Observable<boolean> {
+            return this._themeSubject.asObservable();
+      }
+
+      private applyTheme(theme: boolean): void {
+            document.body.classList.toggle(DARK_CLASS, theme)
+            document.body.classList.toggle(LIGHT_CLASS, !theme)
       }
 }

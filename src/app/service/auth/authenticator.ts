@@ -5,10 +5,12 @@ import {SignInRequest} from "../../model/dto/sign-in-request";
 
 export abstract class Authenticator {
 
+      abstract loginOAuth2(idToken: string): Observable<Account>;
+
       abstract signUp(body: SignUpRequest): Observable<Account>;
 
       abstract signIn(body: SignInRequest): Observable<Account>;
-      
+
       abstract changePassword(oldPassword: string, newPassword: string): Observable<any>
 
       abstract logout(): Observable<Boolean>;

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {AccountRepository} from './account-repository';
 import {BehaviorSubject, catchError, filter, map, Observable, of, switchMap, take} from "rxjs";
-import {HttpClient, HttpErrorResponse, HttpParams, HttpResponse} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../environments";
 import {AccountEntry} from "../../model/dto/account-entry";
 import {Authenticator} from "./authenticator";
@@ -25,6 +25,24 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
             this.init()
       }
 
+      loginOAuth2(idToken: string): Observable<Account> {
+            const headers = new HttpHeaders({
+                  'Oauth2-Token': idToken
+            });
+
+            return this.httpClient.post<AccountEntry>(
+                    environment.API_URL + "/tokens/oauth2",
+                    null,
+                    {headers}
+            ).pipe(
+                    map((accountEntry) => {
+                          const account = accountEntry.account
+                          this.onAccountLogin(accountEntry)
+                          return account
+                    })
+            );
+      }
+
       onTokenChange(token: string): void {
             this.tokenStore.accessToken = token;
       }
@@ -42,7 +60,7 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
                           this.onAccountLogin(accountEntry)
                     },
                     (error: HttpErrorResponse) => {
-                          if (error.status === 401 || error.status === 403) {
+                          if (error.status >= 400 && error.status < 500) {
                                 this.onAccountLogout()
                           } else {
                                 //network
