@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Injector, OnDestroy, OnInit} from '@angular/core';
 import {User} from "../../model/dto/user";
 import {ActivationEnd, Router} from "@angular/router";
 import {ProgressDialogComponent} from "../progress-dialog/progress-dialog.component";
@@ -8,9 +8,10 @@ import {Authenticator} from "../../service/auth/authenticator";
 import {settingRoute, threadsRoute} from "../../home-route.module";
 import {environment} from "../../environments";
 import ProfileService from "../../service/profile-service";
+import {SearchDialogComponent} from "../search-dialog/search-dialog.component";
 
 enum Routes {
-      THREAD, SETTINGS
+      THREAD, SETTINGS, SEARCH
 }
 
 @Component({
@@ -32,7 +33,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
               private authenticator: Authenticator,
               private profileService: ProfileService,
               private router: Router,
-              private matDialog: MatDialog) {
+              private matDialog: MatDialog,
+              private injector: Injector) {
 
             this.me = this.profileService.getProfileObservable()
 
@@ -51,6 +53,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
                                       this.currentRoute = Routes.THREAD
                                 } else if (path === 'settings') {
                                       this.currentRoute = Routes.SETTINGS
+                                } else if (path === 'search') {
+                                      this.currentRoute = Routes.SEARCH
                                 }
                           }
                     });
@@ -75,6 +79,17 @@ export class SideNavComponent implements OnInit, OnDestroy {
             }
             this.currentRoute = Routes.THREAD;
             this.router.navigate(threadsRoute);
+      }
+
+      protected openSearchDialog() {
+            this.matDialog.open(SearchDialogComponent, {
+                  width: '600px',
+                  maxWidth: '90vw',
+                  height: 'auto',
+                  maxHeight: '85vh',
+                  injector: this.injector,
+                  panelClass: 'search-dialog-panel'
+            });
       }
 
       protected logout() {

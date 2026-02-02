@@ -1,0 +1,24 @@
+<h2 mat-dialog-title class="dialog-title">Search Messages</h2>
+<mat-dialog-content>
+    <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+        <mat-label>Search</mat-label>
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)"
+               placeholder="Type to search..." autofocus>
+        <mat-icon matSuffix color="primary">search</mat-icon>
+    </mat-form-field>
+
+    <div *ngIf="isLoading" class="loading-container mat-body-2">
+        <span>Searching...</span>
+    </div>
+
+    <div class="results-container" *ngIf="!isLoading && searchResults.length > 0">
+        <app-search-result-item *ngFor="let result of searchResults"
+                                [result]="result"
+                                (resultClick)="onResultClick($event)">
+        </app-search-result-item>
+    </div>
+
+    <div *ngIf="!isLoading && searchQuery && searchResults.length === 0" class="no-results mat-body-2">
+        No messages found matching "{{ searchQuery }}"
+    </div>
+</mat-dialog-content>

@@ -3,7 +3,7 @@ import {ListRepository} from "./repository";
 import {IDialog} from "../../model/IDialog";
 import {ChatRepository} from "./chat-repository";
 import {Conversation} from "../../model/dto/conversation";
-import {map, Observable, Subscription} from "rxjs";
+import {map, Observable, of, Subscription, tap} from "rxjs";
 import {ChatSnapshot} from "../../model/dto/chat-snapshot";
 import {OnlineRepository} from "./online-repository";
 import {ChatIdentifier, toIdString} from "../../model/dto/chat-identifier";
@@ -11,10 +11,13 @@ import {ChatEvent, getConversation, isPendingEvent} from "../../model/dto/chat-e
 import {AnnouncementService} from "../../ui/pipes/AnnouncementPipe";
 import {Preference} from "../../model/dto/preference";
 import {RealtimeClient} from "../websocket/realtime-client.service";
+import ProfileService from "../profile-service";
+import {User} from "../../model/dto/user";
 
 @Injectable()
 export class DialogRepository implements ListRepository<Conversation, IDialog>, OnDestroy {
 
+      private readonly me: User;
       private dialogMap = new Map<string, Dialog>();
 
       private readonly eventSub: Subscription;
@@ -42,11 +45,13 @@ export class DialogRepository implements ListRepository<Conversation, IDialog>, 
 
 
       constructor(
+              private profileService: ProfileService,
               private chatRepo: ChatRepository,
               private realtimeClient: RealtimeClient,
               private onlineRepo: OnlineRepository,
               private announcementService: AnnouncementService,
       ) {
+            this.me = this.profileService.getProfile();
             this.eventSub = this.realtimeClient.getEventChannel().subscribe(this.eventObserver)
       }
 
@@ -62,6 +67,7 @@ export class DialogRepository implements ListRepository<Conversation, IDialog>, 
                           .subscribe((details) => {
                                 if (dialog.ghost) {
                                       dialog.preference = details.preference
+                                      dialog.conversation = Conversation.fromPartner(this.me, details.partner)
                                       dialog.ghost = false;
                                 }
                           })
@@ -105,13 +111,26 @@ export class DialogRepository implements ListRepository<Conversation, IDialog>, 
             return dialog;
       }
 
-      findByIdentifier(identifier: ChatIdentifier): IDialog {
+      findByIdentifier(identifier: ChatIdentifier): Observable<IDialog> {
             const dialog = this.dialogMap.get(toIdString(identifier))
-            if (!dialog)
-                  throw new Error("Unable to find dialog");
+            if (dialog) {
+                  return of(dialog)
+            }
+            return this.chatRepo.get(identifier).pipe(map((details) => {
+                  const preference = details.preference
+                  const conversation = Conversation.fromPartner(this.me, details.partner)
+                  const dialog = this.getOrCreate(conversation)
+                  if (dialog.ghost) {
+                        dialog.preference = preference
+                        dialog.conversation = conversation
+                        dialog.ghost = false;
+                  }
+                  return dialog
+            }));
+      }
 
-            this.sync(dialog)
-            return dialog;
+      findByIdentifierAndSync(identifier: ChatIdentifier): Observable<IDialog> {
+            return this.findByIdentifier(identifier).pipe(tap((dialog) => this.sync(dialog)))
       }
 
       find(conversation: Conversation): IDialog {

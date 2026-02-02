@@ -10,7 +10,7 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {ReactiveFormsModule} from "@angular/forms";
 import {ActivatedRoute} from "@angular/router";
 import {DialogRepository} from "../../service/repository/dialog-repository";
-import {finalize, map, Subscription, tap, timer} from "rxjs";
+import {finalize, map, Subscription, switchMap, tap, timer} from "rxjs";
 import {fromString} from "../../model/dto/chat-identifier";
 import {TypeEvent} from "../../model/dto/type-event";
 import {MessageService} from "../../service/message-service";
@@ -159,10 +159,11 @@ export class MessageListComponent implements OnInit, OnDestroy {
 
       ngOnInit(): void {
             this.routeSub = this.activatedRoute.paramMap
-                    .subscribe(params => {
+                    .pipe(switchMap(params => {
                           const id = params.get('id')!;
-                          const dialog = this.dialogRepo.findByIdentifier(fromString(id))
-                          this.dialogRepo.findAndSync(dialog.conversation)
+                          return this.dialogRepo.findByIdentifierAndSync(fromString(id))
+                    }))
+                    .subscribe(dialog => {
                           this.refresh(dialog);
                     });
             this.activityTimer = timer(0, 1000).subscribe(() => {

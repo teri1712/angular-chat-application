@@ -18,7 +18,6 @@ import {DialogListComponent} from "./ui/dialog-list/dialog-list.component";
 import {MessageListComponent} from "./ui/message-list/message-list.component";
 import {SearchListComponent} from "./ui/search-list/search-list.component";
 import {ThreadComponent} from "./ui/thread/thread.component";
-import {ProfileManagementComponent} from "./ui/profile-management/profile-management.component";
 
 @NgModule({
       imports: [
@@ -37,13 +36,13 @@ import {ProfileManagementComponent} from "./ui/profile-management/profile-manage
             DialogListComponent,
             FormsModule,
             ReactiveFormsModule,
-            MessageListComponent,
-            ProfileManagementComponent],
+            MessageListComponent
+      ],
       declarations: [
             HomeComponent,
             SideNavComponent,
             SettingsComponent,
-      ]
+      ],
 })
 export class HomeModule {
 }

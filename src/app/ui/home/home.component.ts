@@ -12,6 +12,7 @@ import {AccountRepository} from "../../service/auth/account-repository";
 import EventCache from "../../service/cache/data/event-cache";
 import {UploadService} from "../../service/upload-service";
 import ProfileService from "../../service/profile-service";
+import {SearchRepository} from "../../service/repository/search-repository";
 
 @Component({
       selector: 'app-home',
@@ -29,7 +30,8 @@ import ProfileService from "../../service/profile-service";
             RealtimeClient,
             MessageService,
             UploadService,
-            ProfileService
+            ProfileService,
+            SearchRepository
       ]
 })
 export class HomeComponent implements OnInit, OnDestroy {
