@@ -1,0 +1,8 @@
+<app-avatar-container [onlineAt]="dialog.onlineAt" [conversation]="dialog.conversation" size="45px"/>
+<div class="middle">
+    <span class="partner-name" [style.font-weight]="nameWeight">{{ dialog.conversation.partner.name }}</span>
+    <span class="message"
+          [style.font-weight]="contentWeight">{{ dialog.newest }}</span>
+</div>
+<img class="seen mt-2" *ngIf="dialog.seen && newestMine" [src]="dialog.conversation.partner.avatar.uri"
+     alt="">

@@ -12,7 +12,8 @@ export class IconRegistry {
               sanitizer: DomSanitizer
       ) {
             for (const icon of Object.values(iconBundles)) {
-                  iconReg.addSvgIcon(icon, sanitizer.bypassSecurityTrustResourceUrl(`${icon}.svg`));
+                  const url = `${window.location.origin}/${icon}.svg`;
+                  iconReg.addSvgIcon(icon, sanitizer.bypassSecurityTrustResourceUrl(url));
             }
       }
 }

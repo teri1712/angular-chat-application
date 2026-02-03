@@ -1,0 +1,17 @@
+.sent {
+      color: grey;
+      margin: 0.25rem 1rem;
+      font-size: 0.8rem;
+}
+
+.error {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--mat-sys-error);
+}
+
+:host {
+      display: flex;
+      flex-direction: column;
+      align-items: end;
+}

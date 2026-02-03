@@ -6,15 +6,16 @@ import {AppComponent} from './app.component';
 import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {AuthGuard} from './auth.guard';
-import {SplashComponent} from './splash/splash.component';
-import {CredentialInterceptor} from "./usecases/service/auth/credential.interceptor";
-import {AccountService} from "./usecases/service/auth/account.service";
-import {AccountRepository} from "./usecases/service/auth/account-repository";
-import {DevelopmentModeInterceptor} from "./mock/development-mode-interceptor.service";
-import {Authenticator} from "./usecases/service/auth/authenticator";
+import {SplashComponent} from './ui/splash/splash.component';
+import {CredentialInterceptor} from "./service/auth/credential.interceptor";
+import {AccountService} from "./service/auth/account.service";
+import {AccountRepository} from "./service/auth/account-repository";
+import {Authenticator} from "./service/auth/authenticator";
 import {IconRegistry} from './res/IconRegistry';
 import {RouteReuseStrategy} from "@angular/router";
-import {ReuseDialogListStrategy} from "./usecases/service/cache/route/dialog-list-route-resuse";
+import {ReuseDialogListStrategy} from "./service/cache/route/dialog-list-route-resuse";
+import {ITokenStore, TokenStore} from "./service/auth/token.store";
+import {UploadService} from "./service/upload-service";
 
 @NgModule({
       declarations: [AppComponent, SplashComponent],
@@ -22,12 +23,8 @@ import {ReuseDialogListStrategy} from "./usecases/service/cache/route/dialog-lis
       bootstrap: [AppComponent],
       providers: [provideAnimationsAsync(),
             AuthGuard,
+            UploadService,
             provideHttpClient(withInterceptorsFromDi()),
-            {
-                  provide: HTTP_INTERCEPTORS,
-                  useClass: DevelopmentModeInterceptor,
-                  multi: true,
-            },
             {
                   provide: HTTP_INTERCEPTORS,
                   useClass: CredentialInterceptor,
@@ -36,6 +33,10 @@ import {ReuseDialogListStrategy} from "./usecases/service/cache/route/dialog-lis
             {
                   provide: AccountRepository,
                   useExisting: AccountService
+            },
+            {
+                  provide: ITokenStore,
+                  useExisting: TokenStore
             },
             {
                   provide: Authenticator,

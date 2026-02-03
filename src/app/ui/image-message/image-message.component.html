@@ -1,0 +1,8 @@
+<img [src]="imageEvent.downloadUrl"
+     [attr.alt]="imageEvent.filename || 'image'"
+     [ngStyle]="{
+    'width': imageEvent.width ? imageEvent.width + 'px' : 'auto',
+    'height': imageEvent.height ? imageEvent.height + 'px' : 'auto'
+}"
+     (click)="openImage()"
+     style="cursor: zoom-in; border-radius: 6px;">

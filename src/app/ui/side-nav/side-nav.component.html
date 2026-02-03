@@ -1,0 +1,24 @@
+<div class="d-flex flex-column gap-2 align-items-center">
+    <button mat-mini-fab aria-label="Thread" (click)="navigateToThreads()"
+            [ngClass]="{'un-selected': currentRoute !== Routes.THREAD}"
+    >
+        <mat-icon>alternate_email</mat-icon>
+    </button>
+    <button mat-mini-fab aria-label="Settings" (click)="navigateToSettings()"
+            [ngClass]="{'un-selected': currentRoute !== Routes.SETTINGS}">
+        <mat-icon>settings</mat-icon>
+    </button>
+    <button mat-mini-fab aria-label="Search" (click)="openSearchDialog()"
+            [ngClass]="{'un-selected': currentRoute !== Routes.SEARCH}">
+        <mat-icon>search</mat-icon>
+    </button>
+</div>
+
+<button style="background: none; border: none" [matMenuTriggerFor]="user_actions">
+    <img *ngIf="me != null" [src]="(me | async)?.avatar?.uri" alt="avatar">
+</button>
+<mat-menu #user_actions="matMenu">
+    <button mat-menu-item (click)="logout()">Logout</button>
+</mat-menu>
+
+

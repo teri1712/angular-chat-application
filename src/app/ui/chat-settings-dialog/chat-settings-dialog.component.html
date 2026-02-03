@@ -1,0 +1,31 @@
+<h1 mat-dialog-title>Chat Settings</h1>
+<mat-dialog-content>
+    <form [formGroup]="form">
+        <div style="margin-bottom: 16px;">
+            <mat-form-field appearance="fill" style="width: 100%;">
+                <mat-label>Room Name</mat-label>
+                <input matInput formControlName="roomName" required>
+                <mat-error *ngIf="form.get('roomName')?.hasError('required')">Room name is required</mat-error>
+                <mat-error *ngIf="form.get('roomName')?.hasError('pattern')">Room name cannot be blank</mat-error>
+            </mat-form-field>
+        </div>
+    </form>
+    <div style="margin-bottom: 16px;">
+        <button mat-raised-button class="d-flex justify-content-start ps-3" (click)="openIconSelectionDialog()"
+                style="width: 100%;">
+            <mat-icon [svgIcon]="getIcon(preference.iconId)" style="height : 30px"></mat-icon>
+            Select Icon
+        </button>
+    </div>
+    <div style="margin-bottom: 16px;">
+        <button mat-raised-button class="d-flex justify-content-start ps-3" (click)="openThemeSelectionDialog()"
+                style="width: 100%;">
+            <mat-icon>palette</mat-icon>
+            Select Theme
+        </button>
+    </div>
+</mat-dialog-content>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Cancel</button>
+    <button mat-button (click)="submit()" [disabled]="form.invalid" cdkFocusInitial>Submit</button>
+</div>

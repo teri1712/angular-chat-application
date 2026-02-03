@@ -1,0 +1,39 @@
+<app-chat-info-bar [dialog]="dialog"/>
+<cdk-virtual-scroll-viewport
+        itemSize="50"
+        #viewport class="list my-2" (scrolledIndexChange)="onScrollChanged($event)">
+    <div
+            *cdkVirtualFor="let item of renderedList; trackBy: trackByTrackId">
+        <ng-container [ngSwitch]="item.type">
+
+            <app-message *ngSwitchCase="'message'" class="mx-3" style="margin-top: 2px"
+                         [message]="$any(item).message"
+                         [partner]="dialog.conversation.partner"/>
+
+            <div class="loading" *ngSwitchCase="'loading'">
+                <mat-spinner [diameter]="25"></mat-spinner>
+            </div>
+
+            <div
+                    *ngSwitchCase="'typing'"
+                    style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        margin-top: 2px;
+                        "
+                    class="mx-3"
+            >
+                <div class="message-container"
+                     [style.justify-content]="'start'">
+                    <app-typing-message [message]="$any(item).typeEvent"
+                                        [partner]="dialog.conversation.partner"></app-typing-message>
+                </div>
+
+            </div>
+
+        </ng-container>
+
+    </div>
+</cdk-virtual-scroll-viewport>
+<app-input-bar [dialog]="dialog"/>

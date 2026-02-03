@@ -1,0 +1,132 @@
+<h2 mat-dialog-title class="dialog-title">Profile Management</h2>
+<mat-dialog-content class="profile-dialog-content">
+    <div class="container-fluid pt-2">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <mat-card appearance="outlined" class="profile-card">
+                    <mat-card-header>
+                        <mat-card-title>Edit Profile</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper" (click)="fileInput.click()">
+                                <img [src]="avatarPreview || 'assets/default-avatar.png'" alt="Avatar"
+                                     class="avatar-img">
+                                <div class="avatar-overlay">
+                                    <mat-icon>photo_camera</mat-icon>
+                                </div>
+                            </div>
+                            <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none"
+                                   accept="image/*">
+                            <button mat-button color="primary" class="mt-2" (click)="fileInput.click()">
+                                <mat-icon>upload</mat-icon>
+                                Change Avatar
+                            </button>
+                        </div>
+
+                        <form [formGroup]="profileForm" (ngSubmit)="onProfileSubmit()" class="profile-form">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Username</mat-label>
+                                <mat-icon matPrefix>person</mat-icon>
+                                <input matInput formControlName="username">
+                                <mat-error *ngIf="profileForm.get('username')?.hasError('required')">
+                                    Username is required
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Name</mat-label>
+                                <mat-icon matPrefix>badge</mat-icon>
+                                <input matInput formControlName="name">
+                                <mat-error *ngIf="profileForm.get('name')?.hasError('required')">
+                                    Name is required
+                                </mat-error>
+                            </mat-form-field>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-label>Gender</mat-label>
+                                        <mat-select formControlName="gender">
+                                            <mat-option [value]="1">Male</mat-option>
+                                            <mat-option [value]="2">Female</mat-option>
+                                            <mat-option [value]="3">Other</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-sm-6">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-label>Date of Birth</mat-label>
+                                        <input matInput [matDatepicker]="picker" formControlName="dob">
+                                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <button mat-flat-button color="primary" type="submit" [disabled]="profileForm.invalid"
+                                    class="action-button">
+                                <mat-icon>save</mat-icon>
+                                Save Profile
+                            </button>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Change Password Section -->
+            <div class="col-md-6">
+                <mat-card appearance="outlined" class="profile-card">
+                    <mat-card-header>
+                        <mat-card-title>Change Password</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="passwordForm" (ngSubmit)="onPasswordSubmit()" class="profile-form pt-2">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Current Password</mat-label>
+                                <mat-icon matPrefix>lock</mat-icon>
+                                <input matInput type="password" formControlName="oldPassword">
+                                <mat-error *ngIf="passwordForm.get('oldPassword')?.hasError('required')">
+                                    Current password is required
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>New Password</mat-label>
+                                <mat-icon matPrefix>vpn_key</mat-icon>
+                                <input matInput type="password" formControlName="newPassword">
+                                <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                                    New password is required
+                                </mat-error>
+                                <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
+                                    At least 6 characters
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Confirm New Password</mat-label>
+                                <mat-icon matPrefix>lock_reset</mat-icon>
+                                <input matInput type="password" formControlName="confirmPassword">
+                                <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                                    Please confirm
+                                </mat-error>
+                                <mat-error *ngIf="passwordForm.hasError('mismatch')">
+                                    Passwords do not match
+                                </mat-error>
+                            </mat-form-field>
+
+                            <button mat-flat-button color="warn" type="submit" [disabled]="passwordForm.invalid"
+                                    class="action-button">
+                                <mat-icon>update</mat-icon>
+                                Update Password
+                            </button>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

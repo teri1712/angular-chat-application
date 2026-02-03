@@ -1,11 +1,11 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {HomeComponent} from "./home/home.component";
-import {SettingsComponent} from "./settings/settings.component";
-import {MessageListComponent} from "./message-list/message-list.component";
-import {SearchListComponent} from "./search-list/search-list.component";
-import {ThreadComponent} from "./thread/thread.component";
-import {DialogListComponent} from "./dialog-list/dialog-list.component";
+import {HomeComponent} from "./ui/home/home.component";
+import {SettingsComponent} from "./ui/settings/settings.component";
+import {MessageListComponent} from "./ui/message-list/message-list.component";
+import {SearchListComponent} from "./ui/search-list/search-list.component";
+import {ThreadComponent} from "./ui/thread/thread.component";
+import {DialogListComponent} from "./ui/dialog-list/dialog-list.component";
 
 export const threadsRoute = ['/home', {
       outlets: {
@@ -23,6 +23,7 @@ export const settingRoute = ['/home', {
             'side-bar': ['settings']
       }
 }];
+
 const routes: Routes = [{
       path: '',
       component: HomeComponent,

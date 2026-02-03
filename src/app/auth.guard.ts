@@ -8,7 +8,7 @@ import {
       RouterStateSnapshot,
 } from '@angular/router';
 import {map} from 'rxjs';
-import {AccountRepository} from "./usecases/service/auth/account-repository";
+import {AccountRepository} from "./service/auth/account-repository";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
