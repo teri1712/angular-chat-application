@@ -1,16 +1,17 @@
-import {Injectable, OnDestroy} from "@angular/core";
+import {Inject, Injectable, OnDestroy} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {EventHandlerStrategy} from "./event-handler.strategy";
 import {AccountRepository} from "./auth/account-repository";
 import {getMyMessageChannel} from "./event/commons";
 import {ChatEvent} from "../model/dto/chat-event";
+import {EventHandler, HANDLERS} from "./event-handler";
 
 @Injectable()
 export class MessageService implements OnDestroy {
 
+
       private queueState: 'idle' | 'sending' | 'pending' = 'idle';
       private messageChannel: BroadcastChannel;
-      private queue: EventHandlerStrategy[] = [];
+      private queue: ChatEvent[] = [];
 
       private onOnline = () => {
             if (this.queueState === 'pending') {
@@ -43,7 +44,9 @@ export class MessageService implements OnDestroy {
             this.continue();
       }
 
-      constructor(private httpClient: HttpClient, private accountRepository: AccountRepository) {
+      constructor(private httpClient: HttpClient,
+                  private accountRepository: AccountRepository,
+                  @Inject(HANDLERS) private readonly handlers: EventHandler[]) {
             window.addEventListener('online', this.onOnline);
             this.messageChannel = getMyMessageChannel(accountRepository.currentUser?.username!);
       }
@@ -57,23 +60,27 @@ export class MessageService implements OnDestroy {
                   return
             }
             this.queueState = 'sending';
-            const strategy = this.queue.at(0)!;
+            const event = this.queue.at(0)!;
+            const handler = this.handlers.find(h => h.supports(event))!;
 
-            strategy.send(this.httpClient,
-                    () => this.onSent(),
-                    () => {
-                          const event = ChatEvent.from(strategy.create())
-                                  .eventVersion(-1)
-                                  .build();
-                          this.onErrorMessage(event);
-                    },
-                    () => this.onConnectionLost());
+            if (handler) {
+                  handler.handle(event).subscribe((event) => {
+                        this.onSent();
+                  }, (error) => {
+                        if (error.status === 0) {
+                              this.onConnectionLost();
+                        } else {
+                              this.onErrorMessage(ChatEvent.from(event)
+                                      .eventVersion(-1)
+                                      .build());
+                        }
+                  })
+            }
       }
 
-      send(strategy: EventHandlerStrategy): void {
+      send(event: ChatEvent): void {
 
-            const event = strategy.create();
-            this.queue.push(strategy);
+            this.queue.push(event);
             this.messageChannel.postMessage(event);
             this.schedule()
       }

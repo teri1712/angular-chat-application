@@ -21,7 +21,7 @@ import {User} from "../../model/dto/user";
 import {Formatter} from "../format/Formatter";
 import {ChatEvent, isPendingEvent} from "../../model/dto/chat-event";
 import {EventRepository} from "../../service/repository/event-repository";
-import {SeenEventHandlerStrategy} from "../../service/SeenEventHandlerStrategy";
+import {SeenEventFactory} from "../../service/SeenEventFactory";
 import {TypingMessageComponent} from "../typing-left-message/typing-message.component";
 import {Message, MyMessage, toMessage, toMessages, YourMessage} from "./message";
 import {RollInFormatter} from "./roll-in-formater";
@@ -152,6 +152,7 @@ export class MessageListComponent implements OnInit, OnDestroy {
               private readonly messageService: MessageService,
               private readonly realtimeClient: RealtimeClient,
               private readonly sanitizer: DomSanitizer,
+              private readonly seenEventFactory: SeenEventFactory
       ) {
             this.me = this.profileService.getProfile();
       }
@@ -190,9 +191,9 @@ export class MessageListComponent implements OnInit, OnDestroy {
             const first = this.yourMessages[0]
 
             if (!first.seenAt) {
-                  const seenStrategy = new SeenEventHandlerStrategy(this.dialog.conversation, new Date())
-                  this.seenKey = seenStrategy.idempotencyKey
-                  this.messageService.send(seenStrategy)
+                  const seenEvent = this.seenEventFactory.create(this.dialog.conversation, new Date())
+                  this.seenKey = seenEvent.idempotencyKey
+                  this.messageService.send(seenEvent)
             }
       }
 

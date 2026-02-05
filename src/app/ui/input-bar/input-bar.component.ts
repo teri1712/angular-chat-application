@@ -9,10 +9,10 @@ import {ImageEvent} from "../../model/dto/image-event";
 import {Subscription, timer} from "rxjs";
 import {getIcon} from "../../res/icons";
 import {RealtimeClient} from "../../service/websocket/realtime-client.service";
-import {TextEventHandlerStrategy} from "../../service/TextEventHandlerStrategy";
-import {IconEventHandlerStrategy} from "../../service/IconEventHandlerStrategy";
-import {FileEventHandlerStrategy} from "../../service/FileEventHandlerStrategy";
-import {ImageEventHandlerStrategy} from "../../service/ImageEventHandlerStrategy";
+import {TextEventFactory} from "../../service/TextEventFactory";
+import {IconEventFactory} from "../../service/IconEventFactory";
+import {FileEventFactory} from "../../service/FileEventFactory";
+import {ImageEventFactory} from "../../service/ImageEventFactory";
 import {ChatIdentifier} from "../../model/dto/chat-identifier";
 import {IDialog} from "../../model/IDialog";
 import {NgStyle} from "@angular/common";
@@ -35,7 +35,14 @@ export class InputBarComponent implements OnInit, OnDestroy {
 
       private typeTimer!: Subscription
 
-      constructor(private readonly messageService: MessageService, private readonly realtimeClient: RealtimeClient, private readonly uploadService: UploadService) {
+      constructor(private readonly messageService: MessageService,
+                  private readonly realtimeClient: RealtimeClient,
+                  private readonly uploadService: UploadService,
+                  private readonly textEventFactory: TextEventFactory,
+                  private readonly iconEventFactory: IconEventFactory,
+                  private readonly fileEventFactory: FileEventFactory,
+                  private readonly imageEventFactory: ImageEventFactory
+      ) {
       }
 
       protected get chat(): ChatIdentifier {
@@ -70,10 +77,10 @@ export class InputBarComponent implements OnInit, OnDestroy {
 
       protected onSendClicked(): void {
             if (!this.textEmpty) {
-                  this.messageService.send(new TextEventHandlerStrategy(this.conversation, this.textContent))
+                  this.messageService.send(this.textEventFactory.create(this.conversation, this.textContent))
             } else {
                   const iconId = this.dialog.preference?.iconId ?? 1
-                  this.messageService.send(new IconEventHandlerStrategy(this.conversation, iconId))
+                  this.messageService.send(this.iconEventFactory.create(this.conversation, iconId))
             }
             this.textContent = ""
             this.textEmpty = true
@@ -83,7 +90,7 @@ export class InputBarComponent implements OnInit, OnDestroy {
             const files = (event.target as HTMLInputElement)?.files
             if (files?.length) {
                   const file = files[0];
-                  this.messageService.send(new FileEventHandlerStrategy(this.uploadService, this.conversation, file))
+                  this.messageService.send(this.fileEventFactory.create(this.conversation, file))
             }
       }
 
@@ -98,12 +105,22 @@ export class InputBarComponent implements OnInit, OnDestroy {
                   image.onload = () => {
                         const width = image.naturalWidth || 0;
                         const height = image.naturalHeight || 0;
-                        this.messageService.send(new ImageEventHandlerStrategy(this.uploadService, this.conversation, file, width, height, format))
+                        this.messageService.send(this.imageEventFactory.create(this.conversation, {
+                              image: file,
+                              width: width,
+                              height: height,
+                              format: format
+                        }))
                   };
                   image.onerror = () => {
                         const imageEvent = new ImageEvent(fileUrl, file.name, 0, 0, format)
                         imageEvent.file = file
-                        this.messageService.send(new ImageEventHandlerStrategy(this.uploadService, this.conversation, file, 200, 200, format))
+                        this.messageService.send(this.imageEventFactory.create(this.conversation, {
+                              image: file,
+                              width: 200,
+                              height: 200,
+                              format: format
+                        }))
                   };
                   image.src = fileUrl;
             }

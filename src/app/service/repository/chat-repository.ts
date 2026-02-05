@@ -38,7 +38,9 @@ export class ChatRepository implements ListRepository<ChatIdentifier, ChatSnapsh
                   if (snapshots.length != 0 && snapshots[0].atVersion != this.realtimeClient.syncVersion)
                         throw Error("Please retry");
                   snapshots.forEach((snapshot) => {
-                        snapshot.eventList.forEach((event) => this.eventCache.put(event))
+                        snapshot.eventList.forEach((event) => {
+                              this.eventCache.put(event)
+                        })
                   })
                   return of(snapshots);
             }))

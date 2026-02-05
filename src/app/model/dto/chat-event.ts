@@ -7,6 +7,7 @@ import {User} from "./user";
 import {PreferenceEvent} from "./preference-event";
 import {FileEvent} from "./file-event";
 import {Conversation} from "./conversation";
+import {v4 as uuidv4} from 'uuid';
 
 export const NONE: string = "NONE"
 export const TEXT: string = "TEXT"
@@ -19,7 +20,7 @@ export const PREFERENCE: string = "PREFERENCE"
 export class ChatEvent {
 
       constructor(
-              readonly idempotencyKey: string,
+              readonly idempotencyKey: string = uuidv4(),
               readonly id: string | undefined = undefined,
               readonly sender: string = "",
               readonly owner: User = new User(),
@@ -65,7 +66,7 @@ export class ChatEvent {
 }
 
 export class ChatEventBuilder {
-      private _idempotencyKey: string = "";
+      private _idempotencyKey: string = uuidv4();
       private _id: string | undefined = undefined;
       private _sender: string = "";
       private _owner: User = new User();
