@@ -25,7 +25,7 @@ export default class ProfileService {
       }
 
       updateProfile(user: Partial<ProfileRequest>): Observable<User> {
-            return this.httpClient.put<User>(environment.API_URL + "/accounts/me/profile", user).pipe(
+            return this.httpClient.patch<User>(environment.API_URL + "/accounts/me/profile", user).pipe(
                     tap(updatedUser => {
                                   this.profile.next(updatedUser);
                             }
