@@ -1,4 +1,4 @@
-import {Component, DestroyRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit, ViewChild} from '@angular/core';
 import {CdkVirtualScrollViewport, ScrollingModule} from "@angular/cdk/scrolling";
 import {CommonModule} from "@angular/common";
 import {ConversationComponent} from "../dialog/conversation.component";
@@ -29,7 +29,7 @@ import {distinctUntilChanged} from "rxjs/operators";
       templateUrl: './conversation-list.component.html',
       styleUrl: './conversation-list.component.css'
 })
-export class ConversationListComponent implements OnInit, OnDestroy {
+export class ConversationListComponent implements OnInit {
 
       @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
 
@@ -201,8 +201,6 @@ export class ConversationListComponent implements OnInit, OnDestroy {
                     )
       }
 
-      ngOnDestroy(): void {
-      }
 
       private readonly destroyRef = inject(DestroyRef);
 
@@ -215,11 +213,10 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
 
       protected trackBy(index: number, item: ConversationRow) {
-            switch (item.type) {
-                  case 'loading':
-                        return '0';
-                  default:
-                        return item.conversation;
+            if (item.type === 'loading') {
+                  return '0';
+            } else {
+                  return item.conversation;
             }
       }
 
