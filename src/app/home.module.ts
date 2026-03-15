@@ -14,10 +14,11 @@ import {MatCardModule} from "@angular/material/card";
 import {MatRadioModule} from "@angular/material/radio";
 import {SettingsItemComponent} from "./ui/settings-item/settings-item.component";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {DialogListComponent} from "./ui/dialog-list/dialog-list.component";
+import {ConversationListComponent} from "./ui/conversation-list/conversation-list.component";
 import {MessageListComponent} from "./ui/message-list/message-list.component";
-import {SearchListComponent} from "./ui/search-list/search-list.component";
+import {SearchUserListComponent} from "./ui/search-list/search-user-list.component";
 import {ThreadComponent} from "./ui/thread/thread.component";
+import {MessagePanelComponent} from "./ui/message-pannel/message-panel.component";
 
 @NgModule({
       imports: [
@@ -31,12 +32,13 @@ import {ThreadComponent} from "./ui/thread/thread.component";
             MatSlideToggleModule,
             MatIconModule,
             ThreadComponent,
-            SearchListComponent,
+            SearchUserListComponent,
             SettingsItemComponent,
-            DialogListComponent,
+            ConversationListComponent,
             FormsModule,
             ReactiveFormsModule,
-            MessageListComponent
+            MessageListComponent,
+            MessagePanelComponent
       ],
       declarations: [
             HomeComponent,

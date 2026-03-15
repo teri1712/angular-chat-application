@@ -4,6 +4,6 @@ export function getAuthenticationChannel(): BroadcastChannel {
       return new BroadcastChannel("AUTHENTICATION_CHANNEL")
 }
 
-export function getMyMessageChannel(username: string): BroadcastChannel {
+export function getGobalLogChannel(username: string): BroadcastChannel {
       return new BroadcastChannel("MESSAGE_CHANNEL_" + username)
 }

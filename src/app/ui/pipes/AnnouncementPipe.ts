@@ -1,13 +1,13 @@
 import {Injectable} from '@angular/core';
 import {ONE_DAY_SECONDS, ONE_HOUR_SECONDS, ONE_MINUTE_SECONDS, ONE_WEEK_SECONDS} from "../../utils/time";
-import {ChatEvent} from "../../model/dto/chat-event";
+import {MessageState} from "../../model/dto/message-state";
 
 @Injectable({
       providedIn: 'root'
 })
 export class AnnouncementService {
 
-      transform(newest: ChatEvent): string {
+      transform(newest: MessageState): string {
 
             const mine = newest.sender === newest.owner.id;
 

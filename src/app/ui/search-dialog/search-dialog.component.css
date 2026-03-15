@@ -6,7 +6,8 @@
 
 .loading-container, .no-results {
       padding: 40px 20px;
-      text-align: center;
+      display: flex;
+      justify-content: center;
       color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.54));
 }
 

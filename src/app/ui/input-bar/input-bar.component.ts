@@ -1,101 +1,95 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {FormsModule} from "@angular/forms";
 import {MessageService} from "../../service/message-service";
-import {ImageEvent} from "../../model/dto/image-event";
-import {Subscription, timer} from "rxjs";
+import {Subscription, take, timer} from "rxjs";
 import {getIcon} from "../../res/icons";
-import {RealtimeClient} from "../../service/websocket/realtime-client.service";
-import {TextEventFactory} from "../../service/TextEventFactory";
-import {IconEventFactory} from "../../service/IconEventFactory";
-import {FileEventFactory} from "../../service/FileEventFactory";
-import {ImageEventFactory} from "../../service/ImageEventFactory";
-import {ChatIdentifier} from "../../model/dto/chat-identifier";
-import {IDialog} from "../../model/IDialog";
-import {NgStyle} from "@angular/common";
-import {UploadService} from "../../service/upload-service";
+import {NgIf, NgStyle} from "@angular/common";
+import {TextPosting} from "../../service/text-handler";
+import {IconPosting} from "../../service/icon-handler";
+import {FilePosting} from "../../service/file-handler";
+import {ImagePosting} from "../../service/image-handler";
+import {DialogService} from "../../service/repository/dialog.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
       selector: 'app-input-bar',
-      imports: [MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, FormsModule, NgStyle],
+      imports: [MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, FormsModule, NgStyle, NgIf],
       templateUrl: './input-bar.component.html',
       styleUrl: './input-bar.component.css'
 })
-export class InputBarComponent implements OnInit, OnDestroy {
+export class InputBarComponent implements OnInit, OnDestroy, OnChanges {
 
-
-      @Input({required: true}) dialog!: IDialog;
-
-      protected textEmpty: boolean = true
+      @Input({required: true}) chatId: string | null = null;
+      @Input() iconId: number | null = null;
       protected textContent: string = ""
       protected lastChange: number = 0
 
-      private typeTimer!: Subscription
+      private typeTimer?: Subscription
 
-      constructor(private readonly messageService: MessageService,
-                  private readonly realtimeClient: RealtimeClient,
-                  private readonly uploadService: UploadService,
-                  private readonly textEventFactory: TextEventFactory,
-                  private readonly iconEventFactory: IconEventFactory,
-                  private readonly fileEventFactory: FileEventFactory,
-                  private readonly imageEventFactory: ImageEventFactory
-      ) {
+      constructor(private readonly messageService: MessageService, private dialogService: DialogService) {
       }
 
-      protected get chat(): ChatIdentifier {
-            return this.dialog.conversation.chat.identifier;
+      ngOnChanges(changes: SimpleChanges): void {
+            if (changes['chatId']) {
+                  this.textContent = ""
+                  this.lastChange = 0
+            }
       }
+
+
+      private destroyRef = inject(DestroyRef);
 
       ngOnInit(): void {
-            this.typeTimer = timer(0, 1000).subscribe(() => {
-                  if (Date.now() - this.lastChange <= 1100) {
-                        this.realtimeClient.pingChat(this.chat)
+            this.typeTimer = timer(1000, 1000).subscribe(() => {
+                  if (Date.now() - this.lastChange <= 1000 && this.chatId) {
+                        this.dialogService.findByChatId(this.chatId)
+                                .pipe(
+                                        take(1),
+                                        takeUntilDestroyed(this.destroyRef)
+                                )
+                                .subscribe(dialog => {
+                                      dialog.ping()
+                                })
                   }
             })
       }
 
       ngOnDestroy(): void {
-            this.typeTimer.unsubscribe();
+            this.typeTimer?.unsubscribe();
       }
 
       protected onChange(text: string) {
             const _empty = text.length == 0
-            if (_empty != this.textEmpty) {
-                  this.textEmpty = _empty
-            }
             if (!_empty) {
                   this.lastChange = Date.now()
             }
       }
 
-      get conversation() {
-            return this.dialog.conversation;
-      }
+      protected onIconClicked(iconId: number, chatId: string) {
+            this.messageService.send(new IconPosting(iconId, chatId))
 
-      protected onSendClicked(): void {
-            if (!this.textEmpty) {
-                  this.messageService.send(this.textEventFactory.create(this.conversation, this.textContent))
-            } else {
-                  const iconId = this.dialog.preference?.iconId ?? 1
-                  this.messageService.send(this.iconEventFactory.create(this.conversation, iconId))
-            }
             this.textContent = ""
-            this.textEmpty = true
       }
 
-      protected sendFile(event: Event) {
+      protected onSendClicked(content: string, chatId: string): void {
+            this.messageService.send(new TextPosting(content, chatId))
+            this.textContent = ""
+      }
+
+      protected sendFile(event: Event, chatId: string) {
             const files = (event.target as HTMLInputElement)?.files
             if (files?.length) {
                   const file = files[0];
-                  this.messageService.send(this.fileEventFactory.create(this.conversation, file))
+                  this.messageService.send(new FilePosting(file, chatId))
             }
       }
 
 
-      protected sendImage(event: Event) {
+      protected sendImage(event: Event, chatId: string) {
             const files = (event.target as HTMLInputElement)?.files
             if (files?.length) {
                   const file = files[0];
@@ -105,22 +99,10 @@ export class InputBarComponent implements OnInit, OnDestroy {
                   image.onload = () => {
                         const width = image.naturalWidth || 0;
                         const height = image.naturalHeight || 0;
-                        this.messageService.send(this.imageEventFactory.create(this.conversation, {
-                              image: file,
-                              width: width,
-                              height: height,
-                              format: format
-                        }))
+                        this.messageService.send(new ImagePosting(file, width, height, format, chatId))
                   };
                   image.onerror = () => {
-                        const imageEvent = new ImageEvent(fileUrl, file.name, 0, 0, format)
-                        imageEvent.file = file
-                        this.messageService.send(this.imageEventFactory.create(this.conversation, {
-                              image: file,
-                              width: 200,
-                              height: 200,
-                              format: format
-                        }))
+                        this.messageService.send(new ImagePosting(file, 200, 200, format, chatId))
                   };
                   image.src = fileUrl;
             }

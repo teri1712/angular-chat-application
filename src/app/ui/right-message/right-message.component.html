@@ -1,17 +1,28 @@
-<ng-container [ngSwitch]="message.messageType">
-    <app-icon-message *ngSwitchCase="'ICON'" [iconEvent]="message.iconEvent!"/>
+<ng-container [ngSwitch]="message.messageType.toLowerCase()">
+    <app-icon-message *ngSwitchCase="'icon'" [iconState]="$any(message)"/>
 
-    <div *ngSwitchDefault [ngSwitch]="message.messageType" [ngStyle]="{
+    <div *ngSwitchDefault [ngSwitch]="message.messageType.toLowerCase()" [ngStyle]="{
           'overflow': 'hidden',
           'border-top-left-radius':  '20px',
-          'border-top-right-radius': (message.position === Position.Single || message.position === Position.Top) ? '20px' : '3px',
-          'border-bottom-right-radius': (message.position === Position.Single || message.position === Position.Bottom) ? '20px' : '3px',
+          'border-top-right-radius': (frame.position === Position.Single || frame.position === Position.Top) ? '20px' : '3px',
+          'border-bottom-right-radius': (frame.position === Position.Single || frame.position === Position.Bottom) ? '20px' : '3px',
           'border-bottom-left-radius':  '20px',
 }">
-        <app-text-message *ngSwitchCase="'TEXT'" [textEvent]="message.textEvent!"/>
-        <app-image-message *ngSwitchCase="'IMAGE'" [imageEvent]="message.imageEvent!"/>
-        <app-file-message *ngSwitchCase="'FILE'" [fileEvent]="message.fileEvent!"/>
+        <app-text-message *ngSwitchCase="'text'" [textState]="$any(message)"/>
+        <app-image-message *ngSwitchCase="'image'" [imageState]="$any(message)"/>
+        <app-file-message *ngSwitchCase="'file'" [fileState]="$any(message)"/>
     </div>
 </ng-container>
-<span class="error" *ngIf="hasError">{{ $any(message).reason }}</span>
-<span class="sent" *ngIf="message.isLastSent && !hasError">Sent</span>
+<ng-container *ngIf="displaySend" [ngSwitch]="sendState">
+    <span class="error" *ngSwitchCase="SendState.Error">{{ $any(sendState).reason }}</span>
+    <span class="send-state" *ngSwitchCase="SendState.Pending">Pending</span>
+    <span class="send-state" *ngSwitchCase="SendState.Sending">Sending</span>
+    <span class="send-state" *ngSwitchCase="SendState.Sent">Sent</span>
+</ng-container>
+<div class="seen-div">
+    <ng-container *ngFor="let seen of displaySeenBy">
+        <img class="seen mt-2" [src]="seen.avatar"
+             alt="">
+    </ng-container>
+
+</div>

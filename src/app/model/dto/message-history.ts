@@ -1,8 +1,6 @@
-import {ChatIdentifier} from "./chat-identifier";
-
 export interface MessageHistory {
-      id: string,
-      chatIdentifier: ChatIdentifier,
-      partnerName: string,
+      chatId: string,
+      sequenceNumber: number,
+      roomName: string,
       content: string;
 }

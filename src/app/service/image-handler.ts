@@ -1,39 +1,71 @@
 import {EventHandler} from "./event-handler";
-import {ChatEvent} from "../model/dto/chat-event";
+import {generateSequenceNumber, MessageState} from "../model/dto/message-state";
 import {Observable, switchMap} from "rxjs";
 import {Injectable} from "@angular/core";
 import {environment} from "../environments";
-import {toIdString} from "../model/dto/chat-identifier";
 import {UploadService} from "./upload-service";
 import {HttpClient} from "@angular/common/http";
+import {MessagePosting} from "./message-service";
+import {User} from "../model/dto/user";
+import ProfileService from "./profile-service";
+import {Profile} from "../model/dto/profile";
+import {ImageState} from "../model/dto/image-state";
 
 @Injectable()
 export class ImageHandler extends EventHandler {
 
-      constructor(http: HttpClient, private readonly uploadService: UploadService) {
-            super(http);
+      private readonly profile: Profile;
+
+      constructor(private profileService: ProfileService, private readonly httpClient: HttpClient, private readonly uploadService: UploadService) {
+            super();
+            this.profile = profileService.getProfile();
       }
 
-      handle(event: ChatEvent): Observable<ChatEvent> {
-            const chat = event.chat;
-            const chatIdentifier = chat.identifier;
-            const url = environment.API_URL + '/chats/' + encodeURIComponent(toIdString(chatIdentifier)) + '/image-events';
+      override supports(posting: MessagePosting): boolean {
+            return posting instanceof ImagePosting;
+      }
 
-            const imageEvent = event.imageEvent!;
-            return this.uploadService.upload(imageEvent.filename, imageEvent.file!).pipe(
+      override mock(posting: MessagePosting): MessageState {
+            const imagePosting = posting as ImagePosting;
+            const imageState: ImageState = {
+                  chatId: posting.chatId,
+                  sender: new User(this.profile.id, this.profile.username, this.profile.name, this.profile.avatar),
+                  messageType: 'IMAGE',
+                  seenBy: [],
+                  sequenceNumber: generateSequenceNumber(),
+                  createdAt: new Date().toDateString(),
+                  updatedAt: new Date().toDateString(),
+                  image: {
+                        filename: imagePosting.file.name,
+                        uri: URL.createObjectURL(imagePosting.file),
+                        width: imagePosting.width,
+                        height: imagePosting.height,
+                        format: imagePosting.format
+                  }
+            }
+            return imageState;
+      }
+
+      override handle(posting: MessagePosting): Observable<any> {
+            const imagePosting = posting as ImagePosting;
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/image-events/' + encodeURIComponent(posting.id);
+
+            return this.uploadService.upload(imagePosting.file.name, imagePosting.file).pipe(
                     switchMap(downloadUrl => {
-                          imageEvent.downloadUrl = downloadUrl.path;
-                          return this.http.post<ChatEvent>(url, imageEvent, {
-                                headers: {
-                                      'Content-Type': 'application/json',
-                                      'Idempotency-key': event.idempotencyKey
-                                },
-                          });
+                          return this.httpClient.put<MessageState>(url, {
+                                filename: imagePosting.file.name,
+                                uri: downloadUrl.path,
+                                width: imagePosting.width,
+                                height: imagePosting.height,
+                                format: imagePosting.format
+                          }, {});
                     })
             );
       }
+}
 
-      supports(event: ChatEvent): boolean {
-            return !!event.imageEvent;
+export class ImagePosting extends MessagePosting {
+      constructor(readonly file: File, readonly width: number, readonly height: number, readonly format: string, readonly chatId: string) {
+            super();
       }
 }

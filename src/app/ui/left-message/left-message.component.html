@@ -1,27 +1,27 @@
 <div class="avatar-holder">
-    <img *ngIf=" message.position === Position.Single || message.position === Position.Bottom"
-         [src]="partner.avatar.uri"
+    <img *ngIf=" frame.position === Position.Single || frame.position === Position.Bottom"
+         [src]="message.sender.avatar"
          alt="">
 </div>
-<ng-container [ngSwitch]="message.messageType" ]>
-    <app-icon-message *ngSwitchCase="'ICON'" [iconEvent]="message.iconEvent!"/>
+<ng-container [ngSwitch]="message.messageType.toLowerCase()">
+    <app-icon-message *ngSwitchCase="'icon'" [iconState]="$any(message)"/>
     <div *ngSwitchDefault
          [ngStyle]="{
                   'overflow': 'hidden',
                   'border-top-left-radius':  (
-                     message.position === Position.Single
-                  || message.position === Position.Top) ? '20px' : '3px',
+                     frame.position === Position.Single
+                  || frame.position === Position.Top) ? '20px' : '3px',
                   'border-top-right-radius': '20px',
                   'border-bottom-right-radius': '20px',
                   'border-bottom-left-radius':  (
-                     message.position === Position.Single
-                  || message.position === Position.Bottom) ? '20px' : '3px',
+                     frame.position === Position.Single
+                  || frame.position === Position.Bottom) ? '20px' : '3px',
                 }"
     >
-        <ng-container [ngSwitch]="message.messageType">
-            <app-text-message *ngSwitchCase="'TEXT'" [textEvent]="message.textEvent!"/>
-            <app-image-message *ngSwitchCase="'IMAGE'" [imageEvent]="message.imageEvent!"/>
-            <app-file-message *ngSwitchCase="'FILE'" [fileEvent]="message.fileEvent!"/>
+        <ng-container [ngSwitch]="message.messageType.toLowerCase()">
+            <app-text-message *ngSwitchCase="'text'" [textState]="$any(message)"/>
+            <app-image-message *ngSwitchCase="'image'" [imageState]="$any(message)"/>
+            <app-file-message *ngSwitchCase="'file'" [fileState]="$any(message)"/>
 
         </ng-container>
     </div>

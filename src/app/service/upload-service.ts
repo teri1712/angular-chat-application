@@ -20,7 +20,7 @@ export class UploadService {
 
       upload(filename: string, file: File): Observable<DownloadUrl> {
             const presignUrl = environment.API_URL + '/files/upload-urls?filename=' + encodeURIComponent(filename);
-            return this.httpClient.get<PresignedUpload>(presignUrl, {observe: 'body'}).pipe(
+            return this.httpClient.post<PresignedUpload>(presignUrl, {observe: 'body'}).pipe(
                     switchMap((presigned: PresignedUpload) => {
                           return from(fetch(presigned.presignedUploadUrl, {
                                 method: 'PUT',

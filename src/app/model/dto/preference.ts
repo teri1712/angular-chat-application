@@ -1,11 +1,6 @@
-import {Theme} from './theme';
-
-export class Preference {
-      constructor(
-              public iconId: number = 1,
-              public roomName: string = '',
-              public theme: Theme | undefined = undefined
-      ) {
-      }
-
+export interface Preference {
+      readonly iconId: number,
+      readonly customName?: string,
+      readonly customAvatar?: string,
+      readonly theme?: string
 }

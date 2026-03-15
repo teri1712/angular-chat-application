@@ -1,11 +1,7 @@
-import {User} from "./user";
-import {SyncContext} from "./sync-context";
+import {AccessToken} from "./access-token";
+import {Profile} from "./profile";
 
-export class Account {
-      constructor(
-              public id: string,
-              public user: User,
-              public syncContext: SyncContext,
-      ) {
-      }
+export interface Account {
+      readonly profile: Profile,
+      readonly accessToken: AccessToken,
 }

@@ -1,0 +1,137 @@
+import {Injectable, OnDestroy} from "@angular/core";
+import {Client, Frame, IMessage} from "@stomp/stompjs";
+import {environment} from "../../environments";
+import {TokenStore} from "../auth/token.store";
+import {delay, finalize, Observable, of, Subject, switchMap, tap} from "rxjs";
+import {HttpClient, HttpParams} from "@angular/common/http";
+import {InboxLog} from "../../model/dto/inbox-log";
+import {LogRepository} from "../repository/log-repository";
+import {TypeMessage} from "../../model/dto/type-message";
+import {PreferenceMessage} from "../../model/dto/preference-message";
+
+
+@Injectable()
+export class LogTrailerService implements OnDestroy {
+
+      private stage: ClientStage = ClientStage.DISCONNECTED;
+      private currentSequenceNumber: number;
+
+      private readonly client: Client;
+
+
+      constructor(tokenStore: TokenStore, private httpClient: HttpClient, private logRepository: LogRepository) {
+            this.currentSequenceNumber = Number.MAX_SAFE_INTEGER;
+            this.client = new Client({
+                  brokerURL: environment.WEBSOCKET_HOST + '/handshake',
+                  connectHeaders: {
+                        'Authorization': `Bearer ${tokenStore.accessToken}`
+                  },
+
+                  reconnectDelay: 5000,
+                  heartbeatIncoming: 5000,
+                  heartbeatOutgoing: 5000,
+                  debug: (msg: string) => console.debug('[STOMP]', msg),
+            });
+
+            this.init()
+      }
+
+      send(chatId: string): void {
+            if (this.client.connected) {
+                  this.client.publish({
+                        destination: '/room/' + chatId,
+                        headers: {},
+                        body: 'I am typing...',
+                  })
+            }
+      }
+
+      subscribeRoom(chatId: string): Observable<TypeMessage | PreferenceMessage> {
+            if (!this.client.connected) {
+                  throw Error("Client is not connected.");
+            }
+            const observable = new Subject<TypeMessage>();
+            const subscription = this.client.subscribe("/room/" + chatId, (msg: IMessage) => {
+                  observable.next(JSON.parse(msg.body));
+            }, {})
+            return observable.pipe(
+                    finalize(() => {
+                          subscription.unsubscribe();
+                    }));
+      }
+
+
+      private init() {
+
+            this.client.onConnect = (frame: Frame) => {
+                  this.client.subscribe("/user/queue", (msg: IMessage) => {
+                        const log = JSON.parse(msg.body) as InboxLog;
+                        console.log('[STOMP] Event:', log);
+                        if (this.stage === ClientStage.CONNECTED)
+                              this.emit(log);
+                  })
+                  if (this.currentSequenceNumber === Number.MAX_SAFE_INTEGER) {
+                        this.stage = ClientStage.CONNECTED;
+                  } else {
+                        this.stage = ClientStage.RECONNECTING;
+                        this.download(this.currentSequenceNumber).subscribe(
+                                () => {
+                                      this.stage = ClientStage.CONNECTED;
+                                })
+                  }
+            }
+
+            this.client.onDisconnect = (frame: Frame) => {
+                  this.stage = ClientStage.DISCONNECTED;
+            }
+
+            this.client.onStompError = (frame: Frame) => {
+                  console.error('[STOMP] error:', frame.headers['message']);
+                  console.error('[STOMP] error body:', frame.body);
+            };
+            this.client.activate()
+      }
+
+      private emit(log: InboxLog) {
+            const sequenceNumber = log.sequenceNumber
+            this.currentSequenceNumber = sequenceNumber;
+            this.logRepository.publish(log)
+      }
+
+      private emitAll(logs: InboxLog[]) {
+            logs.forEach((log: InboxLog) => {
+                  this.emit(log)
+            })
+      }
+
+      private download(sequenceNumber: number): Observable<InboxLog[]> {
+            const params = new HttpParams()
+                    .set("anchorSequenceNumber", sequenceNumber);
+
+            return this.httpClient.get<InboxLog[]>(environment.API_URL + "/users/me/logs", {
+                  observe: 'body',
+                  params: params
+            }).pipe(
+                    tap((logs) => {
+                          this.emitAll(logs)
+                    }),
+                    delay(500),
+                    switchMap((logs: InboxLog[]) => {
+                          const firstSequence = logs.at(-1)?.sequenceNumber
+                          return firstSequence ? this.download(firstSequence + 1) : of([]);
+                    })
+            )
+      }
+
+
+      ngOnDestroy(): void {
+            this.client.deactivate()
+      }
+}
+
+
+enum ClientStage {
+      CONNECTED,
+      RECONNECTING,
+      DISCONNECTED
+}

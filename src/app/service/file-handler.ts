@@ -1,39 +1,65 @@
 import {EventHandler} from "./event-handler";
-import {ChatEvent} from "../model/dto/chat-event";
+import {generateSequenceNumber, MessageState} from "../model/dto/message-state";
 import {Observable, switchMap} from "rxjs";
 import {Injectable} from "@angular/core";
 import {environment} from "../environments";
-import {toIdString} from "../model/dto/chat-identifier";
 import {UploadService} from "./upload-service";
 import {HttpClient} from "@angular/common/http";
+import {MessagePosting} from "./message-service";
+import {User} from "../model/dto/user";
+import ProfileService from "./profile-service";
+import {Profile} from "../model/dto/profile";
+import {FileState} from "../model/dto/file-state";
 
 @Injectable()
 export class FileHandler extends EventHandler {
 
-      constructor(http: HttpClient, private readonly uploadService: UploadService) {
-            super(http);
+      private readonly profile: Profile;
+
+      constructor(private profileService: ProfileService, private readonly httpClient: HttpClient, private readonly uploadService: UploadService) {
+            super();
+            this.profile = profileService.getProfile();
       }
 
-      handle(event: ChatEvent): Observable<ChatEvent> {
-            const chat = event.chat;
-            const chatIdentifier = chat.identifier;
-            const url = environment.API_URL + '/chats/' + encodeURIComponent(toIdString(chatIdentifier)) + '/file-events';
+      override supports(posting: MessagePosting): boolean {
+            return posting instanceof FilePosting;
+      }
 
-            const fileEvent = event.fileEvent!;
-            return this.uploadService.upload(fileEvent.filename, fileEvent.file!).pipe(
+      override mock(posting: MessagePosting): MessageState {
+            const filePosting = posting as FilePosting;
+            const fileState: FileState = {
+                  chatId: posting.chatId,
+                  sender: new User(this.profile.id, this.profile.username, this.profile.name, this.profile.avatar),
+                  messageType: 'FILE',
+                  seenBy: [],
+                  sequenceNumber: generateSequenceNumber(),
+                  createdAt: new Date().toDateString(),
+                  updatedAt: new Date().toDateString(),
+                  filename: filePosting.file.name,
+                  uri: URL.createObjectURL(filePosting.file),
+                  size: filePosting.file.size,
+            }
+            return fileState;
+      }
+
+      override handle(posting: MessagePosting): Observable<any> {
+            const filePosting = posting as FilePosting;
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/file-events/' + encodeURIComponent(posting.id);
+
+            return this.uploadService.upload(filePosting.file.name, filePosting.file).pipe(
                     switchMap(downloadUrl => {
-                          fileEvent.mediaUrl = downloadUrl.path;
-                          return this.http.post<ChatEvent>(url, fileEvent, {
-                                headers: {
-                                      'Content-Type': 'application/json',
-                                      'Idempotency-key': event.idempotencyKey
-                                },
-                          });
+                          return this.httpClient.put<MessageState>(url, {
+                                filename: filePosting.file.name,
+                                uri: downloadUrl.path,
+                                size: filePosting.file.size
+                          }, {});
                     })
             );
       }
+}
 
-      supports(event: ChatEvent): boolean {
-            return !!event.fileEvent;
+export class FilePosting extends MessagePosting {
+      constructor(readonly file: File, readonly chatId: string) {
+            super();
       }
 }

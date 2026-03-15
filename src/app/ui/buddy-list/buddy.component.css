@@ -1,0 +1,10 @@
+:host {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      align-items: center;
+}
+
+app-avatar-container {
+      margin: 0 4px;
+}

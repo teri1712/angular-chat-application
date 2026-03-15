@@ -1,15 +1,15 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {RealtimeClient} from "../../service/websocket/realtime-client.service";
+import {LogTrailerService} from "../../service/websocket/log-trailer.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Router} from "@angular/router";
-import {ChatRepository} from "../../service/repository/chat-repository";
-import {DialogRepository} from "../../service/repository/dialog-repository";
-import {EventRepository} from "../../service/repository/event-repository";
+import {ConversationRepository} from "../../service/repository/conversation-repository.service";
+import {DialogService} from "../../service/repository/dialog.service";
+import {MessageRepository} from "../../service/repository/message-repository.service";
 import {UserRepository} from "../../service/repository/user-repository";
-import {OnlineRepository} from "../../service/repository/online-repository";
+import {PresenceRepository} from "../../service/repository/presence-repository.service";
 import {MessageService} from "../../service/message-service";
 import {AccountRepository} from "../../service/auth/account-repository";
-import EventCache from "../../service/cache/data/event-cache";
+import CacheService from "../../service/cache/data/cache-service";
 import ProfileService from "../../service/profile-service";
 import {SearchRepository} from "../../service/repository/search-repository";
 import {AccountService} from "../../service/auth/account.service";
@@ -19,6 +19,8 @@ import {IconHandler} from "../../service/icon-handler";
 import {SeenHandler} from "../../service/seen-handler";
 import {FileHandler} from "../../service/file-handler";
 import {ImageHandler} from "../../service/image-handler";
+import {LogRepository} from "../../service/repository/log-repository";
+import {ChatRepository, DirectRepository} from "../../service/repository/chat-repository";
 
 @Component({
       selector: 'app-home',
@@ -28,12 +30,15 @@ import {ImageHandler} from "../../service/image-handler";
       styleUrl: './home.component.css',
       providers: [
             ChatRepository,
-            EventCache,
-            DialogRepository,
-            EventRepository,
+            DirectRepository,
+            LogRepository,
+            ConversationRepository,
+            CacheService,
+            DialogService,
+            MessageRepository,
             UserRepository,
-            OnlineRepository,
-            RealtimeClient,
+            PresenceRepository,
+            LogTrailerService,
             MessageService,
             ProfileService,
             SearchRepository,
@@ -73,7 +78,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       constructor(
               private readonly accountRepository: AccountRepository,
-              stompClient: RealtimeClient,
+              stompClient: LogTrailerService,
               private readonly router: Router,
               private readonly snackBar: MatSnackBar) {
       }

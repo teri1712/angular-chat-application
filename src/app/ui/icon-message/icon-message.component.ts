@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {IconEvent} from "../../model/dto/icon-event";
+import {IconState} from "../../model/dto/icon-state";
 import {getIcon} from "../../res/icons";
 import {MatIcon} from "@angular/material/icon";
 
@@ -12,13 +12,13 @@ import {MatIcon} from "@angular/material/icon";
       styleUrl: './icon-message.component.css'
 })
 export class IconMessageComponent implements OnInit {
-      @Input({required: true}) iconEvent!: IconEvent;
+      @Input({required: true}) iconState!: IconState;
       protected iconName!: string
 
       constructor() {
       }
 
       ngOnInit(): void {
-            this.iconName = getIcon(this.iconEvent.iconId)
+            this.iconName = getIcon(this.iconState.iconId)
       }
 }

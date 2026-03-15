@@ -27,11 +27,11 @@
       object-fit: cover;
 }
 
-.partner-name {
+.room-name {
       font-weight: 500;
 }
 
-.partner-status {
+.room-presence {
       font-size: 0.9rem;
 }
 

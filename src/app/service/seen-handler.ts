@@ -1,32 +1,43 @@
 import {EventHandler} from "./event-handler";
-import {ChatEvent} from "../model/dto/chat-event";
+import {MessageState} from "../model/dto/message-state";
 import {Observable} from "rxjs";
 import {Injectable} from "@angular/core";
 import {environment} from "../environments";
-import {toIdString} from "../model/dto/chat-identifier";
 import {HttpClient} from "@angular/common/http";
+import {MessagePosting} from "./message-service";
+import ProfileService from "./profile-service";
+import {Profile} from "../model/dto/profile";
 
 @Injectable()
 export class SeenHandler extends EventHandler {
 
-      constructor(http: HttpClient) {
-            super(http);
+      private readonly profile: Profile;
+
+      constructor(private profileService: ProfileService, private readonly httpClient: HttpClient) {
+            super();
+            this.profile = profileService.getProfile();
       }
 
-      handle(event: ChatEvent): Observable<ChatEvent> {
-            const chat = event.chat;
-            const chatIdentifier = chat.identifier;
-            const url = environment.API_URL + '/chats/' + encodeURIComponent(toIdString(chatIdentifier)) + '/seen-events';
-            return this.http
-                    .post<ChatEvent>(url, event.seenEvent!, {
-                          headers: {
-                                'Content-Type': 'application/json',
-                                'Idempotency-key': event.idempotencyKey
-                          },
-                    });
+      override supports(posting: MessagePosting): boolean {
+            return posting instanceof SeenPosting;
       }
 
-      supports(event: ChatEvent): boolean {
-            return !!event.seenEvent;
+      override mock(posting: MessagePosting): MessageState | null {
+            return null
+      }
+
+      override handle(posting: MessagePosting): Observable<any> {
+            const seenPosting = posting as SeenPosting;
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/seen-events/' + encodeURIComponent(posting.id);
+            return this.httpClient
+                    .put<MessageState>(url, {
+                          at: seenPosting.at
+                    }, {});
+      }
+}
+
+export class SeenPosting extends MessagePosting {
+      constructor(readonly at: Date, readonly chatId: string) {
+            super();
       }
 }

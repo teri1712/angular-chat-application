@@ -1,6 +1,5 @@
 import {ChangeDetectorRef, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {Preference} from '../../model/dto/preference';
 import {IconSelectionDialogComponent} from '../icon-selection-dialog/icon-selection-dialog.component';
 import {ThemeSelectionDialogComponent} from '../theme-selection-dialog/theme-selection-dialog.component';
 import {getIcon} from '../../res/icons';
@@ -11,6 +10,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {CommonModule} from '@angular/common';
 import {ScrollingModule} from '@angular/cdk/scrolling';
+import {PreferenceRequest} from "../../service/preference.service";
 
 @Component({
       selector: 'app-chat-settings-dialog',
@@ -29,9 +29,9 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
       ],
 })
 export class ChatSettingsDialogComponent {
-      preference: Preference;
-      getIcon = getIcon;
       form: FormGroup;
+
+      private request: PreferenceRequest = {}
 
       constructor(
               public dialogRef: MatDialogRef<ChatSettingsDialogComponent>,
@@ -40,13 +40,9 @@ export class ChatSettingsDialogComponent {
               private cdr: ChangeDetectorRef,
               private fb: FormBuilder
       ) {
-            this.preference = new Preference(
-                    data.preference.iconId,
-                    data.preference.roomName,
-                    data.preference.theme
-            );
             this.form = this.fb.group({
-                  roomName: [this.preference.roomName, [Validators.required, Validators.pattern(/.*[\w]+.*/)]]
+                  customName: [this.data.preference.customName ?? '', [Validators.pattern(/.*[\w]+.*/)]],
+                  icon: getIcon(data.preference.iconId),
             });
       }
 
@@ -61,7 +57,8 @@ export class ChatSettingsDialogComponent {
 
             dialogRef.afterClosed().subscribe(result => {
                   if (result) {
-                        this.preference.iconId = result;
+                        this.form.patchValue({icon: getIcon(result)});
+                        this.request.iconId = result;
                   }
                   this.cdr.markForCheck();
             });
@@ -73,17 +70,16 @@ export class ChatSettingsDialogComponent {
             });
 
             dialogRef.afterClosed().subscribe(result => {
-                  if (result) {
-                        this.preference.theme = result;
-                  }
+                  if (result)
+                        this.request.themeId = result;
                   this.cdr.markForCheck();
             });
       }
 
       submit() {
             if (this.form.valid) {
-                  this.preference.roomName = this.form.value.roomName;
-                  this.dialogRef.close(this.preference);
+                  this.request.customName = this.form.value.customName;
+                  this.dialogRef.close(this.request);
             }
       }
 }

@@ -1,10 +1,14 @@
-import {Component, HostBinding, Input} from '@angular/core';
-import {IMyMessage, Position} from "../../model/IMessage";
+import {Component, HostBinding, Input, OnInit} from '@angular/core';
 import {IconMessageComponent} from "../icon-message/icon-message.component";
 import {CommonModule} from "@angular/common";
 import {TextMessageComponent} from "../text-message/text-message.component";
 import {ImageMessageComponent} from "../image-message/image-message.component";
 import {FileMessageComponent} from "../file-message/file-message.component";
+import {MessageFrame, Position} from "../format/Formatter";
+import {MessageState} from "../../model/dto/message-state";
+import {SendState} from "../../model/message";
+import ProfileService from "../../service/profile-service";
+import {User} from "../../model/dto/user";
 
 @Component({
       selector: 'app-right-message',
@@ -18,9 +22,23 @@ import {FileMessageComponent} from "../file-message/file-message.component";
       templateUrl: './right-message.component.html',
       styleUrl: './right-message.component.css'
 })
-export class RightMessageComponent {
+export class RightMessageComponent implements OnInit {
 
-      @Input({required: true,}) message!: IMyMessage
+
+      constructor(private readonly profileService: ProfileService) {
+      }
+
+      ngOnInit(): void {
+      }
+
+      @Input({required: true,}) message!: MessageState
+      @Input({required: true,}) frame!: MessageFrame
+      @Input({required: true,}) sendState?: SendState
+      @Input({required: true,}) displaySend?: boolean
+
+      get displaySeenBy(): User[] {
+            return this.message.seenBy.filter(user => !this.profileService.thatsMe(user))
+      }
 
       protected get hasError(): boolean {
             return 'reason' in this.message
@@ -42,4 +60,6 @@ export class RightMessageComponent {
       }
 
       protected readonly Position = Position;
+
+      protected readonly SendState = SendState;
 }

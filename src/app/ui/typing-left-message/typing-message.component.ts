@@ -1,8 +1,7 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {CommonModule} from "@angular/common";
-import {TypeEvent} from "../../model/dto/type-event";
+import {TypeMessage} from "../../model/dto/type-message";
 import {TypingComponent} from "../typing/typing.component";
-import {User} from "../../model/dto/user";
 
 @Component({
       selector: 'app-typing-message',
@@ -13,11 +12,11 @@ import {User} from "../../model/dto/user";
       templateUrl: './typing-message.component.html',
       styleUrl: './typing-message.component.css'
 })
-export class TypingMessageComponent {
+export class TypingMessageComponent implements OnInit {
+      ngOnInit(): void {
+      }
 
-      @Input({required: true,}) message!: TypeEvent
-
-      @Input({required: true,}) partner!: User
+      @Input({required: true,}) message!: TypeMessage
 
 
 }

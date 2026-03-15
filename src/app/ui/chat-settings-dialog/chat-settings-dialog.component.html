@@ -4,8 +4,7 @@
         <div style="margin-bottom: 16px;">
             <mat-form-field appearance="fill" style="width: 100%;">
                 <mat-label>Room Name</mat-label>
-                <input matInput formControlName="roomName" required>
-                <mat-error *ngIf="form.get('roomName')?.hasError('required')">Room name is required</mat-error>
+                <input matInput formControlName="customName">
                 <mat-error *ngIf="form.get('roomName')?.hasError('pattern')">Room name cannot be blank</mat-error>
             </mat-form-field>
         </div>
@@ -13,7 +12,7 @@
     <div style="margin-bottom: 16px;">
         <button mat-raised-button class="d-flex justify-content-start ps-3" (click)="openIconSelectionDialog()"
                 style="width: 100%;">
-            <mat-icon [svgIcon]="getIcon(preference.iconId)" style="height : 30px"></mat-icon>
+            <mat-icon [svgIcon]="form.controls['icon'].value" style="height : 30px"></mat-icon>
             Select Icon
         </button>
     </div>

@@ -1,7 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {HttpErrorResponse} from "@angular/common/http";
-import {environment} from "../../../environments";
 import {Authenticator} from "../../../service/auth/authenticator";
 import {Router} from "@angular/router";
 import {ThemeService} from "../../../service/theme-service";
@@ -17,7 +16,6 @@ declare var google: any;
 })
 export class LoginComponent implements OnInit, OnDestroy {
 
-      readonly oauth2_url = environment.API_URL + '/oauth2/authorization/google';
       private themeSubscription?: Subscription;
 
       constructor(
@@ -107,8 +105,8 @@ export class LoginComponent implements OnInit, OnDestroy {
                     (user) => {
                           this.router.navigate(['/home']);
                     },
-                    (error: HttpErrorResponse) => {
-                          this.error = error.error
+                    (error: Error) => {
+                          this.error = error.message
                     }
             )
       }

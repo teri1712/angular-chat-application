@@ -2,10 +2,10 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {HomeComponent} from "./ui/home/home.component";
 import {SettingsComponent} from "./ui/settings/settings.component";
-import {MessageListComponent} from "./ui/message-list/message-list.component";
-import {SearchListComponent} from "./ui/search-list/search-list.component";
+import {SearchUserListComponent} from "./ui/search-list/search-user-list.component";
 import {ThreadComponent} from "./ui/thread/thread.component";
-import {DialogListComponent} from "./ui/dialog-list/dialog-list.component";
+import {ConversationListComponent} from "./ui/conversation-list/conversation-list.component";
+import {MessagePanelComponent} from "./ui/message-pannel/message-panel.component";
 
 export const threadsRoute = ['/home', {
       outlets: {
@@ -40,17 +40,17 @@ const routes: Routes = [{
                   children: [
                         {
                               path: 'search',
-                              component: SearchListComponent,
+                              component: SearchUserListComponent,
                         },
                         {
                               path: 'list',
-                              component: DialogListComponent,
+                              component: ConversationListComponent,
                         }
                   ]
             },
             {
                   path: ':id',
-                  component: MessageListComponent,
+                  component: MessagePanelComponent,
                   outlet: 'conversation'
             }
       ]

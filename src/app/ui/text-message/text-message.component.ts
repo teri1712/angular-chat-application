@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {TextEvent} from "../../model/dto/text-event";
+import {TextState} from "../../model/dto/text-state";
 
 @Component({
       selector: 'app-text-message',
@@ -8,9 +8,10 @@ import {TextEvent} from "../../model/dto/text-event";
       styleUrl: './text-message.component.css'
 })
 export class TextMessageComponent {
-      @Input({required: true}) textEvent!: TextEvent;
+      @Input({required: true}) textState!: TextState;
 
       constructor() {
       }
+
 
 }

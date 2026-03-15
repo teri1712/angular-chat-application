@@ -1,6 +1,6 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
@@ -8,11 +8,10 @@ import {MatListModule} from '@angular/material/list';
 import {FormsModule} from '@angular/forms';
 import {SearchRepository} from '../../service/repository/search-repository';
 import {MessageHistory} from '../../model/dto/message-history';
-import {catchError, of, Subject, Subscription} from 'rxjs';
+import {catchError, of, Subject, Subscription, tap} from 'rxjs';
 import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
-import {Router} from "@angular/router";
-import {toIdString} from "../../model/dto/chat-identifier";
 import {SearchResultItemComponent} from "../search-result-item/search-result-item.component";
+import {MatProgressSpinner} from "@angular/material/progress-spinner";
 
 @Component({
       selector: 'app-search-dialog',
@@ -25,7 +24,8 @@ import {SearchResultItemComponent} from "../search-result-item/search-result-ite
             MatIconModule,
             MatListModule,
             FormsModule,
-            SearchResultItemComponent
+            SearchResultItemComponent,
+            MatProgressSpinner
       ],
       templateUrl: './search-dialog.component.html',
       styleUrl: './search-dialog.component.css'
@@ -40,13 +40,16 @@ export class SearchDialogComponent implements OnInit, OnDestroy {
 
       constructor(
               private searchRepository: SearchRepository,
-              private dialogRef: MatDialogRef<SearchDialogComponent>,
-              private router: Router
+              public dialogRef: MatDialogRef<SearchDialogComponent>,
+              @Inject(MAT_DIALOG_DATA) private readonly data: { chatId: string; }
       ) {
       }
 
       ngOnInit(): void {
             this.searchSubscription = this.searchSubject.pipe(
+                    tap(() => {
+                          this.isLoading = true;
+                    }),
                     debounceTime(300),
                     distinctUntilChanged(),
                     switchMap(query => {
@@ -54,8 +57,10 @@ export class SearchDialogComponent implements OnInit, OnDestroy {
                                 this.isLoading = false;
                                 return of([]);
                           }
-                          this.isLoading = true;
-                          return this.searchRepository.list(query).pipe(
+                          return this.searchRepository.list({
+                                query: query,
+                                chatId: this.data.chatId,
+                          }).pipe(
                                   catchError(err => {
                                         console.error('Search failed', err);
                                         return of([]);
@@ -64,6 +69,7 @@ export class SearchDialogComponent implements OnInit, OnDestroy {
                     })
             ).subscribe({
                   next: (results) => {
+                        console.log(results)
                         this.searchResults = results;
                         this.isLoading = false;
                   }
@@ -74,16 +80,11 @@ export class SearchDialogComponent implements OnInit, OnDestroy {
             this.searchSubject.next(query);
       }
 
-      onResultClick(result: MessageHistory): void {
-            this.dialogRef.close();
-            this.router.navigate(['/home', {
-                  outlets: {
-                        'conversation': [toIdString(result.chatIdentifier)]
-                  }
-            }]);
-      }
-
       ngOnDestroy(): void {
             this.searchSubscription?.unsubscribe();
+      }
+
+      close() {
+            this.dialogRef.close();
       }
 }

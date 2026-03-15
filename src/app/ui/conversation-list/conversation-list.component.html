@@ -1,0 +1,27 @@
+<cdk-virtual-scroll-viewport #viewport itemSize="100"
+                             style="height: 100%; width: 100%;"
+                             (scrolledIndexChange)="onScrollChanged($event)"
+>
+
+    <div
+            *cdkVirtualFor="let item of conversationRows | async; let i = index; trackBy: trackBy"
+    >
+        <ng-container [ngSwitch]="item.type">
+            <div class="loading" *ngSwitchCase="'loading'">
+                <mat-spinner [diameter]="25"></mat-spinner>
+            </div>
+            <app-conversation *ngSwitchCase="'conversation'"
+
+                              [identifier]="$any(item).conversation.chatId"
+                              [roomName]="$any(item).conversation.roomName"
+                              [roomAvatar]="$any(item).conversation.roomAvatar"
+                              [content]="$any(item).conversation.content"
+                              [sender]="$any(item).conversation.sender"
+                              [seenBy]="$any(item).conversation.seenBy"
+                              [initialPresence]="$any(item).conversation.presence"
+
+
+            />
+        </ng-container>
+    </div>
+</cdk-virtual-scroll-viewport>

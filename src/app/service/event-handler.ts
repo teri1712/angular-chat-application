@@ -1,16 +1,15 @@
-import {ChatEvent} from "../model/dto/chat-event";
+import {MessageState} from "../model/dto/message-state";
 import {Observable} from "rxjs";
-import {HttpClient} from "@angular/common/http";
 import {InjectionToken} from "@angular/core";
+import {MessagePosting} from "./message-service";
 
 export abstract class EventHandler {
 
-      constructor(protected readonly http: HttpClient) {
-      }
+      abstract supports(posting: MessagePosting): boolean;
 
-      abstract supports(event: ChatEvent): boolean;
+      abstract mock(posting: MessagePosting): MessageState | null;
 
-      abstract handle(event: ChatEvent): Observable<ChatEvent>
+      abstract handle(posting: MessagePosting): Observable<any>
 }
 
 

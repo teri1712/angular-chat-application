@@ -1,14 +1,13 @@
 import {Injectable} from '@angular/core';
 import {AccountRepository} from './account-repository';
-import {BehaviorSubject, catchError, filter, map, Observable, of, switchMap, take} from "rxjs";
+import {BehaviorSubject, catchError, filter, map, Observable, of, switchMap, take, throwError} from "rxjs";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../environments";
-import {AccountEntry} from "../../model/dto/account-entry";
 import {Authenticator} from "./authenticator";
 import {Account} from "../../model/dto/account";
 import {SignUpRequest} from "../../model/dto/sign-up-request";
 import {SignInRequest} from "../../model/dto/sign-in-request";
-import {User} from "../../model/dto/user";
+import {Profile} from "../../model/dto/profile";
 import {TokenListener, TokenStore} from "./token.store";
 import {CredentialInterceptor} from "./credential.interceptor";
 
@@ -19,26 +18,25 @@ import {CredentialInterceptor} from "./credential.interceptor";
 export class AccountService implements AccountRepository, Authenticator, TokenListener {
 
       private readonly accountSubject
-              = new BehaviorSubject<Account | null | undefined>(undefined);
+              = new BehaviorSubject<Profile | null | undefined>(undefined);
 
       constructor(private httpClient: HttpClient, private readonly tokenStore: TokenStore, private readonly credentialInterceptor: CredentialInterceptor) {
             this.init()
       }
 
-      loginOAuth2(idToken: string): Observable<Account> {
+      loginOAuth2(idToken: string): Observable<Profile> {
             const headers = new HttpHeaders({
                   'Oauth2-Token': idToken
             });
 
-            return this.httpClient.post<AccountEntry>(
+            return this.httpClient.post<Account>(
                     environment.API_URL + "/tokens/oauth2",
                     null,
                     {headers}
             ).pipe(
-                    map((accountEntry) => {
-                          const account = accountEntry.account
-                          this.onAccountLogin(accountEntry)
-                          return account
+                    map((account) => {
+                          this.onAccountLogin(account)
+                          return account.profile
                     })
             );
       }
@@ -53,11 +51,12 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
 
 
       private init() {
-            this.httpClient.get<AccountEntry>(environment.API_URL + "/accounts/me", {
+            this.httpClient.get<Profile>(environment.API_URL + "/profiles/me", {
                   observe: 'body'
             }).subscribe(
-                    (accountEntry) => {
-                          this.onAccountLogin(accountEntry)
+                    (profile) => {
+                          this.onAutoLogin(profile)
+
                     },
                     (error: HttpErrorResponse) => {
                           if (error.status >= 400 && error.status < 500) {
@@ -72,10 +71,15 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
             this.credentialInterceptor.addTokenListener(this)
       }
 
+      private onAutoLogin(profile: Profile) {
+            this.accountSubject.next(profile);
+      }
 
-      private onAccountLogin(accountEntry: AccountEntry) {
-            this.accountSubject.next(accountEntry.account);
-            const tokens = accountEntry.tokenCredential;
+
+      private onAccountLogin(account: Account) {
+            this.accountSubject.next(account.profile);
+
+            const tokens = account.accessToken;
             if (tokens) {
                   this.tokenStore.accessToken = tokens.accessToken;
                   this.tokenStore.refreshToken = tokens.refreshToken;
@@ -87,20 +91,19 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
             this.accountSubject.next(null);
       }
 
-      get currentUser(): User {
-            return this.accountSubject.value?.user!;
+      get currentUser(): Profile | null {
+            return this.accountSubject.value ?? null;
       }
 
 
-      get accountObservable(): Observable<User | null> {
+      get accountObservable(): Observable<Profile | null> {
             return this.accountSubject.pipe(
-                    filter(user => user !== undefined),
-                    map(account => account?.user ?? null),
+                    filter(profile => profile !== undefined),
                     take(1)
             )
       }
 
-      signUp(body: SignUpRequest): Observable<Account> {
+      signUp(body: SignUpRequest): Observable<Profile> {
             if (this.accountSubject.value) {
                   throw new Error('There is already a user.');
             }
@@ -126,23 +129,25 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
             )
       }
 
-      signIn(body: SignInRequest): Observable<Account> {
+      signIn(body: SignInRequest): Observable<Profile> {
             if (this.accountSubject.value) {
                   throw new Error('There is already a user.');
             }
             const params = new HttpParams()
                     .set('username', body.username)
                     .set('password', body.password);
-            return this.httpClient.post<AccountEntry>(environment.API_URL + "/login", params.toString(), {
+            return this.httpClient.post<Account>(environment.API_URL + "/login", params.toString(), {
                   observe: 'body',
                   headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                   }
             }).pipe(
-                    map((accountEntry) => {
-                          const account = accountEntry.account
-                          this.onAccountLogin(accountEntry)
-                          return account
+                    map((account) => {
+                          this.onAccountLogin(account)
+                          return account.profile
+                    }), catchError((err: HttpErrorResponse) => {
+                          const problem = err.error;
+                          return throwError(() => new Error(problem.detail));
                     })
             )
       }
@@ -182,10 +187,6 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
 
       }
 
-      get loginAtVersion(): number | null {
-            return this.accountSubject.value?.syncContext.eventVersion ?? null
-      }
-
       changePassword(oldPassword: string, newPassword: string): Observable<any> {
 
             const refreshToken = this.tokenStore.refreshToken
@@ -198,7 +199,7 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
                     .set('password', oldPassword)
                     .set('new_password', newPassword)
                     .set('refresh_token', refreshToken);
-            return this.httpClient.post(environment.API_URL + "/accounts/me/profile/password", params.toString(), {
+            return this.httpClient.post(environment.API_URL + "/profiles/me/profile/password", params.toString(), {
                   headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                   }

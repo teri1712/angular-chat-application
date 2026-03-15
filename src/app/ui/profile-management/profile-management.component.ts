@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {User} from '../../model/dto/user';
+import {Profile} from '../../model/dto/profile';
 import {CommonModule} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -38,7 +38,7 @@ import {Authenticator} from "../../service/auth/authenticator";
 export class ProfileManagementComponent implements OnInit {
       profileForm!: FormGroup;
       passwordForm!: FormGroup;
-      me!: User;
+      profile!: Profile;
       avatarPreview: string | null = null;
 
       constructor(
@@ -51,19 +51,19 @@ export class ProfileManagementComponent implements OnInit {
       }
 
       ngOnInit(): void {
-            this.me = this.profileService.getProfile();
+            this.profile = this.profileService.getProfile();
             this.initForms();
-            if (this.me.avatar?.uri) {
-                  this.avatarPreview = this.me.avatar.uri;
+            if (this.profile.avatar) {
+                  this.avatarPreview = this.profile.avatar;
             }
       }
 
       initForms(): void {
             this.profileForm = this.fb.group({
-                  username: [this.me.username || '', [Validators.required]],
-                  name: [this.me.name || '', [Validators.required]],
-                  gender: [this.me.gender || 1, [Validators.required]],
-                  dob: [this.me.dob ? new Date(this.me.dob) : new Date()]
+                  username: [this.profile.username || '', [Validators.required]],
+                  name: [this.profile.name || '', [Validators.required]],
+                  gender: [this.profile.gender || 1, [Validators.required]],
+                  dob: [this.profile.dob ? new Date(this.profile.dob) : new Date()]
             });
 
             this.passwordForm = this.fb.group({
@@ -86,7 +86,7 @@ export class ProfileManagementComponent implements OnInit {
                   }
                   this.profileService.updateProfile(formValue).subscribe({
                         next: (updatedUser) => {
-                              this.me = updatedUser;
+                              this.profile = updatedUser;
                               this.snackBar.open('Profile updated successfully', 'Close', {duration: 3000});
                         },
                         error: (err) => {
@@ -122,7 +122,7 @@ export class ProfileManagementComponent implements OnInit {
 
                   this.profileService.updateAvatar(file).subscribe({
                         next: (updatedUser) => {
-                              this.me = updatedUser;
+                              this.profile = updatedUser;
                               this.snackBar.open('Avatar updated successfully', 'Close', {duration: 3000});
                         },
                         error: (err) => {
