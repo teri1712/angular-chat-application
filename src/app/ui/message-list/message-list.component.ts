@@ -1,4 +1,4 @@
-import {Component, DestroyRef, HostBinding, inject, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, DestroyRef, HostBinding, inject, Input, OnInit, ViewChild} from '@angular/core';
 import {ChatInfoBarComponent} from "../chat-info-bar/chat-info-bar.component";
 import {InputBarComponent} from "../input-bar/input-bar.component";
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
@@ -59,7 +59,7 @@ export function scrollStrategyFactory() {
       templateUrl: './message-list.component.html',
       styleUrl: './message-list.component.css'
 })
-export class MessageListComponent implements OnInit, OnDestroy {
+export class MessageListComponent implements OnInit {
 
       @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
 
@@ -96,7 +96,7 @@ export class MessageListComponent implements OnInit, OnDestroy {
             }, 100)
       }
 
-      private scrollIndex = new BehaviorSubject<number>(0);
+      private readonly scrollIndex = new BehaviorSubject<number>(0);
 
       protected onScrollChanged(index: number) {
             this.scrollIndex.next(index);
@@ -105,7 +105,7 @@ export class MessageListComponent implements OnInit, OnDestroy {
       // Fuck
 
       protected messageRows = new Observable<MessageRow[]>();
-      private messages = new BehaviorSubject<Message[]>([]);
+      private readonly messages = new BehaviorSubject<Message[]>([]);
 
       protected trackByTrackId(index: number, item: MessageRow) {
             switch (item.type) {
@@ -198,7 +198,7 @@ export class MessageListComponent implements OnInit, OnDestroy {
             } as MessageRow
       }
 
-      private destroyRef = inject(DestroyRef);
+      private readonly destroyRef = inject(DestroyRef);
 
 
       definePrependingPipe() {
@@ -278,9 +278,10 @@ export class MessageListComponent implements OnInit, OnDestroy {
                           if (loading) {
                                 merged.push(this.toExpandingRow());
                           }
-                          merged.push(...[...messages].reverse())
-                          merged.push(...sendings.map(sending => this.toSendingRow(sending)))
-                          merged.push(...typings.map(typing => this.toTypingRow(typing)))
+                          merged.push(
+                                  ...[...messages].reverse(),
+                                  ...sendings.map(sending => this.toSendingRow(sending)),
+                                  ...typings.map(typing => this.toTypingRow(typing)))
                           return merged
                     }))
       }
@@ -291,9 +292,6 @@ export class MessageListComponent implements OnInit, OnDestroy {
             this.definePrependingPipe();
             this.defineAppendingPipe();
             this.defineExpandPipe();
-      }
-
-      ngOnDestroy(): void {
       }
 
 

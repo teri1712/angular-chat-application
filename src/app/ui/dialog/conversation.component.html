@@ -3,7 +3,7 @@
 <div class="middle">
     <span class="room-name" [style.font-weight]="nameWeight">{{ roomName }}</span>
     <span class="message"
-          [style.font-weight]="contentWeight">{{ content }}</span>
+          [style.font-weight]="contentWeight">{{ getPreview(newest) }}</span>
 </div>
 <ng-container *ngIf="mine()">
     <div class="seen-div">

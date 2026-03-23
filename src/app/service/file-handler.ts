@@ -44,7 +44,7 @@ export class FileHandler extends EventHandler {
 
       override handle(posting: MessagePosting): Observable<any> {
             const filePosting = posting as FilePosting;
-            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/file-events/' + encodeURIComponent(posting.id);
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/files/' + encodeURIComponent(posting.id);
 
             return this.uploadService.upload(filePosting.file.name, filePosting.file).pipe(
                     switchMap(downloadUrl => {

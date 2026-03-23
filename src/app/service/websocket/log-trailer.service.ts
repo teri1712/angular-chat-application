@@ -19,7 +19,7 @@ export class LogTrailerService implements OnDestroy {
       private readonly client: Client;
 
 
-      constructor(tokenStore: TokenStore, private httpClient: HttpClient, private logRepository: LogRepository) {
+      constructor(tokenStore: TokenStore, private readonly httpClient: HttpClient, private readonly logRepository: LogRepository) {
             this.currentSequenceNumber = Number.MAX_SAFE_INTEGER;
             this.client = new Client({
                   brokerURL: environment.WEBSOCKET_HOST + '/handshake',
@@ -48,7 +48,7 @@ export class LogTrailerService implements OnDestroy {
 
       subscribeRoom(chatId: string): Observable<TypeMessage | PreferenceMessage> {
             if (!this.client.connected) {
-                  throw Error("Client is not connected.");
+                  throw new Error("Client is not connected.");
             }
             const observable = new Subject<TypeMessage>();
             const subscription = this.client.subscribe("/room/" + chatId, (msg: IMessage) => {

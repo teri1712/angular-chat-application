@@ -10,6 +10,8 @@ import {User} from "../../model/dto/user";
 import {combineLatest, map, Observable, of, switchMap} from "rxjs";
 import {DialogService} from "../../service/repository/dialog.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {MessageState} from "../../model/dto/message-state";
+import {TextState} from "../../model/dto/text-state";
 
 @Component({
       selector: 'app-conversation',
@@ -22,7 +24,7 @@ export class ConversationComponent implements OnInit {
       @Input() identifier!: string;
       @Input() roomName!: string;
       @Input() roomAvatar!: string;
-      @Input() content!: string
+      @Input() newest!: MessageState
       @Input() sender!: User;
       @Input() seenBy!: User[]
       @Input() initialPresence!: Date
@@ -84,4 +86,37 @@ export class ConversationComponent implements OnInit {
                     })
       }
 
+      protected getPreview(messageState: MessageState): string {
+
+            const prefix = this.profileService.thatsMe(messageState.sender) ? "You " : "";
+            let content = "Wtf";
+
+            switch (messageState.messageType.toLowerCase()) {
+                  case "text":
+                        content = (messageState as TextState).content;
+                        break;
+
+                  case "image":
+                        content = "has sent an image";
+                        break;
+
+                  case "icon":
+                        content = "has sent an icon";
+                        break;
+
+                  case "preference":
+                        content = "has updated preferences";
+                        break;
+
+                  case "file":
+                        content = "has sent a file";
+                        break;
+
+                  default:
+                        break;
+            }
+
+            return prefix + content;
+
+      }
 }

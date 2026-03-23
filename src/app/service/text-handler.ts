@@ -41,7 +41,7 @@ export class TextHandler extends EventHandler {
 
       override handle(posting: MessagePosting): Observable<any> {
             const textPosting = posting as TextPosting;
-            return this.httpClient.put<MessageState>(environment.API_URL + "/chats/" + encodeURIComponent(posting.chatId) + "/text-events/" + encodeURIComponent(posting.id), {
+            return this.httpClient.put<MessageState>(environment.API_URL + "/chats/" + encodeURIComponent(posting.chatId) + "/texts/" + encodeURIComponent(posting.id), {
                   content: textPosting.content,
             }, {});
       }

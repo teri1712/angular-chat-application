@@ -48,7 +48,7 @@ export class ImageHandler extends EventHandler {
 
       override handle(posting: MessagePosting): Observable<any> {
             const imagePosting = posting as ImagePosting;
-            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/image-events/' + encodeURIComponent(posting.id);
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/images/' + encodeURIComponent(posting.id);
 
             return this.uploadService.upload(imagePosting.file.name, imagePosting.file).pipe(
                     switchMap(downloadUrl => {

@@ -28,7 +28,7 @@ export class SeenHandler extends EventHandler {
 
       override handle(posting: MessagePosting): Observable<any> {
             const seenPosting = posting as SeenPosting;
-            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/seen-events/' + encodeURIComponent(posting.id);
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/seens/' + encodeURIComponent(posting.id);
             return this.httpClient
                     .put<MessageState>(url, {
                           at: seenPosting.at

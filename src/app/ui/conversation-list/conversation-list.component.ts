@@ -7,7 +7,6 @@ import {BehaviorSubject, catchError, combineLatest, filter, map, Observable, of,
 import {ConversationRepository} from "../../service/repository/conversation-repository.service";
 import {InboxLog, LogAction} from "../../model/dto/inbox-log";
 import {LogRepository} from "../../service/repository/log-repository";
-import {TextState} from "../../model/dto/text-state";
 import {MessageState} from "../../model/dto/message-state";
 import ProfileService from "../../service/profile-service";
 import {User} from "../../model/dto/user";
@@ -64,7 +63,7 @@ export class ConversationListComponent implements OnInit {
                   chatId: log.chatId,
                   presence: new Date(),
                   revisionNumber: log.revisionNumber,
-                  content: this.getPreview(message),
+                  newest: message,
                   sender: message.sender,
                   seenBy: message.seenBy,
             }
@@ -83,7 +82,7 @@ export class ConversationListComponent implements OnInit {
                   presence: presenceAt,
                   revisionNumber: conversation.revisionNumber,
                   sender: newest.sender,
-                  content: this.getPreview(newest),
+                  newest: newest,
                   seenBy: newest.seenBy
             }
       }
@@ -224,7 +223,8 @@ export class ConversationListComponent implements OnInit {
             conversations.map((conversation) => {
                   return {
                         chatId: conversation.identifier,
-                        revisionNumber: conversation.revisionNumber
+                        revisionNumber: conversation.revisionNumber,
+                        newest: conversation.recents[0]
                   }
             }).forEach((conversation) => {
                   history.append(conversation, Existing.DELETE);
@@ -266,40 +266,6 @@ export class ConversationListComponent implements OnInit {
       }
 
 
-      getPreview(messageState: MessageState): string {
-
-            const prefix = this.profileService.thatsMe(messageState.sender) ? "You " : "";
-            let content = "Wtf";
-
-            switch (messageState.messageType.toLowerCase()) {
-                  case "text":
-                        content = (messageState as TextState).content;
-                        break;
-
-                  case "image":
-                        content = "has sent an image";
-                        break;
-
-                  case "icon":
-                        content = "has sent an icon";
-                        break;
-
-                  case "preference":
-                        content = "has updated preferences";
-                        break;
-
-                  case "file":
-                        content = "has sent a file";
-                        break;
-
-                  default:
-                        break;
-            }
-
-            return prefix + content;
-
-      }
-
 }
 
 
@@ -314,12 +280,13 @@ type ConversationView = {
       roomAvatar: string;
       revisionNumber: number;
       sender: User;
-      content: string;
+      newest: MessageState;
       seenBy: User[]
 }
 
 type Revision = {
       chatId: string;
+      newest: MessageState
       revisionNumber: number;
 }
 
@@ -350,10 +317,15 @@ class RevisionList<R extends Revision> {
             return true;
       }
 
+
       replace(value: R) {
             const index = this.list.findIndex((revision) => this.compare(revision, value));
             if (index >= 0) {
-                  this.list[index] = value;
+                  const item = this.list[index];
+                  item.revisionNumber = value.revisionNumber
+                  if (item.newest.sequenceNumber == value.newest.sequenceNumber) {
+                        item.newest = value.newest;
+                  }
             }
       }
 

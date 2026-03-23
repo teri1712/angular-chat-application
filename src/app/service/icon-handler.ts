@@ -41,7 +41,7 @@ export class IconHandler extends EventHandler {
 
       override handle(posting: MessagePosting): Observable<any> {
             const iconPosting = posting as IconPosting;
-            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/icon-events/' + encodeURIComponent(posting.id);
+            const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/icons/' + encodeURIComponent(posting.id);
             return this.httpClient
                     .put<MessageState>(url, {
                           iconId: iconPosting.iconId
