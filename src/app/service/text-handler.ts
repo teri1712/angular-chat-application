@@ -28,6 +28,7 @@ export class TextHandler extends EventHandler {
             const textPosting = posting as TextPosting;
             const textState: TextState = {
                   chatId: posting.chatId,
+                  postingId: posting.id,
                   sender: new User(this.profile.id, this.profile.username, this.profile.name, this.profile.avatar),
                   messageType: 'TEXT',
                   seenBy: [],

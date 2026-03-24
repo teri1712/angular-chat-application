@@ -8,6 +8,7 @@ import {Authenticator} from "../../service/auth/authenticator";
 import {settingRoute, threadsRoute} from "../../home-route.module";
 import {environment} from "../../environments";
 import ProfileService from "../../service/profile-service";
+import {CreateGroupDialogComponent} from "../create-group-dialog/create-group-dialog.component";
 
 enum Routes {
       THREAD, SETTINGS, SEARCH
@@ -79,6 +80,13 @@ export class SideNavComponent implements OnInit, OnDestroy {
             this.router.navigate(threadsRoute);
       }
 
+
+      protected openCreateGroupDialog(): void {
+            this.matDialog.open(CreateGroupDialogComponent, {
+                  width: '420px',
+                  maxWidth: '95vw',
+            });
+      }
 
       protected logout() {
             const ref = this.matDialog.open(ProgressDialogComponent, {

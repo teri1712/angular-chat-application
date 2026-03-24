@@ -2,6 +2,7 @@ import {User} from "./user";
 
 export interface MessageState {
       readonly chatId: string,
+      readonly postingId: string,
       readonly sender: User,
       readonly messageType: string,
       readonly seenBy: User[],

@@ -25,8 +25,15 @@ export class ConversationComponent implements OnInit {
       @Input() roomName!: string;
       @Input() roomAvatar!: string;
       @Input() newest!: MessageState
-      @Input() sender!: User;
-      @Input() seenBy!: User[]
+
+      get sender(): User {
+            return this.newest.sender
+      }
+
+      get seenBy(): User[] {
+            return this.newest.seenBy
+      }
+
       @Input() initialPresence!: Date
 
       protected presence!: Observable<Date>;
@@ -106,6 +113,10 @@ export class ConversationComponent implements OnInit {
 
                   case "preference":
                         content = "has updated preferences";
+                        break;
+
+                  case "group":
+                        content = "has created the room"
                         break;
 
                   case "file":

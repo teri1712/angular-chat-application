@@ -8,6 +8,10 @@
             [ngClass]="{'un-selected': currentRoute !== Routes.SETTINGS}">
         <mat-icon>settings</mat-icon>
     </button>
+    <button mat-mini-fab aria-label="Create Group" class="un-selected" (click)="openCreateGroupDialog()"
+            matTooltip="Create Group">
+        <mat-icon>group_add</mat-icon>
+    </button>
 </div>
 
 <button style="background: none; border: none" [matMenuTriggerFor]="user_actions">

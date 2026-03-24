@@ -126,7 +126,6 @@ class Dialog implements IDialog {
             this.presenceRepo.find([this.identifier])
                     .subscribe((presenceMap) => {
                           const presence = presenceMap[this.identifier];
-                          console.debug("Presence: ", presenceMap);
                           if (presence) {
                                 this._presence.next(new Date(presence.at));
                           }

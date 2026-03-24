@@ -29,6 +29,7 @@ export class FileHandler extends EventHandler {
             const filePosting = posting as FilePosting;
             const fileState: FileState = {
                   chatId: posting.chatId,
+                  postingId: posting.id,
                   sender: new User(this.profile.id, this.profile.username, this.profile.name, this.profile.avatar),
                   messageType: 'FILE',
                   seenBy: [],

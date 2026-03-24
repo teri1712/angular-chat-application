@@ -9,6 +9,12 @@
                 [maker]="message.sender">
         </app-preference-message>
 
+        <app-group-message
+                class="center"
+                *ngSwitchCase="'group'"
+                [creator]="message.sender">
+        </app-group-message>
+
         <ng-container *ngSwitchDefault>
             <app-left-message
                     *ngIf="!mine"

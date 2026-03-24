@@ -60,8 +60,8 @@ export class MessageService implements OnDestroy {
       private onError(posting: MessagePosting) {
             const pendingQueue = this.getOrCreateSendingQueue(posting.chatId);
 
-            const errorIndex = pendingQueue.value.findIndex(s => s.postingId === posting.id)!;
-            if (errorIndex === -1) {
+            const errorIndex = pendingQueue.value.findIndex(s => s.postingId === posting.id);
+            if (errorIndex !== -1) {
                   const errorOne = pendingQueue.value[errorIndex];
                   pendingQueue.value[errorIndex] = {
                         postingId: posting.id,
@@ -87,7 +87,9 @@ export class MessageService implements OnDestroy {
             logRepository.getChannel()
                     .pipe(takeUntilDestroyed(this.destroyRef))
                     .subscribe((log) => {
-                          this.onReceived(log.postingId)
+                          const message = log.messageState;
+                          if (message)
+                                this.onReceived(message.postingId)
                     });
       }
 

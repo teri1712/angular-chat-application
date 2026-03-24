@@ -4,7 +4,7 @@
                    [chatId]="chatId | async"/>
 <cdk-virtual-scroll-viewport itemSize="50" #viewport class="list my-2" (scrolledIndexChange)="onScrollChanged($event)">
     <div
-            *cdkVirtualFor="let item of (messageRows | async | grouping | sentmessages); trackBy: trackByTrackId">
+            *cdkVirtualFor="let item of (messageRows | grouping | sentmessages); trackBy: trackByTrackId">
         <ng-container [ngSwitch]="item.type">
 
             <app-message *ngSwitchCase="'message'" class="mx-3" style="margin-top: 2px"

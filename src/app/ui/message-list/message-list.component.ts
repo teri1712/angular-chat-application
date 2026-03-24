@@ -8,7 +8,18 @@ import {CommonModule} from "@angular/common";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {ReactiveFormsModule} from "@angular/forms";
 import {DialogService} from "../../service/repository/dialog.service";
-import {BehaviorSubject, combineLatest, filter, map, Observable, of, switchMap, tap, withLatestFrom} from "rxjs";
+import {
+      BehaviorSubject,
+      combineLatest,
+      filter,
+      map,
+      Observable,
+      of,
+      Subject,
+      switchMap,
+      tap,
+      withLatestFrom
+} from "rxjs";
 import {TypeMessage} from "../../model/dto/type-message";
 import {MessageService} from "../../service/message-service";
 import {DomSanitizer, SafeStyle} from "@angular/platform-browser";
@@ -23,7 +34,6 @@ import CacheService from "../../service/cache/data/cache-service";
 import {Preference} from "../../model/dto/preference";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AutoSizeVirtualScrollStrategy} from "@angular/cdk-experimental/scrolling";
-import {distinctUntilChanged} from "rxjs/operators";
 import {GroupPipe} from "../pipes/group";
 import {SendMessage, SentMessagesPipe} from "../pipes/sent-message.pipe";
 
@@ -65,10 +75,10 @@ export class MessageListComponent implements OnInit {
 
       @Input() set chat(chatId: string | null) {
             if (chatId) {
-                  this.messages.next([]);
-                  this.expanding.next(false);
-                  this.end.next(false);
-                  this.chatId.next(chatId)
+                  this.expanding = false;
+                  this.end = false;
+                  this.chatId.next(chatId);
+                  this.replace([])
                   this.scrollIndex.next(0);
             }
       }
@@ -97,15 +107,19 @@ export class MessageListComponent implements OnInit {
       }
 
       private readonly scrollIndex = new BehaviorSubject<number>(0);
+      private readonly messageLength = new BehaviorSubject<number>(0)
 
       protected onScrollChanged(index: number) {
             this.scrollIndex.next(index);
       }
 
-      // Fuck
+      private messages: Message[] = [];
+      private sendings: ISendingMessage[] = [];
+      private typings: TypeMessage[] = [];
 
-      protected messageRows = new Observable<MessageRow[]>();
-      private readonly messages = new BehaviorSubject<Message[]>([]);
+      private expanding: boolean = false;
+      private end: boolean = false;
+      private readonly expandTrigger = new Subject<void>();
 
       protected trackByTrackId(index: number, item: MessageRow) {
             switch (item.type) {
@@ -200,94 +214,96 @@ export class MessageListComponent implements OnInit {
 
       private readonly destroyRef = inject(DestroyRef);
 
+      replace(messages: Message[]) {
+            this.messages = messages;
+            this.messageLength.next(messages.length)
+      }
 
       definePrependingPipe() {
             this.logRepository.getChannel().pipe(
                     takeUntilDestroyed(this.destroyRef)
-            ).subscribe((log) => {
+            ).subscribe(log => {
                   this.cacheStore.put(log.messageState);
-            })
+            });
+
             this.chatId.pipe(
                     takeUntilDestroyed(this.destroyRef),
-                    switchMap((chatId) => {
-                          return this.logRepository.getChatChannel(chatId);
-                    }), withLatestFrom(this.messages),)
-                    .subscribe(([log, messages]) => {
-                          const message = log.messageState;
-                          if (log.action === LogAction.ADDITION)
-                                this.messages.next(this.prepend(message, messages));
-                          else
-                                this.messages.next(this.update(message, messages));
-
-                    })
+                    switchMap(chatId => this.logRepository.getChatChannel(chatId)),
+            ).subscribe(log => {
+                  const message = log.messageState;
+                  if (log.action === LogAction.ADDITION) {
+                        this.replace(this.prepend(message, this.messages));
+                  } else {
+                        this.replace(this.update(message, this.messages));
+                  }
+            });
       }
 
+
       defineAppendingPipe() {
-            combineLatest([this.expanding, this.end]).pipe(
+            this.expandTrigger.pipe(
                     takeUntilDestroyed(this.destroyRef),
-                    filter(([expanding, end]) =>
-                            expanding && !end
-                    ), withLatestFrom(this.chatId, this.messages),
-                    switchMap(([, chatId, messages]) =>
-                            this.expand(messages, chatId)
-                    ), withLatestFrom(this.messages))
-                    .subscribe(([newMessages, messages]) => {
-                          this.messages.next(this.append(messages, newMessages));
-                          if (newMessages.length == 0) {
-                                this.end.next(true);
-                          }
-                          this.expanding.next(false);
-                    })
+                    withLatestFrom(this.chatId),
+                    filter(([trigger, chatId]) => !!chatId),
+                    switchMap(([trigger, chatId]) => this.expand(this.messages, chatId)),
+            ).subscribe(newMessages => {
+                  if (newMessages.length == 0) {
+                        this.end = true;
+                  }
+                  this.expanding = false;
+                  this.replace(this.append(this.messages, newMessages));
+            });
       }
 
       defineExpandPipe() {
-            combineLatest([this.scrollIndex, this.messages])
-                    .pipe(
-                            takeUntilDestroyed(this.destroyRef),
-                            distinctUntilChanged(),
-                    )
-                    .subscribe(([scrollIndex, messages]) => {
-                          if (scrollIndex < 5) {
-                                this.expanding.next(true);
-                          }
-                    })
+            combineLatest([this.scrollIndex, this.messageLength]).pipe(
+                    takeUntilDestroyed(this.destroyRef),
+            ).subscribe(([index, length]) => {
+                  this.checkAndExpand(index);
+            });
+      }
+
+      protected get messageRows(): MessageRow[] {
+            const merged: MessageRow[] = [];
+            if (this.expanding && !this.end) {
+                  merged.push(this.toExpandingRow());
+            }
+            merged.push(
+                    ...[...this.messages].reverse(),
+                    ...this.sendings.map(s => this.toSendingRow(s)),
+                    ...this.typings.map(t => this.toTypingRow(t))
+            );
+            return merged;
+      }
+
+      private checkAndExpand(scrollIndex: number) {
+
+            if (!this.expanding && !this.end && scrollIndex < 5) {
+                  this.expanding = true;
+                  this.expandTrigger.next();
+            }
       }
 
       defineDisplayPipe() {
-
-            const loading = combineLatest([this.expanding, this.end]).pipe(
-                    map(([expanding, end]) => expanding && !end));
-
-            const sendings = this.chatId.pipe(
+            this.chatId.pipe(
                     takeUntilDestroyed(this.destroyRef),
-                    switchMap((chatId) => {
-                          return this.messageService.getSendingQueue(chatId);
-                    }),
-                    tap(() => {
-                          this.scrollToBeginning();
-                    }))
+                    switchMap(chatId => this.messageService.getSendingQueue(chatId)),
+                    tap(() => this.scrollToBeginning())
+            ).subscribe(sendings => {
+                  this.sendings = sendings;
+            });
 
-            const typings = this.chatId.pipe(
-                    switchMap((chatId) => this.dialogService.findByChatId(chatId)),
-                    switchMap((dialog) => dialog.typings),
-                    map(typings => typings.filter(typing => !this.profileService.thatsMe(typing.from)))
-            )
-            this.messageRows = combineLatest([this.messages, sendings, typings, loading])
-                    .pipe(map(([messages, sendings, typings, loading]) => {
-                          const merged: MessageRow[] = []
-                          if (loading) {
-                                merged.push(this.toExpandingRow());
-                          }
-                          merged.push(
-                                  ...[...messages].reverse(),
-                                  ...sendings.map(sending => this.toSendingRow(sending)),
-                                  ...typings.map(typing => this.toTypingRow(typing)))
-                          return merged
-                    }))
+            this.chatId.pipe(
+                    takeUntilDestroyed(this.destroyRef),
+                    switchMap(chatId => this.dialogService.findByChatId(chatId)),
+                    switchMap(dialog => dialog.typings),
+                    map(typings => typings.filter(t => !this.profileService.thatsMe(t.from)))
+            ).subscribe(typings => {
+                  this.typings = typings;
+            });
       }
 
       ngOnInit(): void {
-
             this.defineDisplayPipe();
             this.definePrependingPipe();
             this.defineAppendingPipe();
@@ -295,11 +311,7 @@ export class MessageListComponent implements OnInit {
       }
 
 
-      protected expanding = new BehaviorSubject<boolean>(false);
-      protected end = new BehaviorSubject<boolean>(false);
-
       private expand(messages: Message[], chatId: string): Observable<MessageState[]> {
-
             const lastSeq = messages.at(-1)?.message?.sequenceNumber;
             const anchor = (lastSeq ?? Number.MAX_SAFE_INTEGER) - 1;
 

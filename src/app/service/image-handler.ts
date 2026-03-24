@@ -29,6 +29,7 @@ export class ImageHandler extends EventHandler {
             const imagePosting = posting as ImagePosting;
             const imageState: ImageState = {
                   chatId: posting.chatId,
+                  postingId: posting.id,
                   sender: new User(this.profile.id, this.profile.username, this.profile.name, this.profile.avatar),
                   messageType: 'IMAGE',
                   seenBy: [],

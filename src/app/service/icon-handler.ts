@@ -28,6 +28,7 @@ export class IconHandler extends EventHandler {
             const iconPosting = posting as IconPosting;
             const iconState: IconState = {
                   chatId: posting.chatId,
+                  postingId: posting.id,
                   sender: new User(this.profile.id, this.profile.username, this.profile.name, this.profile.avatar),
                   messageType: 'ICON',
                   seenBy: [],

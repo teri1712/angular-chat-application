@@ -19,6 +19,9 @@ import {MessageListComponent} from "./ui/message-list/message-list.component";
 import {SearchUserListComponent} from "./ui/search-list/search-user-list.component";
 import {ThreadComponent} from "./ui/thread/thread.component";
 import {MessagePanelComponent} from "./ui/message-pannel/message-panel.component";
+import {MatTooltipModule} from "@angular/material/tooltip";
+import GroupService from "./service/group-service";
+import {UserRepository} from "./service/repository/user-repository";
 
 @NgModule({
       imports: [
@@ -31,6 +34,7 @@ import {MessagePanelComponent} from "./ui/message-pannel/message-panel.component
             MatCheckboxModule,
             MatSlideToggleModule,
             MatIconModule,
+            MatTooltipModule,
             ThreadComponent,
             SearchUserListComponent,
             SettingsItemComponent,
@@ -44,6 +48,10 @@ import {MessagePanelComponent} from "./ui/message-pannel/message-panel.component
             HomeComponent,
             SideNavComponent,
             SettingsComponent,
+      ],
+      providers: [
+            GroupService,
+            UserRepository,
       ],
 })
 export class HomeModule {

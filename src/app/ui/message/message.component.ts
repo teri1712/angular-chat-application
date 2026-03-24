@@ -8,6 +8,7 @@ import {MessageFrame} from "../format/Formatter";
 import {PreferenceMessageComponent} from "../preference-message/preference-message.component";
 import {MessageState} from "../../model/dto/message-state";
 import {SendMessage} from "../pipes/sent-message.pipe";
+import {GroupMessageComponent} from "../group-message/group-message.component";
 
 @Component({
       selector: 'app-message',
@@ -16,7 +17,8 @@ import {SendMessage} from "../pipes/sent-message.pipe";
             FormatTimePipe,
             LeftMessageComponent,
             RightMessageComponent,
-            PreferenceMessageComponent
+            PreferenceMessageComponent,
+            GroupMessageComponent
       ],
       templateUrl: './message.component.html',
       styleUrl: './message.component.css'
