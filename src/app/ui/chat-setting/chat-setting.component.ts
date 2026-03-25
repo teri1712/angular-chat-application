@@ -1,11 +1,10 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {ChatSettingsDialogComponent} from '../chat-settings-dialog/chat-settings-dialog.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {PreferenceService} from '../../service/preference.service';
 import {Preference} from '../../model/dto/preference';
-import {IDialog} from "../../model/IDialog";
 
 @Component({
       selector: 'app-chat-setting',
@@ -14,8 +13,9 @@ import {IDialog} from "../../model/IDialog";
       standalone: true,
       imports: [MatButtonModule, MatIconModule, MatDialogModule]
 })
-export class ChatSettingComponent {
-      @Input() dialog!: IDialog;
+export class ChatSettingComponent implements OnChanges {
+      @Input() chatId: string | null = null;
+      @Input() preference: Preference | null = null;
 
       constructor(
               public matDialog: MatDialog,
@@ -23,18 +23,17 @@ export class ChatSettingComponent {
       ) {
       }
 
-      get isPreferenceDefined(): boolean {
-            return !!this.dialog.preference;
+      ngOnChanges(changes: SimpleChanges): void {
       }
 
-      openSettingsDialog(): void {
+      openSettingsDialog(chatId: string, preference: Preference): void {
             const dialogRef = this.matDialog.open(ChatSettingsDialogComponent, {
-                  data: {preference: this.dialog.preference}
+                  data: {preference: preference}
             });
 
             dialogRef.afterClosed().subscribe((result: Preference | undefined) => {
                   if (result) {
-                        this.preferenceService.updatePreference(this.dialog.conversation.chat.identifier, result)
+                        this.preferenceService.updatePreference(chatId, result)
                   }
             });
       }

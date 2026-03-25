@@ -5,14 +5,20 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments";
 
+
+export type SearchQuery = {
+      chatId: string;
+      query: string;
+}
+
 @Injectable()
-export class SearchRepository implements ListRepository<String, MessageHistory> {
+export class SearchRepository implements ListRepository<SearchQuery, MessageHistory> {
 
       constructor(private readonly httpClient: HttpClient) {
       }
 
 
-      list(query: string): Observable<MessageHistory[]> {
-            return this.httpClient.get<MessageHistory[]>(environment.API_URL + "/me/history/messages?query=" + encodeURIComponent(query), {observe: 'body'});
+      list(query: SearchQuery): Observable<MessageHistory[]> {
+            return this.httpClient.get<MessageHistory[]>(environment.API_URL + "/chats/" + encodeURIComponent(query.chatId) + "/history?query=" + encodeURIComponent(query.query), {observe: 'body'});
       }
 }

@@ -1,46 +1,52 @@
-import {GetRepository, ListRepository} from "./repository";
-import {ChatSnapshot} from "../../model/dto/chat-snapshot";
-import {Injectable} from "@angular/core";
-import {HttpClient, HttpParams} from "@angular/common/http";
-import {ChatIdentifier, toIdString} from "../../model/dto/chat-identifier";
+import {GetRepository} from "./repository";
+import {Chat} from "../../model/dto/chat";
+import {BehaviorSubject, filter, Observable} from "rxjs";
 import {environment} from "../../environments";
-import {map, Observable, of, switchMap} from "rxjs";
-import {RealtimeClient} from "../websocket/realtime-client.service";
-import EventCache from "../cache/data/event-cache";
-import {ChatDetails} from "../../model/dto/chat-details";
+import {HttpClient} from "@angular/common/http";
+import {Injectable} from "@angular/core";
 
 @Injectable()
-export class ChatRepository implements ListRepository<ChatIdentifier, ChatSnapshot>, GetRepository<ChatIdentifier, ChatDetails> {
+export class ChatRepository implements GetRepository<string, Chat> {
+
       constructor(
-              private readonly httpClient: HttpClient,
-              private readonly eventCache: EventCache,
-              private readonly realtimeClient: RealtimeClient) {
+              private httpClient: HttpClient,
+      ) {
       }
 
-      get(index: ChatIdentifier): Observable<ChatDetails> {
-            return this.httpClient.get<ChatDetails>(environment.API_URL + "/chats/" + toIdString(index), {
+      get(chatId: string): Observable<Chat> {
+            return this.httpClient.get<Chat>(environment.API_URL + "/chats/" + chatId, {
                   observe: 'body',
-            }).pipe(map((details: ChatDetails) => {
-                  return details
-            }));
+            });
       }
 
-      list(index?: ChatIdentifier): Observable<ChatSnapshot[]> {
-            let params = new HttpParams();
-            params = params.set("atVersion", this.realtimeClient.syncVersion);
-            if (index) {
-                  params = params.set("startAt", toIdString(index));
+}
+
+
+@Injectable()
+export class DirectRepository implements GetRepository<string, string> {
+
+      private knownDirect = new Map<string, BehaviorSubject<string | undefined>>();
+
+      constructor(
+              private httpClient: HttpClient,
+      ) {
+      }
+
+      get(partnerId: string): Observable<string> {
+            const chatId = this.knownDirect.get(partnerId)
+                    ?? new BehaviorSubject<string | undefined>(undefined);
+            this.knownDirect.set(partnerId, chatId);
+
+            if (!chatId.value) {
+                  this.httpClient.put<any>(environment.API_URL + "/direct-chats/" + encodeURIComponent(partnerId), {}, {
+                        observe: 'body',
+                  }).subscribe((res: any) => {
+                        chatId.next(res.mapping.chatId);
+                  });
             }
-            return this.httpClient.get<ChatSnapshot[]>(environment.API_URL + "/chats", {
-                  observe: 'body',
-                  params: params,
-            }).pipe(switchMap((snapshots: ChatSnapshot[]) => {
-                  if (snapshots.length != 0 && snapshots[0].atVersion != this.realtimeClient.syncVersion)
-                        throw Error("Please retry");
-                  snapshots.forEach((snapshot) => {
-                        snapshot.eventList.forEach((event) => this.eventCache.put(event))
-                  })
-                  return of(snapshots);
-            }))
+            return chatId.asObservable().pipe(
+                    filter(id => id != undefined));
       }
+
+
 }

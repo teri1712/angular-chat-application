@@ -1,14 +1,14 @@
 import {Component} from '@angular/core';
 import {RouterOutlet} from "@angular/router";
 import {SearchBarComponent} from "../search-bar/search-bar.component";
-import {OnlineUserListComponent} from "../online-user-list/online-user-list.component";
+import {BuddyListComponent} from "../buddy/buddy-list.component";
 
 @Component({
       selector: 'app-thread',
       imports: [
             RouterOutlet,
             SearchBarComponent,
-            OnlineUserListComponent
+            BuddyListComponent
       ],
       templateUrl: './thread.component.html',
       styleUrl: './thread.component.css'

@@ -1,11 +1,14 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {IMessage} from "../../model/IMessage";
 import {CommonModule} from "@angular/common";
-import {User} from "../../model/dto/user";
 import {LeftMessageComponent} from "../left-message/left-message.component";
 import {RightMessageComponent} from "../right-message/right-message.component";
 import {FormatTimePipe} from "../pipes/FormatTimePipe";
 import ProfileService from "../../service/profile-service";
+import {MessageFrame} from "../format/Formatter";
+import {PreferenceMessageComponent} from "../preference-message/preference-message.component";
+import {MessageState} from "../../model/dto/message-state";
+import {SendMessage} from "../pipes/sent-message.pipe";
+import {GroupMessageComponent} from "../group-message/group-message.component";
 
 @Component({
       selector: 'app-message',
@@ -13,27 +16,25 @@ import ProfileService from "../../service/profile-service";
             CommonModule,
             FormatTimePipe,
             LeftMessageComponent,
-            RightMessageComponent
+            RightMessageComponent,
+            PreferenceMessageComponent,
+            GroupMessageComponent
       ],
       templateUrl: './message.component.html',
       styleUrl: './message.component.css'
 })
 export class MessageComponent implements OnInit {
-      @Input({required: true,}) message!: IMessage
-      @Input({required: true,}) partner!: User
-      protected me: User
+      @Input({required: true,}) send?: SendMessage
+      @Input({required: true,}) mine!: boolean
+      @Input({required: true,}) message!: MessageState
+      @Input({required: true,}) frame!: MessageFrame
 
 
       constructor(profileService: ProfileService) {
-            this.me = profileService.getProfile()
       }
 
       ngOnInit(): void {
       }
 
-
-      protected get mine(): boolean {
-            return this.message.sender === this.me.id
-      }
 
 }

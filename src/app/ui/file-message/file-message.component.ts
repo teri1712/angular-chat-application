@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
-import {FileEvent} from "../../model/dto/file-event";
+import {FileState} from "../../model/dto/file-state";
 
 @Component({
       selector: 'app-file-message',
@@ -11,7 +11,7 @@ import {FileEvent} from "../../model/dto/file-event";
       styleUrl: './file-message.component.css'
 })
 export class FileMessageComponent {
-      @Input({required: true}) fileEvent!: FileEvent;
+      @Input({required: true}) fileState!: FileState;
 
       readableSize(size: number | undefined): string {
             if (!size && size !== 0) return '';

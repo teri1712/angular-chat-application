@@ -1,14 +1,17 @@
-<app-chat-info-bar [dialog]="dialog"/>
-<cdk-virtual-scroll-viewport
-        itemSize="50"
-        #viewport class="list my-2" (scrolledIndexChange)="onScrollChanged($event)">
+<app-chat-info-bar [roomName]="roomName"
+                   [roomAvatar]="roomAvatar"
+                   [presence]="presence"
+                   [chatId]="chatId | async"/>
+<cdk-virtual-scroll-viewport itemSize="50" #viewport class="list my-2" (scrolledIndexChange)="onScrollChanged($event)">
     <div
-            *cdkVirtualFor="let item of renderedList; trackBy: trackByTrackId">
+            *cdkVirtualFor="let item of (messageRows | grouping | sentmessages); trackBy: trackByTrackId">
         <ng-container [ngSwitch]="item.type">
 
             <app-message *ngSwitchCase="'message'" class="mx-3" style="margin-top: 2px"
-                         [message]="$any(item).message"
-                         [partner]="dialog.conversation.partner"/>
+                         [frame]="$any(item).frame"
+                         [send]="$any(item).sent"
+                         [mine]="$any(item).mine"
+                         [message]="$any(item).message"/>
 
             <div class="loading" *ngSwitchCase="'loading'">
                 <mat-spinner [diameter]="25"></mat-spinner>
@@ -26,8 +29,7 @@
             >
                 <div class="message-container"
                      [style.justify-content]="'start'">
-                    <app-typing-message [message]="$any(item).typeEvent"
-                                        [partner]="dialog.conversation.partner"></app-typing-message>
+                    <app-typing-message [message]="$any(item).typeEvent"></app-typing-message>
                 </div>
 
             </div>
@@ -36,4 +38,5 @@
 
     </div>
 </cdk-virtual-scroll-viewport>
-<app-input-bar [dialog]="dialog"/>
+<app-input-bar [chatId]="chatId | async" [iconId]="preference?.iconId ?? 1"/>
+

@@ -1,13 +1,11 @@
 import {Observable} from "rxjs";
-import {User} from "../../model/dto/user";
+import {Profile} from "../../model/dto/profile";
 
 export abstract class AccountRepository {
 
-      abstract get accountObservable(): Observable<User | null>;
+      abstract get accountObservable(): Observable<Profile | null>;
 
-      abstract get loginAtVersion(): number | null;
-
-      abstract get currentUser(): User | null;
+      abstract get currentUser(): Profile | null;
 
 
 }

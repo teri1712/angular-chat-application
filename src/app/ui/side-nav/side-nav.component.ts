@@ -1,5 +1,5 @@
 import {Component, Injector, OnDestroy, OnInit} from '@angular/core';
-import {User} from "../../model/dto/user";
+import {Profile} from "../../model/dto/profile";
 import {ActivationEnd, Router} from "@angular/router";
 import {ProgressDialogComponent} from "../progress-dialog/progress-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
@@ -8,7 +8,7 @@ import {Authenticator} from "../../service/auth/authenticator";
 import {settingRoute, threadsRoute} from "../../home-route.module";
 import {environment} from "../../environments";
 import ProfileService from "../../service/profile-service";
-import {SearchDialogComponent} from "../search-dialog/search-dialog.component";
+import {CreateGroupDialogComponent} from "../create-group-dialog/create-group-dialog.component";
 
 enum Routes {
       THREAD, SETTINGS, SEARCH
@@ -24,7 +24,7 @@ enum Routes {
 export class SideNavComponent implements OnInit, OnDestroy {
 
 
-      protected me!: Observable<User>;
+      protected profile!: Observable<Profile>;
       protected currentRoute?: Routes;
       private routeSub!: Subscription;
 
@@ -33,10 +33,10 @@ export class SideNavComponent implements OnInit, OnDestroy {
               private authenticator: Authenticator,
               private profileService: ProfileService,
               private router: Router,
-              private matDialog: MatDialog,
-              private injector: Injector) {
+              private injector: Injector,
+              private matDialog: MatDialog) {
 
-            this.me = this.profileService.getProfileObservable()
+            this.profile = this.profileService.getProfileObservable()
 
       }
 
@@ -81,14 +81,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
             this.router.navigate(threadsRoute);
       }
 
-      protected openSearchDialog() {
-            this.matDialog.open(SearchDialogComponent, {
-                  width: '600px',
-                  maxWidth: '90vw',
-                  height: 'auto',
-                  maxHeight: '85vh',
+
+      protected openCreateGroupDialog(): void {
+            this.matDialog.open(CreateGroupDialogComponent, {
+                  width: '420px',
+                  maxWidth: '95vw',
                   injector: this.injector,
-                  panelClass: 'search-dialog-panel'
             });
       }
 

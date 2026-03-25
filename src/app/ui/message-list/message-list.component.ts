@@ -1,33 +1,45 @@
-import {Component, HostBinding, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, DestroyRef, HostBinding, inject, Input, OnInit, ViewChild} from '@angular/core';
 import {ChatInfoBarComponent} from "../chat-info-bar/chat-info-bar.component";
-import {IDialog} from "../../model/IDialog";
 import {InputBarComponent} from "../input-bar/input-bar.component";
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
-import {IMessage} from "../../model/IMessage";
+import {ISendingMessage, SendState} from "../../model/message";
 import {MessageComponent} from "../message/message.component";
 import {CommonModule} from "@angular/common";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {ReactiveFormsModule} from "@angular/forms";
-import {ActivatedRoute} from "@angular/router";
-import {DialogRepository} from "../../service/repository/dialog-repository";
-import {finalize, map, Subscription, switchMap, tap, timer} from "rxjs";
-import {fromString} from "../../model/dto/chat-identifier";
-import {TypeEvent} from "../../model/dto/type-event";
+import {DialogService} from "../../service/repository/dialog.service";
+import {
+      BehaviorSubject,
+      combineLatest,
+      filter,
+      map,
+      Observable,
+      of,
+      Subject,
+      switchMap,
+      tap,
+      withLatestFrom
+} from "rxjs";
+import {TypeMessage} from "../../model/dto/type-message";
 import {MessageService} from "../../service/message-service";
-import {RealtimeClient} from "../../service/websocket/realtime-client.service";
-import {ChatSubscriber} from "../../service/websocket/chat-subscriber";
 import {DomSanitizer, SafeStyle} from "@angular/platform-browser";
-import {User} from "../../model/dto/user";
-import {Formatter} from "../format/Formatter";
-import {ChatEvent, isPendingEvent} from "../../model/dto/chat-event";
-import {EventRepository} from "../../service/repository/event-repository";
-import {SeenEventHandlerStrategy} from "../../service/SeenEventHandlerStrategy";
+import {MessageFrame, Position} from "../format/Formatter";
+import {MessageState} from "../../model/dto/message-state";
 import {TypingMessageComponent} from "../typing-left-message/typing-message.component";
-import {Message, MyMessage, toMessage, toMessages, YourMessage} from "./message";
-import {RollInFormatter} from "./roll-in-formater";
-import Expander from "../expander/expander";
-import EventExpander from "./event-expander";
 import ProfileService from "../../service/profile-service";
+import {LogAction} from "../../model/dto/inbox-log";
+import {MessageRepository} from "../../service/repository/message-repository.service";
+import {LogRepository} from "../../service/repository/log-repository";
+import CacheService from "../../service/cache/data/cache-service";
+import {Preference} from "../../model/dto/preference";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AutoSizeVirtualScrollStrategy} from "@angular/cdk-experimental/scrolling";
+import {GroupPipe} from "../pipes/group";
+import {SendMessage, SentMessagesPipe} from "../pipes/sent-message.pipe";
+
+export function scrollStrategyFactory() {
+      return new AutoSizeVirtualScrollStrategy(200, 400);
+}
 
 @Component({
       selector: 'app-message-list',
@@ -40,390 +52,323 @@ import ProfileService from "../../service/profile-service";
             MessageComponent,
             MatProgressSpinner,
             ReactiveFormsModule,
-            CdkFixedSizeVirtualScroll,
             TypingMessageComponent,
+            CdkFixedSizeVirtualScroll,
+            GroupPipe,
+            SentMessagesPipe,
+
             // CdkAutoSizeVirtualScroll
       ],
-      providers: [
-            // {
-            //       provide: VIRTUAL_SCROLL_STRATEGY,
-            //       useFactory: autoSizeStrategyFactory
-            // }
-      ],
+      // providers: [
+      //       {
+      //             provide: VIRTUAL_SCROLL_STRATEGY,
+      //             useFactory: scrollStrategyFactory
+      //       }
+      //
+      // ],
       templateUrl: './message-list.component.html',
       styleUrl: './message-list.component.css'
 })
-export class MessageListComponent implements OnInit, OnDestroy {
+export class MessageListComponent implements OnInit {
 
       @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
 
+      @Input() set chat(chatId: string | null) {
+            if (chatId) {
+                  this.expanding = false;
+                  this.end = false;
+                  this.chatId.next(chatId);
+                  this.replace([])
+                  this.scrollIndex.next(0);
+            }
+      }
+
+      @Input() roomName: string | null = null;
+      @Input() roomAvatar: string | null = null;
+      @Input() presence: Date | null = null;
+      @Input() preference: Preference | null = null;
+
+      protected chatId = new BehaviorSubject<string>('');
+
       @HostBinding('style')
       get hostStyle(): SafeStyle {
-            const url = this.dialog.preference?.theme?.background?.uri;
-            if (url) {
-                  return this.sanitizer.bypassSecurityTrustStyle(`background-image: url('${url}')`);
+            const theme = this.preference?.theme;
+            if (theme) {
+                  return this.sanitizer.bypassSecurityTrustStyle(`background-image: url('${theme}')`);
             }
             return this.sanitizer.bypassSecurityTrustStyle(``);
       }
 
       private scrollToBeginning(): void {
             setTimeout(() => {
-                  this.viewport.scrollToIndex(this.renderedLength - 1);
+                  const lastIndex = this.viewport.getDataLength() - 1;
+                  this.viewport.scrollToIndex(lastIndex);
             }, 100)
       }
 
+      private readonly scrollIndex = new BehaviorSubject<number>(0);
+      private readonly messageLength = new BehaviorSubject<number>(0)
+
       protected onScrollChanged(index: number) {
-            this.expandIfNecessary();
+            this.scrollIndex.next(index);
       }
 
-      protected dialog!: IDialog;
-      protected me: User
+      private messages: Message[] = [];
+      private sendings: ISendingMessage[] = [];
+      private typings: TypeMessage[] = [];
 
-      // Fuck
-      protected get renderedList(): MessageRow[] {
-            const list: MessageRow[] = [
-                  ...this.pending.map((message) => ({
-                        type: 'message',
-                        message: message
-                  } as MessageRow)),
-                  ...this.reals.map((message) => ({
-                        type: 'message',
-                        message: message
-                  } as MessageRow))
-            ].reverse();
-            if (this.typeEvent) {
-                  list.push({
-
-                        type: 'typing',
-                        typeEvent: this.typeEvent
-                  })
-            }
-            if (this.expanding)
-                  list.unshift({type: 'loading'})
-            return list
-      }
-
-      private get renderedLength(): number {
-            let length = this.length()
-            if (this.typeEvent) length += 1
-            if (this.expanding) length += 1
-            return length;
-      }
+      private expanding: boolean = false;
+      private end: boolean = false;
+      private readonly expandTrigger = new Subject<void>();
 
       protected trackByTrackId(index: number, item: MessageRow) {
             switch (item.type) {
                   case "message":
-                        return item.message.idempotencyKey;
+                        return item.message.sequenceNumber;
                   case "typing":
-                        return '1';
+                        return item.typeEvent.from;
                   case 'loading':
                         return '0';
                   default:
-                        return '2'
-            }
-      }
-
-      protected expanding?: Subscription;
-      private expander!: Expander<ChatEvent>
-
-      private routeSub!: Subscription;
-      private activityTimer!: Subscription
-
-      private typeEvent?: TypeEvent
-      private chatSubscription?: Subscription;
-      private chatSub: ChatSubscriber = (typeEvent) => {
-            const mine = typeEvent.from === this.me.id;
-            if (!mine) {
-                  this.typeEvent = typeEvent
-                  const range = this.viewport.getRenderedRange();
-                  const lastVisible = range.end;
-                  if (lastVisible >= this.renderedList.length - 1) {
-                        this.scrollToBeginning()
-                  }
+                        return 'wtf'
             }
       }
 
 
       constructor(
-              private readonly dialogRepo: DialogRepository,
-              private readonly activatedRoute: ActivatedRoute,
+              private readonly cacheStore: CacheService,
+              private readonly dialogService: DialogService,
+              private readonly messageRepository: MessageRepository,
+              private readonly logRepository: LogRepository,
               private readonly profileService: ProfileService,
-              private readonly eventRepository: EventRepository,
               private readonly messageService: MessageService,
-              private readonly realtimeClient: RealtimeClient,
-              private readonly sanitizer: DomSanitizer,
+              private readonly sanitizer: DomSanitizer
       ) {
-            this.me = this.profileService.getProfile();
       }
 
+
+      toMessageRow(message: MessageState): Message {
+            const frame: MessageFrame = {
+                  forceSplit: false,
+                  receiveTime: new Date(message.createdAt),
+                  senderId: message.sender.id,
+                  position: Position.Single,
+                  displayTime: false
+            }
+
+            return ({
+                  type: 'message',
+                  sent: {
+                        sendState: SendState.Sent,
+                  },
+                  mine: this.profileService.thatsMe(message.sender),
+                  message: message,
+                  frame: frame
+            } as Message)
+      }
+
+      toSendingRow(sending: ISendingMessage): MessageRow {
+            return {
+                  type: 'message',
+                  sent: {
+                        sendState: sending.sendState,
+                  },
+                  mine: true,
+                  message: sending.mockState,
+                  frame: {
+                        forceSplit: false,
+                        receiveTime: new Date(sending.mockState.createdAt),
+                        senderId: sending.mockState.sender.id,
+                        position: Position.Single,
+                        displayTime: false
+                  }
+            } as MessageRow;
+      }
+
+      toTypingRow(typing: TypeMessage): MessageRow {
+            return {
+                  type: 'typing',
+                  typeEvent: typing,
+                  frame: {
+                        forceSplit: true,
+                        receiveTime: new Date(typing.time),
+                        senderId: typing.from,
+                        position: Position.Single,
+                        displayTime: false
+                  }
+            } as MessageRow
+      }
+
+      toExpandingRow(): MessageRow {
+            return {
+                  type: 'loading',
+                  frame: {
+                        forceSplit: false,
+                        receiveTime: new Date(),
+                        senderId: '',
+                        position: Position.Single,
+                        displayTime: false
+                  }
+            } as MessageRow
+      }
+
+      private readonly destroyRef = inject(DestroyRef);
+
+      replace(messages: Message[]) {
+            this.messages = messages;
+            this.messageLength.next(messages.length)
+      }
+
+      definePrependingPipe() {
+            this.logRepository.getChannel().pipe(
+                    takeUntilDestroyed(this.destroyRef)
+            ).subscribe(log => {
+                  this.cacheStore.put(log.messageState);
+            });
+
+            this.chatId.pipe(
+                    takeUntilDestroyed(this.destroyRef),
+                    switchMap(chatId => this.logRepository.getChatChannel(chatId)),
+            ).subscribe(log => {
+                  const message = log.messageState;
+                  if (log.action === LogAction.ADDITION) {
+                        this.replace(this.prepend(message, this.messages));
+                  } else {
+                        this.replace(this.update(message, this.messages));
+                  }
+            });
+      }
+
+
+      defineAppendingPipe() {
+            this.expandTrigger.pipe(
+                    takeUntilDestroyed(this.destroyRef),
+                    withLatestFrom(this.chatId),
+                    filter(([trigger, chatId]) => !!chatId),
+                    switchMap(([trigger, chatId]) => this.expand(this.messages, chatId)),
+            ).subscribe(newMessages => {
+                  if (newMessages.length == 0) {
+                        this.end = true;
+                  }
+                  this.expanding = false;
+                  this.replace(this.append(this.messages, newMessages));
+            });
+      }
+
+      defineExpandPipe() {
+            combineLatest([this.scrollIndex, this.messageLength]).pipe(
+                    takeUntilDestroyed(this.destroyRef),
+            ).subscribe(([index, length]) => {
+                  this.checkAndExpand(index);
+            });
+      }
+
+      protected get messageRows(): MessageRow[] {
+            const merged: MessageRow[] = [];
+            if (this.expanding && !this.end) {
+                  merged.push(this.toExpandingRow());
+            }
+            merged.push(
+                    ...[...this.messages].reverse(),
+                    ...this.sendings.map(s => this.toSendingRow(s)),
+                    ...this.typings.map(t => this.toTypingRow(t))
+            );
+            return merged;
+      }
+
+      private checkAndExpand(scrollIndex: number) {
+
+            if (!this.expanding && !this.end && scrollIndex < 5) {
+                  this.expanding = true;
+                  this.expandTrigger.next();
+            }
+      }
+
+      defineDisplayPipe() {
+            this.chatId.pipe(
+                    takeUntilDestroyed(this.destroyRef),
+                    switchMap(chatId => this.messageService.getSendingQueue(chatId)),
+                    tap(() => this.scrollToBeginning())
+            ).subscribe(sendings => {
+                  this.sendings = sendings;
+            });
+
+            this.chatId.pipe(
+                    takeUntilDestroyed(this.destroyRef),
+                    switchMap(chatId => this.dialogService.findByChatId(chatId)),
+                    switchMap(dialog => dialog.typings),
+                    map(typings => typings.filter(t => !this.profileService.thatsMe(t.from)))
+            ).subscribe(typings => {
+                  this.typings = typings;
+            });
+      }
 
       ngOnInit(): void {
-            this.routeSub = this.activatedRoute.paramMap
-                    .pipe(switchMap(params => {
-                          const id = params.get('id')!;
-                          return this.dialogRepo.findByIdentifierAndSync(fromString(id))
-                    }))
-                    .subscribe(dialog => {
-                          this.refresh(dialog);
-                    });
-            this.activityTimer = timer(0, 1000).subscribe(() => {
-                  this.seenCheck()
-                  this.typeCheck()
-            })
-            this.eventSub = this.realtimeClient.getEventChannel().subscribe(this.eventObserver)
+            this.defineDisplayPipe();
+            this.definePrependingPipe();
+            this.defineAppendingPipe();
+            this.defineExpandPipe();
       }
 
-      private typeCheck(): void {
-            if (this.typeEvent) {
-                  const at = new Date(this.typeEvent.time)
-                  if (at.getTime() + 2000 < Date.now())
-                        this.typeEvent = undefined;
+
+      private expand(messages: Message[], chatId: string): Observable<MessageState[]> {
+            const lastSeq = messages.at(-1)?.message?.sequenceNumber;
+            const anchor = (lastSeq ?? Number.MAX_SAFE_INTEGER) - 1;
+
+            const cached = this.cacheStore.list(chatId, anchor);
+            if (cached.length > 0) {
+                  return of(cached);
             }
-      }
 
-      private seenKey?: string;
-
-      private seenCheck(): void {
-            const length = this.yourMessages.length;
-            if (length === 0 || this.seenKey)
-                  return
-            const first = this.yourMessages[0]
-
-            if (!first.seenAt) {
-                  const seenStrategy = new SeenEventHandlerStrategy(this.dialog.conversation, new Date())
-                  this.seenKey = seenStrategy.idempotencyKey
-                  this.messageService.send(seenStrategy)
-            }
-      }
-
-      ngOnDestroy(): void {
-            this.routeSub.unsubscribe()
-            this.activityTimer.unsubscribe()
-            this.eventSub.unsubscribe()
-      }
-
-
-      private refresh(dialog: IDialog) {
-            this.expanding?.unsubscribe();
-            this.chatSubscription?.unsubscribe();
-            this.expanding = undefined;
-            this.typeEvent = undefined
-            this.chatSubscription = undefined;
-            this.pending = [];
-            this.reals = [];
-            this.myMessages = [];
-            this.yourMessages = [];
-            this.ownerSeenAt = undefined;
-            this.partnerSeenAt = undefined;
-            this.seenKey = undefined;
-
-            this.dialog = dialog;
-            this.expander = new EventExpander(dialog, this.eventRepository);
-            this.chatSubscription = this.realtimeClient.subscribeChat(this.dialog.conversation.chat.identifier, this.chatSub)
-            this.expandIfNecessary();
-      }
-
-
-      private expandIfNecessary(): void {
-            const index = this.viewport?.getRenderedRange().start ?? 0;
-            if (this.reals.length >= 40 && index > 5)
-                  return;
-
-            if (this.expanding || this.expander.isEnd())
-                  return;
-            this.expanding = this.expander.expand().pipe(
-                    tap(events => this.updateSeenStates(events)),
-                    map(events => toMessages(events)),
-                    finalize(() => {
-                          setTimeout(() => {
-                                this.expanding = undefined;
-                                this.expandIfNecessary();
-                          }, 200)
-                    })).subscribe(messages => {
-                          messages.forEach(message => this.append(message));
-                    },
-                    error => {
-                          console.error(error);
-                    },
-            )
+            return this.messageRepository.list({chatId: chatId, anchorSequenceNumber: anchor});
 
       }
 
 
-      private readonly formatter: Formatter = new RollInFormatter()
-      private pending: IMessage[] = [];
-      private reals: IMessage[] = [];
-      private myMessages: MyMessage[] = []
-      private yourMessages: YourMessage[] = []
+      private append(messages: Message[], newMessages: MessageState[]): Message[] {
+            this.cacheStore.putAll(newMessages);
 
-      private ownerSeenAt?: Date;
-      private partnerSeenAt?: Date;
+            messages.push(...newMessages.map((state) => this.toMessageRow(state)))
 
-      private eventSub!: Subscription;
-      private eventObserver = (event: ChatEvent) => {
-            const partner = event.partner.id
-            const owner = event.owner.id
-            if (owner !== this.me.id || partner !== this.dialog.conversation.partner.id)
-                  return;
-            if (isPendingEvent(event)) {
-                  if (event.message) {
-                        this.pending.push(toMessage(event));
-                        this.scrollToBeginning()
-                  }
-                  return;
-            }
-            const mine = this.isMine(event);
-            if (event.eventType === 'SEEN') {
-                  const seenAt = new Date(event.seenEvent!.at);
-                  if (mine) {
-                        if (this.seenKey) {
-                              if (event.idempotencyKey === this.seenKey) {
-                                    this.seenKey = undefined;
-                              }
-                        }
-                        this.ownerSeenAt = seenAt;
-                        for (let i = 0; i < this.yourMessages.length; i++) {
-                              if (!!this.yourMessages[i].seenAt)
-                                    break
-                              this.updateMessageState(i, false)
-                        }
-                  } else {
-                        this.partnerSeenAt = seenAt;
-                        for (let i = 0; i < this.myMessages.length; i++) {
-                              if (!!this.myMessages[i].seenAt)
-                                    break
-                              this.updateMessageState(i, true)
-                        }
-                  }
-                  return;
-            }
-            if (event.message) {
-                  const message = toMessage(event);
-                  this.prepend(message);
-            }
+            return messages
+
       }
 
-      private length(): number {
-            return this.pending.length + this.reals.length;
+      private prepend(message: MessageState, messages: Message[]): Message[] {
+            return [this.toMessageRow(message), ...messages];
       }
 
-
-      private updateSeenStates(events: ChatEvent[]) {
-            events.forEach(event => {
-                  const mine = this.isMine(event);
-                  if (event.eventType === 'SEEN') {
-                        const seenAt = new Date(event.seenEvent!.at);
-                        if (mine) {
-                              if (!this.ownerSeenAt || seenAt > this.ownerSeenAt)
-                                    this.ownerSeenAt = seenAt;
-                        } else {
-                              if (!this.partnerSeenAt || seenAt > this.partnerSeenAt)
-                                    this.partnerSeenAt = seenAt;
-                        }
-                  }
-            })
-      }
-
-
-      private updateMessageState(index: number, mine: boolean) {
-            if (mine) {
-                  const message = this.myMessages[index];
-                  if (this.partnerSeenAt && message.receiveTime <= this.partnerSeenAt)
-                        message.seenAt = this.partnerSeenAt;
-                  if (index == 0) {
-                        message.isLastSent = true;
-                        if (this.partnerSeenAt && message.receiveTime <= this.partnerSeenAt)
-                              message.isLastSeen = true;
-                  } else {
-                        message.isLastSent = false;
-                        const ahead = this.myMessages[index - 1];
-                        message.isLastSeen = !!(this.partnerSeenAt
-                                && ahead.receiveTime < this.partnerSeenAt
-                                && message.receiveTime >= this.partnerSeenAt);
-                  }
-            } else {
-                  const message = this.yourMessages[index];
-                  if (this.ownerSeenAt && message.receiveTime <= this.ownerSeenAt)
-                        message.seenAt = this.ownerSeenAt;
-                  if (index == 0) {
-                        if (this.ownerSeenAt && message.receiveTime <= this.ownerSeenAt)
-                              message.isLastSeen = true;
-                  } else {
-                        const ahead = this.yourMessages[index - 1];
-                        message.isLastSeen = !!(this.ownerSeenAt
-                                && ahead.receiveTime < this.ownerSeenAt
-                                && message.receiveTime >= this.ownerSeenAt);
-                  }
-            }
-      }
-
-      private append(message: IMessage) {
-            this.reals.push(message);
-            const mine = this.isMine(message);
-            if (mine) {
-                  this.myMessages.push(message as MyMessage);
-
-                  const length = this.myMessages.length;
-                  this.updateMessageState(length - 1, true);
-                  if (length > 1)
-                        this.updateMessageState(length - 2, true);
-            } else {
-                  this.yourMessages.push(message as YourMessage);
-
-                  const length = this.yourMessages.length;
-                  this.updateMessageState(length - 1, false);
-                  if (length > 1)
-                        this.updateMessageState(length - 2, false);
-            }
-            this.formatter.reformat(this.reals);
-            this.formatter.reformat(this.pending);
-      }
-
-      private prepend(message: IMessage) {
-            this.reals.unshift(message);
-            const mine = this.isMine(message);
-            if (mine) {
-                  const thePendingIdx = this.pending.findIndex(pending =>
-                          pending.idempotencyKey === message.idempotencyKey
-                  );
-
-                  if (thePendingIdx >= 0) {
-                        this.pending.splice(thePendingIdx, 1);
-                  }
-
-                  this.myMessages.unshift(message as MyMessage);
-                  this.updateMessageState(0, true);
-
-                  if (this.myMessages.length > 1)
-                        this.updateMessageState(1, true);
-            } else {
-                  this.yourMessages.unshift(message as YourMessage);
-                  this.updateMessageState(0, false);
-
-                  if (this.yourMessages.length > 1)
-                        this.updateMessageState(1, false);
-            }
-            this.formatter.reformat(this.reals);
-            this.formatter.reformat(this.pending);
-      }
-
-      private isMine(message: IMessage | ChatEvent): boolean {
-            return message.sender === this.me.id;
+      private update(message: MessageState, messages: Message[]): Message[] {
+            const index = messages.findIndex(msg =>
+                    msg.message.sequenceNumber === message.sequenceNumber);
+            messages[index] = this.toMessageRow(message);
+            return messages;
       }
 
 }
 
 type MessageRow =
         | {
-      type: 'loading'
+      type: 'loading',
+      frame: MessageFrame,
+      mine: false,
+      sent?: SendMessage,
 }
         | {
       type: 'message';
-      message: Message
+      message: MessageState,
+      mine: boolean,
+      sent: SendMessage
+      frame: MessageFrame
 }
         | {
       type: 'typing';
-      typeEvent: TypeEvent
+      typeEvent: TypeMessage,
+      message: MessageState,
+      mine: false,
+      frame: MessageFrame,
+      sent?: SendMessage,
 }
 
 
+type Message = Extract<MessageRow, { type: 'message' }>;

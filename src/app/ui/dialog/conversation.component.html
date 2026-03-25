@@ -1,0 +1,16 @@
+<app-avatar-container [presence]="(presence | async)" [avatar]="roomAvatar" [chatId]="identifier"
+                      size="45"/>
+<div class="middle">
+    <span class="room-name" [style.font-weight]="nameWeight">{{ roomName }}</span>
+    <span class="message"
+          [style.font-weight]="contentWeight">{{ getPreview(newest) }}</span>
+</div>
+<ng-container *ngIf="mine()">
+    <div class="seen-div">
+        <ng-container *ngFor="let seen of displaySeenBy">
+            <img class="seen mt-2" [src]="seen.avatar"
+                 alt="">
+
+        </ng-container>
+    </div>
+</ng-container>

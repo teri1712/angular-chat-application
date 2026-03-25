@@ -8,8 +8,6 @@
      }"
      matBadgePosition="below after"
 >
-    <img [src]="conversation.partner.avatar.uri" alt="" [ngStyle]="{
-        'width': size,
-        'height': size
-    }">
+    <img [ngSrc]="avatar?? 'https://i.pinimg.com/webp/1200x/e7/70/51/e77051136cf95616fcb83bbd3f338c93.webp'" alt=""
+         [width]="size" [height]="size">
 </div>

@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {ImageEvent} from "../../model/dto/image-event";
+import {ImageState} from "../../model/dto/image-state";
 import {CommonModule} from "@angular/common";
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {ImageViewerDialogComponent} from "../image-viewer-dialog/image-viewer-dialog.component";
@@ -11,17 +11,18 @@ import {ImageViewerDialogComponent} from "../image-viewer-dialog/image-viewer-di
       styleUrl: './image-message.component.css'
 })
 export class ImageMessageComponent {
-      @Input({required: true}) imageEvent!: ImageEvent;
+      @Input({required: true}) imageState!: ImageState;
 
       constructor(private dialog: MatDialog) {
       }
 
       openImage(): void {
-            if (!this.imageEvent?.downloadUrl) return;
+            const image = this.imageState.image
+            if (!image.uri) return;
             this.dialog.open(ImageViewerDialogComponent, {
                   data: {
-                        uri: this.imageEvent.downloadUrl,
-                        filename: this.imageEvent.filename
+                        uri: image.uri,
+                        filename: image.filename,
                   },
                   width: '95vw',
                   maxWidth: '95vw',

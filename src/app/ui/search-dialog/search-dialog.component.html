@@ -7,15 +7,22 @@
         <mat-icon matSuffix color="primary">search</mat-icon>
     </mat-form-field>
 
-    <div *ngIf="isLoading" class="loading-container mat-body-2">
-        <span>Searching...</span>
-    </div>
 
     <div class="results-container" *ngIf="!isLoading && searchResults.length > 0">
+
         <app-search-result-item *ngFor="let result of searchResults"
                                 [result]="result"
-                                (resultClick)="onResultClick($event)">
+                                (selected)="close()"
+        >
         </app-search-result-item>
+    </div>
+
+    <div class="loading-container mat-body-2">
+
+        <mat-progress-spinner *ngIf="isLoading" mode="indeterminate"
+                              diameter="30">
+        </mat-progress-spinner>
+
     </div>
 
     <div *ngIf="!isLoading && searchQuery && searchResults.length === 0" class="no-results mat-body-2">

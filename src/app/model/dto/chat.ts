@@ -1,11 +1,10 @@
-import {ChatIdentifier} from "./chat-identifier";
+import {Preference} from "./preference";
 
-export class Chat {
+export interface Chat {
 
-      constructor(
-              public identifier: ChatIdentifier = new ChatIdentifier(),
-              public owner: string = "",
-              public partner: string = "",
-      ) {
-      }
+      readonly identifier: string,
+      readonly preference: Preference,
+      readonly roomName: string,
+      readonly roomAvatar: string,
+      readonly lastActivity: string
 }

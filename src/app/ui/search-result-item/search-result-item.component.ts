@@ -1,8 +1,9 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatListModule} from '@angular/material/list';
 import {MatIconModule} from '@angular/material/icon';
 import {MessageHistory} from '../../model/dto/message-history';
+import {Router} from "@angular/router";
 
 @Component({
       selector: 'app-search-result-item',
@@ -13,11 +14,25 @@ import {MessageHistory} from '../../model/dto/message-history';
 })
 export class SearchResultItemComponent {
       @Input({required: true}) result!: MessageHistory;
-      @Output() resultClick = new EventEmitter<MessageHistory>();
+      @Output() selected = new EventEmitter<void>();
 
-      onItemClick() {
-            // Placeholder for custom action
-            console.log('Search result clicked:', this.result);
-            this.resultClick.emit(this.result);
+      constructor(private router: Router) {
+      }
+
+      @HostListener('click', ['$event'])
+      onClick(event: MouseEvent) {
+            event.stopPropagation();
+            this.router.navigate(['/home', {
+                          outlets: {
+                                'conversation': [this.result.chatId]
+                          }
+                    }],
+                    {
+                          queryParamsHandling: 'merge',
+                          queryParams: {
+                                sequenceNumber: this.result.sequenceNumber,
+                          }
+                    })
+            this.selected.emit();
       }
 }

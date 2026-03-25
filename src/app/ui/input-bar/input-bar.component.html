@@ -1,17 +1,19 @@
 <div class="left-container" [ngStyle]="{
-    'width': textEmpty? '80px' : '0px',
+    'width': !textContent? '80px' : '0px',
 }">
     <button class="left-button" mat-icon-button
+            [disabled]="!chatId"
             [ngStyle]="{
-    'scale': textEmpty? '1' : '0',
+    'scale': !textContent? '1' : '0',
 }" (click)="imageInput.click()">
         <mat-icon>imagesmode</mat-icon>
         <input #imageInput type="file" hidden (change)="sendImage($event)">
     </button>
 
     <button class="left-button" mat-icon-button
+            [disabled]="!chatId"
             [ngStyle]="{
-    'scale': textEmpty? '1' : '0',
+    'scale': !textContent? '1' : '0',
 }" (click)="fileInput.click()">
         <mat-icon>attach_file</mat-icon>
         <input #fileInput type="file" hidden (change)="sendFile($event)">
@@ -21,9 +23,17 @@
 <input matInput placeholder="Type something"
        [(ngModel)]="textContent"
        (ngModelChange)="onChange($event)"
-       (keydown.enter)="onSendClicked()"
+       [disabled]="!chatId"
+       (keydown.enter)="chatId && onSendClicked()"
 >
-<button class="right-button" mat-icon-button [disabled]="dialog.ghost" (click)="onSendClicked()">
-    <mat-icon [svgIcon]="textEmpty? getIcon(dialog.preference?.iconId??1) : 'send'"
+<button *ngIf="textContent" class="right-button" mat-icon-button [disabled]="!chatId"
+        (click)="onSendClicked()">
+    <mat-icon [svgIcon]="'send'"
+              color="primary"></mat-icon>
+</button>
+
+<button *ngIf="iconId" class="right-button" mat-icon-button [disabled]="!chatId"
+        (click)="onIconClicked()">
+    <mat-icon [svgIcon]="getIcon(iconId)"
               color="primary"></mat-icon>
 </button>

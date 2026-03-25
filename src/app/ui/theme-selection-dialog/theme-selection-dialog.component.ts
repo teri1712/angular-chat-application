@@ -35,6 +35,7 @@ export class ThemeSelectionDialogComponent implements OnInit {
       ngOnInit(): void {
             this.preferenceService.getThemes().subscribe((themes) => {
                   this.themes = themes;
+                  console.log(themes)
                   this.isLoading = false;
             });
       }
@@ -44,6 +45,6 @@ export class ThemeSelectionDialogComponent implements OnInit {
       }
 
       selectTheme(theme: Theme): void {
-            this.dialogRef.close(theme);
+            this.dialogRef.close(theme.id);
       }
 }

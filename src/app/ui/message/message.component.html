@@ -1,7 +1,36 @@
-<span *ngIf="message.fixedDisplayTime" class="time">
-    {{ message.receiveTime | formatTime }}
+<span *ngIf="frame.displayTime" class="time">
+    {{ frame.receiveTime | formatTime }}
 </span>
-<div class="message-container" [style.justify-content]="mine? 'end' : 'start'">
-    <app-left-message *ngIf="!mine" [message]="message" [partner]="partner"/>
-    <app-right-message *ngIf="mine" [message]="$any(message)"/>
-</div>
+<ng-container [ngSwitch]="message.messageType.toLowerCase()">
+    <div class="message-container">
+        <app-preference-message
+                class="center"
+                *ngSwitchCase="'preference'"
+                [maker]="message.sender">
+        </app-preference-message>
+
+        <app-group-message
+                class="center"
+                *ngSwitchCase="'group'"
+                [creator]="message.sender">
+        </app-group-message>
+
+        <ng-container *ngSwitchDefault>
+            <app-left-message
+                    *ngIf="!mine"
+                    class="left"
+                    [message]="message"
+                    [frame]="frame">
+            </app-left-message>
+
+            <app-right-message
+                    *ngIf="mine"
+                    class="right"
+                    [message]="message"
+                    [frame]="frame"
+                    [displaySend]="send?.display"
+                    [sendState]="send?.sendState">
+            </app-right-message>
+        </ng-container>
+    </div>
+</ng-container>

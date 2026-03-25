@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {User} from '../../model/dto/user';
+import {Profile} from '../../model/dto/profile';
 import {CommonModule} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -38,8 +38,9 @@ import {Authenticator} from "../../service/auth/authenticator";
 export class ProfileManagementComponent implements OnInit {
       profileForm!: FormGroup;
       passwordForm!: FormGroup;
-      me!: User;
+      profile!: Profile;
       avatarPreview: string | null = null;
+      private initialProfileValues: any = {};
 
       constructor(
               private fb: FormBuilder,
@@ -51,20 +52,22 @@ export class ProfileManagementComponent implements OnInit {
       }
 
       ngOnInit(): void {
-            this.me = this.profileService.getProfile();
+            this.profile = this.profileService.getProfile();
             this.initForms();
-            if (this.me.avatar?.uri) {
-                  this.avatarPreview = this.me.avatar.uri;
+            if (this.profile.avatar) {
+                  this.avatarPreview = this.profile.avatar;
             }
       }
 
       initForms(): void {
             this.profileForm = this.fb.group({
-                  username: [this.me.username || '', [Validators.required]],
-                  name: [this.me.name || '', [Validators.required]],
-                  gender: [this.me.gender || 1, [Validators.required]],
-                  dob: [this.me.dob ? new Date(this.me.dob) : new Date()]
+                  username: [this.profile.username || '', [Validators.required]],
+                  name: [this.profile.name || '', [Validators.required]],
+                  gender: [this.profile.gender || 'Male', [Validators.required]],
+                  dob: [this.profile.dob ? new Date(this.profile.dob) : new Date()]
             });
+
+            this.initialProfileValues = this.profileForm.getRawValue();
 
             this.passwordForm = this.fb.group({
                   oldPassword: ['', [Validators.required]],
@@ -81,12 +84,45 @@ export class ProfileManagementComponent implements OnInit {
       onProfileSubmit(): void {
             if (this.profileForm.valid) {
                   const formValue = {...this.profileForm.value};
-                  if (formValue.dob instanceof Date) {
-                        formValue.dob = formValue.dob.toISOString().split('T')[0];
+                  const changedFields: any = {};
+
+                  for (const key of Object.keys(formValue)) {
+                        const current = formValue[key];
+                        const initial = this.initialProfileValues[key];
+                        const currentStr = current instanceof Date ? current.toISOString().split('T')[0] : current;
+                        const initialStr = initial instanceof Date ? initial.toISOString().split('T')[0] : initial;
+                        if (currentStr !== initialStr) {
+                              changedFields[key] = current;
+                        }
                   }
-                  this.profileService.updateProfile(formValue).subscribe({
+
+                  if (Object.keys(changedFields).length === 0) {
+                        this.snackBar.open('No changes to save', 'Close', {duration: 3000});
+                        return;
+                  }
+
+                  if (changedFields.dob instanceof Date) {
+                        changedFields.dob = changedFields.dob.toISOString().split('T')[0];
+                  }
+                  if (changedFields.gender) {
+                        let gender = 0;
+                        switch (changedFields.gender.toLowerCase()) {
+                              case "male":
+                                    gender = 1;
+                                    break;
+                              case "female":
+                                    gender = 2;
+                                    break;
+                              default:
+                                    gender = 3;
+                                    break;
+                        }
+                        changedFields.gender = gender;
+                  }
+                  this.profileService.updateProfile(changedFields).subscribe({
                         next: (updatedUser) => {
-                              this.me = updatedUser;
+                              this.profile = updatedUser;
+                              this.initialProfileValues = this.profileForm.getRawValue();
                               this.snackBar.open('Profile updated successfully', 'Close', {duration: 3000});
                         },
                         error: (err) => {
@@ -122,7 +158,7 @@ export class ProfileManagementComponent implements OnInit {
 
                   this.profileService.updateAvatar(file).subscribe({
                         next: (updatedUser) => {
-                              this.me = updatedUser;
+                              this.profile = updatedUser;
                               this.snackBar.open('Avatar updated successfully', 'Close', {duration: 3000});
                         },
                         error: (err) => {
