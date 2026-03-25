@@ -1,7 +1,7 @@
 name: Angular Chat Application CI with Maven
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
