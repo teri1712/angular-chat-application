@@ -40,6 +40,7 @@ export class ProfileManagementComponent implements OnInit {
       passwordForm!: FormGroup;
       profile!: Profile;
       avatarPreview: string | null = null;
+      private initialProfileValues: any = {};
 
       constructor(
               private fb: FormBuilder,
@@ -62,9 +63,11 @@ export class ProfileManagementComponent implements OnInit {
             this.profileForm = this.fb.group({
                   username: [this.profile.username || '', [Validators.required]],
                   name: [this.profile.name || '', [Validators.required]],
-                  gender: [this.profile.gender || 1, [Validators.required]],
+                  gender: [this.profile.gender || 'Male', [Validators.required]],
                   dob: [this.profile.dob ? new Date(this.profile.dob) : new Date()]
             });
+
+            this.initialProfileValues = this.profileForm.getRawValue();
 
             this.passwordForm = this.fb.group({
                   oldPassword: ['', [Validators.required]],
@@ -81,12 +84,45 @@ export class ProfileManagementComponent implements OnInit {
       onProfileSubmit(): void {
             if (this.profileForm.valid) {
                   const formValue = {...this.profileForm.value};
-                  if (formValue.dob instanceof Date) {
-                        formValue.dob = formValue.dob.toISOString().split('T')[0];
+                  const changedFields: any = {};
+
+                  for (const key of Object.keys(formValue)) {
+                        const current = formValue[key];
+                        const initial = this.initialProfileValues[key];
+                        const currentStr = current instanceof Date ? current.toISOString().split('T')[0] : current;
+                        const initialStr = initial instanceof Date ? initial.toISOString().split('T')[0] : initial;
+                        if (currentStr !== initialStr) {
+                              changedFields[key] = current;
+                        }
                   }
-                  this.profileService.updateProfile(formValue).subscribe({
+
+                  if (Object.keys(changedFields).length === 0) {
+                        this.snackBar.open('No changes to save', 'Close', {duration: 3000});
+                        return;
+                  }
+
+                  if (changedFields.dob instanceof Date) {
+                        changedFields.dob = changedFields.dob.toISOString().split('T')[0];
+                  }
+                  if (changedFields.gender) {
+                        let gender = 0;
+                        switch (changedFields.gender.toLowerCase()) {
+                              case "male":
+                                    gender = 1;
+                                    break;
+                              case "female":
+                                    gender = 2;
+                                    break;
+                              default:
+                                    gender = 3;
+                                    break;
+                        }
+                        changedFields.gender = gender;
+                  }
+                  this.profileService.updateProfile(changedFields).subscribe({
                         next: (updatedUser) => {
                               this.profile = updatedUser;
+                              this.initialProfileValues = this.profileForm.getRawValue();
                               this.snackBar.open('Profile updated successfully', 'Close', {duration: 3000});
                         },
                         error: (err) => {

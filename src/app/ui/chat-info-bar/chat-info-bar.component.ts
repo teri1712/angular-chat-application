@@ -68,7 +68,6 @@ export class ChatInfoBarComponent implements OnChanges, OnInit {
                   height: 'auto',
                   maxHeight: '85vh',
                   injector: this.injector,
-                  panelClass: 'search-dialog-panel',
                   data: {
                         chatId: chatId,
                   }

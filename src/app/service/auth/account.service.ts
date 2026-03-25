@@ -8,19 +8,18 @@ import {Account} from "../../model/dto/account";
 import {SignUpRequest} from "../../model/dto/sign-up-request";
 import {SignInRequest} from "../../model/dto/sign-in-request";
 import {Profile} from "../../model/dto/profile";
-import {TokenListener, TokenStore} from "./token.store";
 import {CredentialInterceptor} from "./credential.interceptor";
 
 
 @Injectable({
       providedIn: 'root',
 })
-export class AccountService implements AccountRepository, Authenticator, TokenListener {
+export class AccountService implements AccountRepository, Authenticator {
 
       private readonly accountSubject
               = new BehaviorSubject<Profile | null | undefined>(undefined);
 
-      constructor(private httpClient: HttpClient, private readonly tokenStore: TokenStore, private readonly credentialInterceptor: CredentialInterceptor) {
+      constructor(private readonly httpClient: HttpClient, private readonly credentialInterceptor: CredentialInterceptor) {
             this.init()
       }
 
@@ -41,11 +40,7 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
             );
       }
 
-      onTokenChange(token: string): void {
-            this.tokenStore.accessToken = token;
-      }
-
-      onRefreshExpired(): void {
+      onLogout(): void {
             this.onAccountLogout()
       }
 
@@ -59,7 +54,7 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
 
                     },
                     (error: HttpErrorResponse) => {
-                          if (error.status >= 400 && error.status < 500) {
+                          if (error.status > 400 && error.status < 500) {
                                 this.onAccountLogout()
                           } else {
                                 //network
@@ -68,7 +63,6 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
                     () => {
                     }
             )
-            this.credentialInterceptor.addTokenListener(this)
       }
 
       private onAutoLogin(profile: Profile) {
@@ -78,16 +72,9 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
 
       private onAccountLogin(account: Account) {
             this.accountSubject.next(account.profile);
-
-            const tokens = account.accessToken;
-            if (tokens) {
-                  this.tokenStore.accessToken = tokens.accessToken;
-                  this.tokenStore.refreshToken = tokens.refreshToken;
-            }
       }
 
       private onAccountLogout() {
-            this.tokenStore.removeTokens()
             this.accountSubject.next(null);
       }
 
@@ -156,16 +143,9 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
             if (!this.accountSubject.value) {
                   throw new Error('There is no such account');
             }
-            const refreshToken = this.tokenStore.refreshToken
-            if (!refreshToken) {
-                  this.onAccountLogout()
-                  return of(true);
-            }
-            const includeRefreshToken = new HttpParams().set('refresh_token', refreshToken)
-
 
             return this.httpClient.post<any>(environment.API_URL + "/logout",
-                    includeRefreshToken.toString(), {
+                    new HttpParams(), {
                           observe: 'response',
                           headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -189,17 +169,10 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
 
       changePassword(oldPassword: string, newPassword: string): Observable<any> {
 
-            const refreshToken = this.tokenStore.refreshToken
-            if (!refreshToken) {
-                  this.onAccountLogout()
-                  return of(false);
-            }
-
             const params = new HttpParams()
                     .set('password', oldPassword)
-                    .set('new_password', newPassword)
-                    .set('refresh_token', refreshToken);
-            return this.httpClient.post(environment.API_URL + "/profiles/me/profile/password", params.toString(), {
+                    .set('new_password', newPassword);
+            return this.httpClient.post(environment.API_URL + "/profiles/me/password", params.toString(), {
                   headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                   }

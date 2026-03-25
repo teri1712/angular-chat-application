@@ -1,10 +1,10 @@
 <div class="d-flex flex-column gap-2 align-items-center">
-    <button mat-mini-fab aria-label="Thread" (click)="navigateToThreads()"
+    <button mat-mini-fab aria-label="Thread" (click)="navigateToThreads()" matTooltip="Conversations"
             [ngClass]="{'un-selected': currentRoute !== Routes.THREAD}"
     >
         <mat-icon>alternate_email</mat-icon>
     </button>
-    <button mat-mini-fab aria-label="Settings" (click)="navigateToSettings()"
+    <button mat-mini-fab aria-label="Settings" (click)="navigateToSettings()" matTooltip="Setting"
             [ngClass]="{'un-selected': currentRoute !== Routes.SETTINGS}">
         <mat-icon>settings</mat-icon>
     </button>

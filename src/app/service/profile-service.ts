@@ -5,7 +5,6 @@ import {BehaviorSubject, Observable, switchMap, tap} from "rxjs";
 import {environment} from "../environments";
 import {HttpClient} from "@angular/common/http";
 import {UploadService} from "./upload-service";
-import {ImageSpec} from "../model/dto/image-spec";
 import {User} from "../model/dto/user";
 
 @Injectable()
@@ -47,13 +46,7 @@ export default class ProfileService {
             return this.uploadService.upload(filename, file).pipe(switchMap(
                     (downloadUrl) =>
                             this.updateProfile({
-                                  avatar: {
-                                        uri: downloadUrl.path,
-                                        filename: filename,
-                                        width: 200,
-                                        height: 200,
-                                        format: 'jpg'
-                                  }
+                                  avatar: downloadUrl.path
                             })));
       }
 
@@ -63,5 +56,5 @@ export type ProfileRequest = {
       name: string,
       gender: number,
       dob: string,
-      avatar: ImageSpec
+      avatar: string
 };

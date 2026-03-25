@@ -7,7 +7,6 @@ import {ProgressDialogComponent} from "../../progress-dialog/progress-dialog.com
 import {finalize, map, of, switchMap} from "rxjs";
 import {Authenticator} from "../../../service/auth/authenticator";
 import {UploadService} from "../../../service/upload-service";
-import {ImageSpec} from "../../../model/dto/image-spec";
 
 @Component({
       selector: 'app-sign-up',
@@ -65,20 +64,14 @@ export class SignUpComponent {
 
             const avatarObs = this.body.file
                     ? this.uploadService.upload(this.body.file.name, this.body.file).pipe(
-                            map((downloadUrl): ImageSpec => {
-                                  return {
-                                        uri: downloadUrl.path,
-                                        filename: this.body.file!.name,
-                                        width: 500,
-                                        height: 500,
-                                        format: this.body.file!.name.split('.').pop() || 'jpg'
-                                  }
+                            map((downloadUrl) => {
+                                  return downloadUrl.path
                             })
                     )
-                    : of(null as ImageSpec | null);
+                    : of(null as string | null);
 
             avatarObs.pipe(
-                    switchMap((avatar: ImageSpec | null) => {
+                    switchMap((avatar: string | null) => {
                           return this.authenticator.signUp({
                                 username: this.body.username!,
                                 password: this.body.password!,

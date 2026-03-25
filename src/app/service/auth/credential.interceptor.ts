@@ -6,13 +6,14 @@ import {
       HttpInterceptor,
       HttpParams,
       HttpRequest,
+      HttpResponse,
       HttpStatusCode
 } from "@angular/common/http";
 import {catchError, finalize, Observable, switchMap, tap} from "rxjs";
 import {AccessToken} from "../../model/dto/access-token";
 import {environment} from "../../environments";
 import {JwtHelperService} from "@auth0/angular-jwt";
-import {ITokenStore, TokenListener} from "./token.store";
+import {TokenStore} from "./token.store";
 import {Injectable} from "@angular/core";
 
 @Injectable({
@@ -20,22 +21,20 @@ import {Injectable} from "@angular/core";
 })
 export class CredentialInterceptor implements HttpInterceptor {
 
-      readonly anonymousUrls = new Set(["/login", "/signup", "/logout", "/tokens/refresh", "/tokens/oauth2"])
+      readonly anonymousUrls = new Set(["/login", "/signup", "/tokens/refresh", "/tokens/oauth2"])
 
       private readonly jwtHelper = new JwtHelperService();
       private currentRefresh?: Observable<AccessToken>;
-      private tokenListeners: TokenListener[] = [];
 
-      constructor(private tokenStore: ITokenStore, private client: HttpClient) {
+      constructor(private readonly tokenStore: TokenStore, private readonly client: HttpClient) {
       }
 
-      addTokenListener(listener: TokenListener) {
-            this.tokenListeners.push(listener);
+
+      private set accessToken(accessToken: AccessToken) {
+            this.tokenStore.accessToken = accessToken.accessToken
+            this.tokenStore.refreshToken = accessToken.refreshToken
       }
 
-      removeTokenListener(listener: TokenListener) {
-            this.tokenListeners = this.tokenListeners.filter(l => l !== listener);
-      }
 
       private refresh(refreshToken: string): Observable<AccessToken> {
             if (this.currentRefresh) {
@@ -54,9 +53,7 @@ export class CredentialInterceptor implements HttpInterceptor {
                             })
                     .pipe(
                             tap((body) => {
-                                  this.tokenListeners.forEach((listener) => {
-                                        listener.onTokenChange(body.accessToken);
-                                  })
+                                  this.tokenStore.accessToken = body.accessToken
                                   return body;
                             }),
                             finalize(() => {
@@ -87,10 +84,26 @@ export class CredentialInterceptor implements HttpInterceptor {
             });
 
             const pathOnly = new URL(req.url).pathname;
-            if (!req.url.startsWith("http"))
-                  window.alert("vcl")
+            if (pathOnly == "/logout") {
+                  const refresh = this.tokenStore.refreshToken;
+                  if (refresh)
+                        req = req.clone({
+                              params: req.params.set('refresh_token', refresh)
+                        });
+                  return next.handle(req).pipe(tap(event => {
+                        if (event instanceof HttpResponse) {
+                              this.tokenStore.removeTokens()
+                        }
+                  }));
+            }
             if (this.anonymousUrls.has(pathOnly)) {
-                  return next.handle(req);
+                  return next.handle(req).pipe(
+                          tap(event => {
+                                if (event instanceof HttpResponse && event.body.accessToken) {
+                                      this.accessToken = event.body.accessToken
+                                }
+                          })
+                  );
             }
 
             req = this.includeToken(req);
@@ -110,9 +123,7 @@ export class CredentialInterceptor implements HttpInterceptor {
                                               })
                                       );
                                 }
-                                this.tokenListeners.forEach((listener) => {
-                                      listener.onRefreshExpired()
-                                })
+                                this.tokenStore.removeTokens()
                           }
                           throw err;
                     })

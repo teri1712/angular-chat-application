@@ -69,27 +69,32 @@ export class InputBarComponent implements OnInit, OnDestroy, OnChanges {
             }
       }
 
-      protected onIconClicked(iconId: number, chatId: string) {
-            this.messageService.send(new IconPosting(iconId, chatId))
+      protected onIconClicked() {
+            if (!this.chatId || !this.iconId)
+                  return
+            this.messageService.send(new IconPosting(this.iconId, this.chatId))
 
             this.textContent = ""
       }
 
-      protected onSendClicked(content: string, chatId: string): void {
-            this.messageService.send(new TextPosting(content, chatId))
+      protected onSendClicked(): void {
+            if (!this.textContent || !this.chatId)
+                  return
+            this.messageService.send(new TextPosting(this.textContent, this.chatId))
             this.textContent = ""
       }
 
-      protected sendFile(event: Event, chatId: string) {
+      protected sendFile(event: Event) {
             const files = (event.target as HTMLInputElement)?.files
             if (files?.length) {
                   const file = files[0];
-                  this.messageService.send(new FilePosting(file, chatId))
+                  if (this.chatId)
+                        this.messageService.send(new FilePosting(file, this.chatId))
             }
       }
 
 
-      protected sendImage(event: Event, chatId: string) {
+      protected sendImage(event: Event) {
             const files = (event.target as HTMLInputElement)?.files
             if (files?.length) {
                   const file = files[0];
@@ -99,10 +104,12 @@ export class InputBarComponent implements OnInit, OnDestroy, OnChanges {
                   image.onload = () => {
                         const width = image.naturalWidth || 0;
                         const height = image.naturalHeight || 0;
-                        this.messageService.send(new ImagePosting(file, width, height, format, chatId))
+                        if (this.chatId)
+                              this.messageService.send(new ImagePosting(file, width, height, format, this.chatId))
                   };
                   image.onerror = () => {
-                        this.messageService.send(new ImagePosting(file, 200, 200, format, chatId))
+                        if (this.chatId)
+                              this.messageService.send(new ImagePosting(file, 200, 200, format, this.chatId))
                   };
                   image.src = fileUrl;
             }

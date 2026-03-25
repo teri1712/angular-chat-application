@@ -1,7 +1,7 @@
 import {Injectable, OnDestroy} from "@angular/core";
 import {Client, Frame, IMessage} from "@stomp/stompjs";
 import {environment} from "../../environments";
-import {TokenStore} from "../auth/token.store";
+import {ITokenStore, TokenListener} from "../auth/token.store";
 import {delay, finalize, Observable, of, Subject, switchMap, tap} from "rxjs";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {InboxLog} from "../../model/dto/inbox-log";
@@ -11,33 +11,30 @@ import {PreferenceMessage} from "../../model/dto/preference-message";
 
 
 @Injectable()
-export class LogTrailerService implements OnDestroy {
+export class LogTrailerService implements OnDestroy, TokenListener {
 
       private stage: ClientStage = ClientStage.DISCONNECTED;
       private currentSequenceNumber: number;
 
-      private readonly client: Client;
+      private client?: Client;
 
 
-      constructor(tokenStore: TokenStore, private readonly httpClient: HttpClient, private readonly logRepository: LogRepository) {
+      constructor(private readonly tokenStore: ITokenStore, private readonly httpClient: HttpClient, private readonly logRepository: LogRepository) {
             this.currentSequenceNumber = Number.MAX_SAFE_INTEGER;
-            this.client = new Client({
-                  brokerURL: environment.WEBSOCKET_HOST + '/handshake',
-                  connectHeaders: {
-                        'Authorization': `Bearer ${tokenStore.accessToken}`
-                  },
+            this.tokenStore.addTokenListener(this)
+      }
 
-                  reconnectDelay: 5000,
-                  heartbeatIncoming: 5000,
-                  heartbeatOutgoing: 5000,
-                  debug: (msg: string) => console.debug('[STOMP]', msg),
-            });
+      onTokenChange(token: string) {
+            this.client?.deactivate();
+            this.init(token);
+      }
 
-            this.init()
+      onLogout() {
+            this.client?.deactivate();
       }
 
       send(chatId: string): void {
-            if (this.client.connected) {
+            if (this.client?.connected) {
                   this.client.publish({
                         destination: '/room/' + chatId,
                         headers: {},
@@ -47,7 +44,7 @@ export class LogTrailerService implements OnDestroy {
       }
 
       subscribeRoom(chatId: string): Observable<TypeMessage | PreferenceMessage> {
-            if (!this.client.connected) {
+            if (!this.client?.connected) {
                   throw new Error("Client is not connected.");
             }
             const observable = new Subject<TypeMessage>();
@@ -61,10 +58,22 @@ export class LogTrailerService implements OnDestroy {
       }
 
 
-      private init() {
+      private init(accessToken: string) {
+            const client = new Client({
+                  brokerURL: environment.WEBSOCKET_HOST + '/handshake',
+                  connectHeaders: {
+                        'Authorization': `Bearer ${accessToken}`
+                  },
 
-            this.client.onConnect = (frame: Frame) => {
-                  this.client.subscribe("/user/queue", (msg: IMessage) => {
+                  reconnectDelay: 5000,
+                  heartbeatIncoming: 5000,
+                  heartbeatOutgoing: 5000,
+                  debug: (msg: string) => console.debug('[STOMP]', msg),
+            });
+            this.client = client;
+
+            client.onConnect = (frame: Frame) => {
+                  client.subscribe("/user/queue", (msg: IMessage) => {
                         const log = JSON.parse(msg.body) as InboxLog;
                         console.log('[STOMP] Event:', log);
                         if (this.stage === ClientStage.CONNECTED)
@@ -81,15 +90,15 @@ export class LogTrailerService implements OnDestroy {
                   }
             }
 
-            this.client.onDisconnect = (frame: Frame) => {
+            client.onDisconnect = (frame: Frame) => {
                   this.stage = ClientStage.DISCONNECTED;
             }
 
-            this.client.onStompError = (frame: Frame) => {
+            client.onStompError = (frame: Frame) => {
                   console.error('[STOMP] error:', frame.headers['message']);
                   console.error('[STOMP] error body:', frame.body);
             };
-            this.client.activate()
+            client.activate()
       }
 
       private emit(log: InboxLog) {
@@ -125,7 +134,7 @@ export class LogTrailerService implements OnDestroy {
 
 
       ngOnDestroy(): void {
-            this.client.deactivate()
+            this.client?.deactivate()
       }
 }
 

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Injector, OnDestroy, OnInit} from '@angular/core';
 import {Profile} from "../../model/dto/profile";
 import {ActivationEnd, Router} from "@angular/router";
 import {ProgressDialogComponent} from "../progress-dialog/progress-dialog.component";
@@ -33,6 +33,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
               private authenticator: Authenticator,
               private profileService: ProfileService,
               private router: Router,
+              private injector: Injector,
               private matDialog: MatDialog) {
 
             this.profile = this.profileService.getProfileObservable()
@@ -85,6 +86,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
             this.matDialog.open(CreateGroupDialogComponent, {
                   width: '420px',
                   maxWidth: '95vw',
+                  injector: this.injector,
             });
       }
 
