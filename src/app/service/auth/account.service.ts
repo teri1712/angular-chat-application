@@ -54,11 +54,7 @@ export class AccountService implements AccountRepository, Authenticator {
 
                     },
                     (error: HttpErrorResponse) => {
-                          if (error.status > 400 && error.status < 500) {
-                                this.onAccountLogout()
-                          } else {
-                                //network
-                          }
+                          this.onAccountLogout()
                     },
                     () => {
                     }
