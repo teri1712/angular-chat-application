@@ -31,6 +31,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
 
       onLogout() {
             this.client?.deactivate();
+            this.client = undefined
       }
 
       send(chatId: string): void {
@@ -47,7 +48,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
             if (!this.client?.connected) {
                   throw new Error("Client is not connected.");
             }
-            const observable = new Subject<TypeMessage>();
+            const observable = new Subject<TypeMessage | PreferenceMessage>();
             const subscription = this.client.subscribe("/room/" + chatId, (msg: IMessage) => {
                   observable.next(JSON.parse(msg.body));
             }, {})
@@ -121,6 +122,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
                   observe: 'body',
                   params: params
             }).pipe(
+                    delay(500),
                     tap((logs) => {
                           this.emitAll(logs)
                     }),
@@ -134,7 +136,9 @@ export class LogTrailerService implements OnDestroy, TokenListener {
 
 
       ngOnDestroy(): void {
+            this.tokenStore.removeTokenListener(this)
             this.client?.deactivate()
+            this.client = undefined
       }
 }
 

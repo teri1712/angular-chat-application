@@ -120,7 +120,7 @@ export class MessageService implements OnDestroy {
             }
             this.queueState = 'sending';
             const posting = this.queue.at(0)!;
-            const handler = this.handlers.find(handler => handler.supports(posting))!;
+            const handler = this.handlers.find(handler => handler.supports(posting));
 
             if (handler) {
                   this.markToSending(posting.id, posting.chatId);
