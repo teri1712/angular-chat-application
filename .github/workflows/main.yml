@@ -26,7 +26,7 @@ jobs:
         run: |
           docker build \
           -t teri1712/chat-app-client-production . \
-          --build-arg API_URL=${{ secrets.DOCKERHUB_USERNAME }}
+          --build-arg API_URL=${{ secrets.API_URL }}
           --build-arg WEBSOCKET_HOST=${{ secrets.WEBSOCKET_HOST }}
 
       - name: Push image
