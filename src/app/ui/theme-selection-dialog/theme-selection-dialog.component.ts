@@ -6,6 +6,7 @@ import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {PreferenceService} from '../../service/preference.service';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {ThemeNamePipe} from '../pipes/theme-name.pipe';
 
 @Component({
       selector: 'app-theme-selection-dialog',
@@ -18,7 +19,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
             MatListModule,
             MatButtonModule,
             MatProgressSpinnerModule,
-
+            ThemeNamePipe,
       ],
 })
 export class ThemeSelectionDialogComponent implements OnInit {

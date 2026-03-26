@@ -90,9 +90,16 @@ export class MessageListComponent implements OnInit {
 
       protected chatId = new BehaviorSubject<string>('');
 
+      /** Applies the per-chat palette class, e.g. "chat-theme-meadow". */
+      @HostBinding('class')
+      get hostClass(): string {
+            const name = this.preference?.themeName;
+            return name ? `chat-theme-${name}` : '';
+      }
+
       @HostBinding('style')
       get hostStyle(): SafeStyle {
-            const theme = this.preference?.theme;
+            const theme = this.preference?.themeBackground;
             if (theme) {
                   return this.sanitizer.bypassSecurityTrustStyle(`background-image: url('${theme}')`);
             }

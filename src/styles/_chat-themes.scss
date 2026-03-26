@@ -1,0 +1,126 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Chat Themes — per-conversation Material CSS variable overrides
+//
+// Applied as a class on the <app-message-list> host element.
+// Nesting inside .light-theme / .dark-theme lets each palette adapt to the
+// current app-level theme (light or dark) while remaining fully independent
+// of the global palette.
+//
+// Variables that cascade to sub-components:
+//   --mat-sys-primary            → button / icon accent colour
+//   --mat-sys-on-primary         → text / icon colour drawn ON primary
+//   --mat-sys-primary-container  → lighter container variant (chips, badges…)
+//   --mat-sys-on-primary-container
+//   --mat-sys-neutral-variant60  → bubble background + input field background
+//
+// Design rule:
+//   • --mat-sys-primary must CONTRAST with the dominant wallpaper colour.
+//     (complementary / split-complementary hue from the colour wheel)
+//   • --mat-sys-neutral-variant60 must be clearly visible on any wallpaper.
+//     Use frosted-white in light mode, frosted-dark in dark mode.
+// ─────────────────────────────────────────────────────────────────────────────
+
+
+// ── 1. Silver Mist ────────────────────────────────────────────────────────────
+// Wallpaper: pastel sky-blue with kawaii animals.
+// Dominant hue: baby-blue (~210°).  Contrast: warm rose/pink (~340°).
+
+.light-theme .chat-theme-silver-mist {
+  --mat-sys-primary: #C2185B; // Pink 700  — warm rose on cool sky
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #FCE4EC; // Pink 50
+  --mat-sys-on-primary-container: #3D0021;
+  --mat-sys-neutral-variant60: rgba(255, 255, 255, 0.75); // frosted white
+}
+
+.dark-theme .chat-theme-silver-mist {
+  --mat-sys-primary: #F48FB1; // Pink 200
+  --mat-sys-on-primary: #560027;
+  --mat-sys-primary-container: #880E4F; // Pink 900
+  --mat-sys-on-primary-container: #FCE4EC;
+  --mat-sys-neutral-variant60: rgba(20, 15, 30, 0.72); // frosted dark
+}
+
+
+// ── 2. Ocean Breeze ───────────────────────────────────────────────────────────
+// Wallpaper: teal / aqua water scene.
+// Dominant hue: cyan-teal (~180°).  Contrast: warm amber (~40°).
+
+.light-theme .chat-theme-ocean-breeze {
+  --mat-sys-primary: #E65100; // Deep Orange 900 — punchy on teal
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #FBE9E7; // Deep Orange 50
+  --mat-sys-on-primary-container: #3E1200;
+  --mat-sys-neutral-variant60: rgba(255, 255, 255, 0.75);
+}
+
+.dark-theme .chat-theme-ocean-breeze {
+  --mat-sys-primary: #FFAB40; // Orange Accent 200
+  --mat-sys-on-primary: #3E1200;
+  --mat-sys-primary-container: #BF360C; // Deep Orange 800
+  --mat-sys-on-primary-container: #FBE9E7;
+  --mat-sys-neutral-variant60: rgba(0, 15, 20, 0.72);
+}
+
+
+// ── 3. Meadow ─────────────────────────────────────────────────────────────────
+// Wallpaper: lush green nature / fields.
+// Dominant hue: green (~120°).  Contrast: purple-violet (~280°).
+
+.light-theme .chat-theme-meadow {
+  --mat-sys-primary: #6A1B9A; // Purple 800 — rich violet on green
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #F3E5F5; // Purple 50
+  --mat-sys-on-primary-container: #1A0030;
+  --mat-sys-neutral-variant60: rgba(255, 255, 255, 0.75);
+}
+
+.dark-theme .chat-theme-meadow {
+  --mat-sys-primary: #CE93D8; // Purple 200
+  --mat-sys-on-primary: #2D0052;
+  --mat-sys-primary-container: #4A148C; // Purple 900
+  --mat-sys-on-primary-container: #F3E5F5;
+  --mat-sys-neutral-variant60: rgba(10, 18, 10, 0.72);
+}
+
+
+// ── 4. Golden Hour ────────────────────────────────────────────────────────────
+// Wallpaper: warm sunset with orange / amber tones.
+// Dominant hue: orange (~30°).  Contrast: deep blue (~210°).
+
+.light-theme .chat-theme-golden-hour {
+  --mat-sys-primary: #1565C0; // Blue 800 — cool blue on warm orange
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #E3F2FD; // Blue 50
+  --mat-sys-on-primary-container: #003175;
+  --mat-sys-neutral-variant60: rgba(255, 255, 255, 0.75);
+}
+
+.dark-theme .chat-theme-golden-hour {
+  --mat-sys-primary: #90CAF9; // Blue 200
+  --mat-sys-on-primary: #003175;
+  --mat-sys-primary-container: #0D47A1; // Blue 900
+  --mat-sys-on-primary-container: #E3F2FD;
+  --mat-sys-neutral-variant60: rgba(20, 8, 0, 0.72);
+}
+
+
+// ── 5. Cappuccino ─────────────────────────────────────────────────────────────
+// Wallpaper: warm coffee / caramel brown tones.
+// Dominant hue: brown (~25°).  Contrast: cool teal (~170°).
+
+.light-theme .chat-theme-cappuccino {
+  --mat-sys-primary: #00695C; // Teal 800 — cool teal on warm brown
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #E0F2F1; // Teal 50
+  --mat-sys-on-primary-container: #00201C;
+  --mat-sys-neutral-variant60: rgba(255, 255, 255, 0.75);
+}
+
+.dark-theme .chat-theme-cappuccino {
+  --mat-sys-primary: #80CBC4; // Teal 200
+  --mat-sys-on-primary: #00302A;
+  --mat-sys-primary-container: #004D40; // Teal 900
+  --mat-sys-on-primary-container: #E0F2F1;
+  --mat-sys-neutral-variant60: rgba(20, 8, 4, 0.72);
+}

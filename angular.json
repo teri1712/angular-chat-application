@@ -39,7 +39,8 @@
             "styles": [
               "bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css",
-              "src/styles/theme.scss"
+              "src/styles/theme.scss",
+              "src/styles/_chat-themes.scss"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [

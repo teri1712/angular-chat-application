@@ -1,7 +1,5 @@
-import {ImageSpec} from './image-spec';
-
 export interface Theme {
       readonly id: number,
-      readonly background: ImageSpec
-
+      readonly background: string
+      readonly themeName: string
 }

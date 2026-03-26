@@ -44,19 +44,31 @@ export class RightMessageComponent implements OnInit {
             return 'reason' in this.message
       }
 
+      /**
+       * In error state: tint the whole right-message subtree with the error
+       * colour so icon, bubble and status text all turn red.
+       */
       @HostBinding('style.--mat-sys-primary')
       get primaryOverride() {
             return this.hasError ? 'var(--mat-sys-error)' : null;
       }
 
-      @HostBinding('style.color')
-      get textOverride() {
-            return this.hasError ? 'var(--mat-sys-on-error)' : null;
-      }
-
+      /**
+       * Outgoing bubble background = primary colour (chat-theme or app default).
+       * Error state: red bubble.
+       */
       @HostBinding('style.--mat-sys-neutral-variant60')
       get neutralOverride() {
-            return this.hasError ? 'var(--mat-sys-error)' : null;
+            return this.hasError ? 'var(--mat-sys-error)' : 'var(--mat-sys-primary)';
+      }
+
+      /**
+       * Text inside the outgoing bubble uses on-primary for legibility.
+       * Error state: on-error text.
+       */
+      @HostBinding('style.color')
+      get textOverride() {
+            return this.hasError ? 'var(--mat-sys-on-error)' : 'var(--mat-sys-on-primary)';
       }
 
       protected readonly Position = Position;
