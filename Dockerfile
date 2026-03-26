@@ -5,7 +5,14 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build -- --configuration development
+ARG API_URL=http://localhost:8080
+ENV API_URL=$API_URL
+
+ARG WEBSOCKET_HOST=ws://localhost:8080
+ENV WEBSOCKET_HOST=$WEBSOCKET_HOST
+
+RUN node set-env.js
+RUN npm run build -- --configuration production
 
 FROM nginx:alpine
 

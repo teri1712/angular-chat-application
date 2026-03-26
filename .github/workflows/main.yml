@@ -19,8 +19,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build image
+      - name: Build local image
         run: docker build -t teri1712/chat-app-client .
+
+      - name: Build production image
+        run: |
+          docker build \
+          -t teri1712/chat-app-client-production . \
+          --build-arg API_URL=${{ secrets.API_URL }} \
+          --build-arg WEBSOCKET_HOST=${{ secrets.WEBSOCKET_HOST }}
 
       - name: Push image
         run: docker push teri1712/chat-app-client
