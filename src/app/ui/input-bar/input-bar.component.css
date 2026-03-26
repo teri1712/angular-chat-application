@@ -4,6 +4,8 @@
       padding: 0.5rem 0.5rem;
       align-items: center;
       gap: 5px;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
 }
 
 input {

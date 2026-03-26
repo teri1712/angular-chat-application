@@ -5,8 +5,8 @@
     </div>
     <div *ngIf="!isLoading" class="theme-grid">
         <div *ngFor="let theme of themes" class="theme-item" (click)="selectTheme(theme)">
-            <img class="theme-preview" [src]="theme.background" [alt]="theme.id">
-            <div>{{ theme.id }}</div>
+            <img class="theme-preview" [src]="theme.background" [alt]="theme.themeName">
+            <div class="theme-label">{{ theme.themeName | themeName }}</div>
         </div>
     </div>
 </div>
