@@ -18,6 +18,7 @@ import {
       Subject,
       switchMap,
       tap,
+      timer,
       withLatestFrom
 } from "rxjs";
 import {TypeMessage} from "../../model/dto/type-message";
@@ -79,7 +80,7 @@ export class MessageListComponent implements OnInit {
                   this.end = false;
                   this.chatId.next(chatId);
                   this.replace([])
-                  this.scrollIndex.next(0);
+                  this.firstVisibleIndex.next(0);
             }
       }
 
@@ -107,17 +108,25 @@ export class MessageListComponent implements OnInit {
       }
 
       private scrollToBeginning(): void {
-            setTimeout(() => {
-                  const lastIndex = this.viewport.getDataLength() - 1;
-                  this.viewport.scrollToIndex(lastIndex);
-            }, 100)
+            timer(100).subscribe(() => {
+                  this.viewport.scrollToIndex(this.rowLength);
+            })
       }
 
-      private readonly scrollIndex = new BehaviorSubject<number>(0);
+      private checkKeepScrollBeginning(): void {
+            const range = this.viewport.getRenderedRange();
+            const total = this.viewport.getDataLength();
+
+            const isLastItemVisible = range.end >= total;
+            if (isLastItemVisible)
+                  this.scrollToBeginning();
+      }
+
+      private readonly firstVisibleIndex = new BehaviorSubject<number>(0);
       private readonly messageLength = new BehaviorSubject<number>(0)
 
       protected onScrollChanged(index: number) {
-            this.scrollIndex.next(index);
+            this.firstVisibleIndex.next(index);
       }
 
       private messages: Message[] = [];
@@ -226,6 +235,7 @@ export class MessageListComponent implements OnInit {
             this.messageLength.next(messages.length)
       }
 
+
       definePrependingPipe() {
             this.logRepository.getChannel().pipe(
                     takeUntilDestroyed(this.destroyRef)
@@ -240,6 +250,7 @@ export class MessageListComponent implements OnInit {
                   const message = log.messageState;
                   if (log.action === LogAction.ADDITION) {
                         this.replace(this.prepend(message, this.messages));
+                        this.checkKeepScrollBeginning()
                   } else {
                         this.replace(this.update(message, this.messages));
                   }
@@ -259,15 +270,26 @@ export class MessageListComponent implements OnInit {
                   }
                   this.expanding = false;
                   this.replace(this.append(this.messages, newMessages));
+
             });
       }
 
       defineExpandPipe() {
-            combineLatest([this.scrollIndex, this.messageLength]).pipe(
+            combineLatest([this.firstVisibleIndex, this.messageLength]).pipe(
                     takeUntilDestroyed(this.destroyRef),
             ).subscribe(([index, length]) => {
                   this.checkAndExpand(index);
             });
+      }
+
+      protected get rowLength(): number {
+            let length = 0;
+            if (this.expanding && !this.end) {
+                  length += 1;
+            }
+            length += this.messages.length;
+            length += this.typings.length;
+            return length;
       }
 
       protected get messageRows(): MessageRow[] {
@@ -304,9 +326,10 @@ export class MessageListComponent implements OnInit {
                     takeUntilDestroyed(this.destroyRef),
                     switchMap(chatId => this.dialogService.findByChatId(chatId)),
                     switchMap(dialog => dialog.typings),
-                    map(typings => typings.filter(t => !this.profileService.thatsMe(t.from)))
+                    map(typings => typings.filter(typing => !this.profileService.thatsMe(typing.from)))
             ).subscribe(typings => {
                   this.typings = typings;
+                  this.checkKeepScrollBeginning()
             });
       }
 
@@ -326,7 +349,6 @@ export class MessageListComponent implements OnInit {
             if (cached.length > 0) {
                   return of(cached);
             }
-
             return this.messageRepository.list({chatId: chatId, anchorSequenceNumber: anchor});
 
       }

@@ -35,7 +35,7 @@ export class SearchUserListComponent implements OnDestroy, OnInit {
             this.routeSub = this.activatedRoute.queryParamMap
                     .subscribe(params => {
                           const query = params.get('query');
-                          if (!!query) {
+                          if (query) {
                                 this.searchSubject.next(query);
                           }
                     });

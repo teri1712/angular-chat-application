@@ -105,16 +105,19 @@ class Dialog implements IDialog {
       }
 
       refresh(): void {
-            const threeSecondsAgo = new Date().getTime() - 3000;
+            const threeSecondsAgo = Date.now() - 3000;
             const typings = this._typings.value;
+            let changed = false;
             while (typings.length != 0) {
                   const first = typings[0];
                   if (new Date(first.time).getTime() > threeSecondsAgo) {
                         break
                   }
                   typings.shift();
+                  changed = true;
             }
-            this._typings.next(typings);
+            if (changed)
+                  this._typings.next(typings);
       }
 
       fetchSync() {

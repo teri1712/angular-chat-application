@@ -13,7 +13,7 @@ import {AccountRepository} from "./service/auth/account-repository";
 import {Authenticator} from "./service/auth/authenticator";
 import {IconRegistry} from './res/IconRegistry';
 import {RouteReuseStrategy} from "@angular/router";
-import {ReuseDialogListStrategy} from "./service/cache/route/dialog-list-route-resuse";
+import {ReuseConversationListStrategy} from "./service/cache/route/dialog-list-route-resuse";
 import {ITokenStore, TokenStore} from "./service/auth/token.store";
 import {UploadService} from "./service/upload-service";
 import {ThemeService} from "./service/theme-service";
@@ -45,8 +45,9 @@ import {ThemeService} from "./service/theme-service";
             },
             {
                   provide: RouteReuseStrategy,
-                  useClass: ReuseDialogListStrategy
-            },],
+                  useClass: ReuseConversationListStrategy
+            },
+      ],
 })
 export class AppModule {
       constructor(iconRegistry: IconRegistry, themeService: ThemeService,) {

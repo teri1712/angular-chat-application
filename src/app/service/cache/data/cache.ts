@@ -41,7 +41,7 @@ export class Cache {
                   return [];
             }
             const index = this.binary_search(sequenceNumber + 1) - 1;
-            return this.sequences.slice(index - 20, index + 1)
+            return this.sequences.slice(Math.max(index - 20, 0), index + 1)
                     .map((seq) => this.messageMap.get(seq)!)
                     .reverse();
       }
