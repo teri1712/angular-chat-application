@@ -30,7 +30,7 @@ import {TypingMessageComponent} from "../typing-left-message/typing-message.comp
 import ProfileService from "../../service/profile-service";
 import {LogAction} from "../../model/dto/inbox-log";
 import {MessageRepository} from "../../service/repository/message-repository.service";
-import {LogRepository} from "../../service/repository/log-repository";
+import {LogStream} from "../../service/repository/log-stream.service";
 import CacheService from "../../service/cache/data/cache-service";
 import {Preference} from "../../model/dto/preference";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -109,7 +109,8 @@ export class MessageListComponent implements OnInit {
 
       private scrollToBeginning(): void {
             timer(100).subscribe(() => {
-                  this.viewport.scrollToIndex(this.rowLength);
+                  const lastIndex = this.viewport.getDataLength() - 1;
+                  if (lastIndex >= 0) this.viewport.scrollToIndex(lastIndex);
             })
       }
 
@@ -155,7 +156,7 @@ export class MessageListComponent implements OnInit {
               private readonly cacheStore: CacheService,
               private readonly dialogService: DialogService,
               private readonly messageRepository: MessageRepository,
-              private readonly logRepository: LogRepository,
+              private readonly logStream: LogStream,
               private readonly profileService: ProfileService,
               private readonly messageService: MessageService,
               private readonly sanitizer: DomSanitizer
@@ -237,7 +238,7 @@ export class MessageListComponent implements OnInit {
 
 
       definePrependingPipe() {
-            this.logRepository.getChannel().pipe(
+            this.logStream.getChannel().pipe(
                     takeUntilDestroyed(this.destroyRef)
             ).subscribe(log => {
                   this.cacheStore.put(log.messageState);
@@ -245,7 +246,7 @@ export class MessageListComponent implements OnInit {
 
             this.chatId.pipe(
                     takeUntilDestroyed(this.destroyRef),
-                    switchMap(chatId => this.logRepository.getChatChannel(chatId)),
+                    switchMap(chatId => this.logStream.getChatChannel(chatId)),
             ).subscribe(log => {
                   const message = log.messageState;
                   if (log.action === LogAction.ADDITION) {

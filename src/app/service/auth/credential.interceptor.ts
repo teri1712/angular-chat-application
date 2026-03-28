@@ -90,10 +90,8 @@ export class CredentialInterceptor implements HttpInterceptor {
                         req = req.clone({
                               params: req.params.set('refresh_token', refresh)
                         });
-                  return next.handle(req).pipe(tap(event => {
-                        if (event instanceof HttpResponse) {
-                              this.tokenStore.removeTokens()
-                        }
+                  return next.handle(req).pipe(finalize(() => {
+                        this.tokenStore.removeTokens()
                   }));
             }
             if (this.anonymousUrls.has(pathOnly)) {

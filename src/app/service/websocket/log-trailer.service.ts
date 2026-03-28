@@ -5,7 +5,7 @@ import {ITokenStore, TokenListener} from "../auth/token.store";
 import {delay, finalize, Observable, of, Subject, switchMap, tap} from "rxjs";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {InboxLog} from "../../model/dto/inbox-log";
-import {LogRepository} from "../repository/log-repository";
+import {LogStream} from "../repository/log-stream.service";
 import {TypeMessage} from "../../model/dto/type-message";
 import {PreferenceMessage} from "../../model/dto/preference-message";
 
@@ -19,7 +19,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
       private client?: Client;
 
 
-      constructor(private readonly tokenStore: ITokenStore, private readonly httpClient: HttpClient, private readonly logRepository: LogRepository) {
+      constructor(private readonly tokenStore: ITokenStore, private readonly httpClient: HttpClient, private readonly logStream: LogStream) {
             this.currentSequenceNumber = Number.MAX_SAFE_INTEGER;
             this.tokenStore.addTokenListener(this)
       }
@@ -105,7 +105,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
       private emit(log: InboxLog) {
             const sequenceNumber = log.sequenceNumber
             this.currentSequenceNumber = sequenceNumber;
-            this.logRepository.publish(log)
+            this.logStream.publish(log)
       }
 
       private emitAll(logs: InboxLog[]) {

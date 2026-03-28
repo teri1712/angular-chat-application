@@ -4,7 +4,7 @@ import {EventHandler, HANDLERS} from "./event-handler";
 import {v4 as uuidv4} from "uuid";
 import {ISendingMessage, SendState} from "../model/message";
 import {BehaviorSubject, Observable} from "rxjs";
-import {LogRepository} from "./repository/log-repository";
+import {LogStream} from "./repository/log-stream.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable()
@@ -81,10 +81,10 @@ export class MessageService implements OnDestroy {
       private destroyRef = inject(DestroyRef);
 
       constructor(
-              logRepository: LogRepository,
+              logStream: LogStream,
               @Inject(HANDLERS) private readonly handlers: EventHandler[]) {
             window.addEventListener('online', this.onConnected);
-            logRepository.getChannel()
+            logStream.getChannel()
                     .pipe(takeUntilDestroyed(this.destroyRef))
                     .subscribe((log) => {
                           const message = log.messageState;

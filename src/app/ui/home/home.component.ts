@@ -7,7 +7,7 @@ import {SearchRepository} from "../../service/repository/search-repository";
 import ProfileService from "../../service/profile-service";
 import GroupService from "../../service/group-service";
 import {ChatRepository, DirectRepository} from "../../service/repository/chat-repository";
-import {LogRepository} from "../../service/repository/log-repository";
+import {LogStream} from "../../service/repository/log-stream.service";
 import {ConversationRepository} from "../../service/repository/conversation-repository.service";
 import CacheService from "../../service/cache/data/cache-service";
 import {DialogService} from "../../service/repository/dialog.service";
@@ -34,7 +34,7 @@ import {ImageHandler} from "../../service/image-handler";
             GroupService,
             ChatRepository,
             DirectRepository,
-            LogRepository,
+            LogStream,
             ConversationRepository,
             CacheService,
             DialogService,

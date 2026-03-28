@@ -40,10 +40,6 @@ export class AccountService implements AccountRepository, Authenticator {
             );
       }
 
-      onLogout(): void {
-            this.onAccountLogout()
-      }
-
 
       private init() {
             this.httpClient.get<Profile>(environment.API_URL + "/profiles/me", {
