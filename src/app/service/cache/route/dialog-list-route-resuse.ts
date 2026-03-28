@@ -4,7 +4,7 @@ import {AccountRepository} from "../../auth/account-repository";
 
 
 @Injectable()
-export class ReuseDialogListStrategy implements RouteReuseStrategy {
+export class ReuseConversationListStrategy implements RouteReuseStrategy {
       private cached?: DetachedRouteHandle
 
       constructor(private readonly accountRepository: AccountRepository) {

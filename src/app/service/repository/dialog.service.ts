@@ -7,7 +7,7 @@ import {IDialog} from "./IDialog";
 import {TypeMessage} from "../../model/dto/type-message";
 import {ChatRepository} from "./chat-repository";
 import {InboxLog} from "../../model/dto/inbox-log";
-import {LogRepository} from "./log-repository";
+import {LogStream} from "./log-stream.service";
 import {Chat} from "../../model/dto/chat";
 import {PreferenceMessage} from "../../model/dto/preference-message";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -29,9 +29,9 @@ export class DialogService implements OnDestroy {
               private realtimeClient: LogTrailerService,
               private presenceRepo: PresenceRepository,
               private chatRepository: ChatRepository,
-              private logRepository: LogRepository,
+              private logStream: LogStream,
       ) {
-            this.logRepository.getChannel()
+            this.logStream.getChannel()
                     .pipe(takeUntilDestroyed(this.destroyRef))
                     .subscribe(this.logObserver);
       }
@@ -105,16 +105,19 @@ class Dialog implements IDialog {
       }
 
       refresh(): void {
-            const threeSecondsAgo = new Date().getTime() - 3000;
+            const threeSecondsAgo = Date.now() - 3000;
             const typings = this._typings.value;
+            let changed = false;
             while (typings.length != 0) {
                   const first = typings[0];
                   if (new Date(first.time).getTime() > threeSecondsAgo) {
                         break
                   }
                   typings.shift();
+                  changed = true;
             }
-            this._typings.next(typings);
+            if (changed)
+                  this._typings.next(typings);
       }
 
       fetchSync() {

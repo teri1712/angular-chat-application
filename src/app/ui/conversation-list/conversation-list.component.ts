@@ -6,7 +6,7 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {BehaviorSubject, catchError, combineLatest, map, Observable, of, Subject, switchMap, tap} from "rxjs";
 import {ConversationRepository} from "../../service/repository/conversation-repository.service";
 import {InboxLog, LogAction} from "../../model/dto/inbox-log";
-import {LogRepository} from "../../service/repository/log-repository";
+import {LogStream} from "../../service/repository/log-stream.service";
 import {MessageState} from "../../model/dto/message-state";
 import CacheStore from "../../service/cache/data/cache-service";
 import {Conversation} from "../../model/dto/Conversation";
@@ -49,7 +49,7 @@ export class ConversationListComponent implements OnInit {
               private readonly repository: ConversationRepository,
               private readonly presenceRepo: PresenceRepository,
               private readonly cacheStore: CacheStore,
-              private readonly logRepository: LogRepository,) {
+              private readonly logStream: LogStream,) {
       }
 
       mapLog(log: InboxLog, presence?: ChatPresence): ConversationView {
@@ -116,7 +116,7 @@ export class ConversationListComponent implements OnInit {
       }
 
       definePrependingPipe() {
-            this.logRepository.getChannel()
+            this.logStream.getChannel()
                     .pipe(takeUntilDestroyed(this.destroyRef))
                     .subscribe(log => {
                           const conversation = this.mapLog(log);

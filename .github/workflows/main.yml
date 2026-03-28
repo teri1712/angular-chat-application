@@ -31,3 +31,6 @@ jobs:
 
       - name: Push image
         run: docker push teri1712/chat-app-client
+
+      - name: Push production image
+        run: docker push teri1712/chat-app-client-production

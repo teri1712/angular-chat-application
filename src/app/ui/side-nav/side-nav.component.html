@@ -15,7 +15,7 @@
 </div>
 
 <button style="background: none; border: none" [matMenuTriggerFor]="user_actions">
-    <img *ngIf="profile != null" [src]="(profile | async)?.avatar" alt="avatar">
+    <img [src]="(profile | async)?.avatar" alt="avatar">
 </button>
 <mat-menu #user_actions="matMenu">
     <button mat-menu-item (click)="logout()">Logout</button>
