@@ -1,4 +1,4 @@
-name: Angular Chat Application CI with Maven
+name: Angular Chat Application CD
 
 on:
   push:
