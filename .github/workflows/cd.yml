@@ -49,6 +49,6 @@ jobs:
           username: ${{ secrets.GOOGLE_CLOUD_USER }}
           key: ${{ secrets.GOOGLE_CLOUD_SSH_KEY }}
           script: |
-            docker stop chat-app-client || true
+            docker rm -f chat-app-client || true
             docker pull teri1712/chat-app-client-production:latest
             docker run -d --name chat-app-client -p 4200:80 --restart unless-stopped teri1712/chat-app-client-production:latest
