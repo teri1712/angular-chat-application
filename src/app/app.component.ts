@@ -24,10 +24,7 @@ export class AppComponent implements OnInit {
                         this.inSession = true;
                   } else {
                         if (this.inSession) {
-                              const ref = this.snackBar.open("Account Session has expired!", "Logout");
-                              ref.onAction().subscribe(() => {
-                                    this.router.navigate(["/auth/login"], {replaceUrl: true});
-                              });
+
                         } else {
                               this.router.navigate(["/auth/login"], {replaceUrl: true});
                         }

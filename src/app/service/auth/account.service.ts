@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AccountRepository} from './account-repository';
-import {BehaviorSubject, catchError, filter, map, Observable, of, switchMap, take, throwError} from "rxjs";
+import {BehaviorSubject, catchError, filter, map, Observable, of, switchMap, throwError} from "rxjs";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../environments";
 import {Authenticator} from "./authenticator";
@@ -8,19 +8,30 @@ import {Account} from "../../model/dto/account";
 import {SignUpRequest} from "../../model/dto/sign-up-request";
 import {SignInRequest} from "../../model/dto/sign-in-request";
 import {Profile} from "../../model/dto/profile";
+import {ITokenStore, TokenListener} from "./token.store";
+import {distinctUntilChanged} from "rxjs/operators";
 import {CredentialInterceptor} from "./credential.interceptor";
 
 
 @Injectable({
       providedIn: 'root',
 })
-export class AccountService implements AccountRepository, Authenticator {
+export class AccountService implements AccountRepository, Authenticator, TokenListener {
 
       private readonly accountSubject
               = new BehaviorSubject<Profile | null | undefined>(undefined);
 
-      constructor(private readonly httpClient: HttpClient, private readonly credentialInterceptor: CredentialInterceptor) {
+      constructor(private readonly httpClient: HttpClient, private readonly tokenStore: ITokenStore, private readonly credentialInterceptor: CredentialInterceptor) {
+            this.tokenStore.addTokenListener(this)
             this.init()
+            console.log("22222222222222222222")
+      }
+
+      onTokenChange(token: string) {
+      }
+
+      onLogout() {
+            this.onAccountLogout()
       }
 
       loginOAuth2(idToken: string): Observable<Profile> {
@@ -47,7 +58,6 @@ export class AccountService implements AccountRepository, Authenticator {
             }).subscribe(
                     (profile) => {
                           this.onAutoLogin(profile)
-
                     },
                     (error: HttpErrorResponse) => {
                           this.onAccountLogout()
@@ -78,7 +88,7 @@ export class AccountService implements AccountRepository, Authenticator {
       get accountObservable(): Observable<Profile | null> {
             return this.accountSubject.pipe(
                     filter(profile => profile !== undefined),
-                    take(1)
+                    distinctUntilChanged()
             )
       }
 
