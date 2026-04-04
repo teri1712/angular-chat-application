@@ -12,6 +12,8 @@ import {take} from "rxjs";
 })
 export class AppComponent implements OnInit {
 
+      protected loaded = false;
+
       constructor(private readonly accountRepository: AccountService, private readonly router: Router, private readonly snackBar: MatSnackBar) {
 
       }
@@ -19,6 +21,7 @@ export class AppComponent implements OnInit {
       ngOnInit(): void {
             this.accountRepository.accountObservable.pipe(take(1))
                     .subscribe(account => {
+                          this.loaded = true;
                           if (account) {
                                 this.router.navigate(['/home']);
                           } else {
