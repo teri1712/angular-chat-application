@@ -1,4 +1,4 @@
-import {Component, Injector, OnDestroy, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, Injector, OnDestroy, OnInit} from '@angular/core';
 import {Profile} from "../../model/dto/profile";
 import {ActivationEnd, Router} from "@angular/router";
 import {ProgressDialogComponent} from "../progress-dialog/progress-dialog.component";
@@ -9,6 +9,9 @@ import {settingRoute, threadsRoute} from "../../home-route.module";
 import {environment} from "../../environments";
 import ProfileService from "../../service/profile-service";
 import {CreateGroupDialogComponent} from "../create-group-dialog/create-group-dialog.component";
+import {AccountRepository} from "../../service/auth/account-repository";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum Routes {
       THREAD, SETTINGS, SEARCH
@@ -27,18 +30,20 @@ export class SideNavComponent implements OnInit, OnDestroy {
       protected profile!: Observable<Profile>;
       protected currentRoute?: Routes;
       private routeSub!: Subscription;
-
+      private logoutRequest = false;
 
       constructor(
+              private accountRepository: AccountRepository,
               private authenticator: Authenticator,
               private profileService: ProfileService,
-              private router: Router,
+              private router: Router, private readonly snackBar: MatSnackBar,
               private injector: Injector,
               private matDialog: MatDialog) {
-
             this.profile = this.profileService.getProfileObservable()
 
       }
+
+      private destroyRef = inject(DestroyRef);
 
       ngOnInit(): void {
             this.routeSub = this.router.events
@@ -59,6 +64,20 @@ export class SideNavComponent implements OnInit, OnDestroy {
                           }
                     });
             this.navigateToThreads()
+            this.accountRepository.accountObservable
+                    .pipe(takeUntilDestroyed(this.destroyRef))
+                    .subscribe(account => {
+                          if (account)
+                                return
+                          if (this.logoutRequest) {
+                                this.router.navigate(["/auth/login"], {replaceUrl: true});
+                          } else {
+                                const ref = this.snackBar.open("Account Session has expired!", "Logout");
+                                ref.onAction().subscribe(() => {
+                                      this.router.navigate(["/auth/login"], {replaceUrl: true});
+                                });
+                          }
+                    })
       }
 
       ngOnDestroy(): void {
@@ -97,10 +116,10 @@ export class SideNavComponent implements OnInit, OnDestroy {
                         action_name: "Logging Out",
                   }
             })
+            this.logoutRequest = true;
             this.authenticator.logout().subscribe(
                     (success) => {
                           if (success) {
-                                this.router.navigate(['/auth/login'], {replaceUrl: true});
                           }
                           ref.close();
                     }

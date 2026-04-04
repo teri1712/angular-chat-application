@@ -84,7 +84,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
                         this.stage = ClientStage.CONNECTED;
                   } else {
                         this.stage = ClientStage.RECONNECTING;
-                        this.download(this.currentSequenceNumber).subscribe(
+                        this.download(this.currentSequenceNumber + 1).subscribe(
                                 () => {
                                       this.stage = ClientStage.CONNECTED;
                                 })
@@ -103,8 +103,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
       }
 
       private emit(log: InboxLog) {
-            const sequenceNumber = log.sequenceNumber
-            this.currentSequenceNumber = sequenceNumber;
+            this.currentSequenceNumber = log.sequenceNumber;
             this.logStream.publish(log)
       }
 

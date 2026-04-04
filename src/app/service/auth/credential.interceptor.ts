@@ -15,6 +15,7 @@ import {environment} from "../../environments";
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {TokenStore} from "./token.store";
 import {Injectable} from "@angular/core";
+import {Account} from "../../model/dto/account";
 
 @Injectable({
       providedIn: 'root',
@@ -24,7 +25,7 @@ export class CredentialInterceptor implements HttpInterceptor {
       readonly anonymousUrls = new Set(["/login", "/signup", "/tokens/refresh", "/tokens/oauth2"])
 
       private readonly jwtHelper = new JwtHelperService();
-      private currentRefresh?: Observable<AccessToken>;
+      private currentRefresh?: Observable<Account>;
 
       constructor(private readonly tokenStore: TokenStore, private readonly client: HttpClient) {
       }
@@ -36,13 +37,13 @@ export class CredentialInterceptor implements HttpInterceptor {
       }
 
 
-      private refresh(refreshToken: string): Observable<AccessToken> {
+      private refresh(refreshToken: string): Observable<Account> {
             if (this.currentRefresh) {
                   return this.currentRefresh;
             }
             const params = new HttpParams().set('refresh_token', refreshToken);
-            return (this.currentRefresh = this.client
-                    .post<AccessToken>(
+            this.currentRefresh = this.client
+                    .post<Account>(
                             environment.API_URL + '/tokens/refresh',
                             params.toString(),
                             {
@@ -52,14 +53,20 @@ export class CredentialInterceptor implements HttpInterceptor {
                                   }
                             })
                     .pipe(
+                            catchError((err: HttpErrorResponse) => {
+                                  this.currentRefresh = undefined;
+                                  this.tokenStore.removeTokens()
+                                  throw err;
+                            }),
                             tap((body) => {
-                                  this.tokenStore.accessToken = body.accessToken
-                                  return body;
+                                  this.currentRefresh = undefined;
+                                  this.accessToken = body.accessToken
                             }),
                             finalize(() => {
                                   this.currentRefresh = undefined;
                             })
-                    ));
+                    );
+            return this.currentRefresh
       }
 
 
@@ -94,37 +101,42 @@ export class CredentialInterceptor implements HttpInterceptor {
                         this.tokenStore.removeTokens()
                   }));
             }
+            let res: Observable<HttpEvent<any>>;
             if (this.anonymousUrls.has(pathOnly)) {
-                  return next.handle(req).pipe(
-                          tap(event => {
-                                if (event instanceof HttpResponse && event.body.accessToken) {
-                                      this.accessToken = event.body.accessToken
+                  res = next.handle(req)
+            } else {
+                  req = this.includeToken(req);
+                  res = next.handle(req).pipe(
+                          catchError((err: HttpErrorResponse) => {
+                                if (err.status == HttpStatusCode.Unauthorized) {
+                                      const refreshToken = this.tokenStore.refreshToken;
+                                      if (
+                                              refreshToken != null &&
+                                              !this.jwtHelper.isTokenExpired(refreshToken)) {
+                                            return this.refresh(refreshToken).pipe(
+                                                    switchMap((token) => {
+                                                          if (!token) {
+                                                                throw err;
+                                                          }
+                                                          req = this.includeToken(req)
+                                                          return next.handle(req);
+                                                    })
+                                            );
+                                      }
                                 }
+                                throw err;
                           })
                   );
+
             }
 
-            req = this.includeToken(req);
-            return next.handle(req).pipe(
-                    catchError((err: HttpErrorResponse) => {
-                          if (err.status === HttpStatusCode.Unauthorized) {
-                                const refreshToken = this.tokenStore.refreshToken;
-                                if (
-                                        refreshToken != null &&
-                                        !this.jwtHelper.isTokenExpired(refreshToken)) {
-                                      return this.refresh(refreshToken).pipe(
-                                              switchMap((token) => {
-                                                    if (!token) {
-                                                          throw err;
-                                                    }
-                                                    return next.handle(req);
-                                              })
-                                      );
-                                }
-                                this.tokenStore.removeTokens()
+            return res.pipe(
+                    tap(event => {
+                          if (event instanceof HttpResponse && event.body.accessToken) {
+                                this.accessToken = event.body.accessToken
                           }
-                          throw err;
                     })
             );
+
       }
 }
