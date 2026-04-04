@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {AccountService} from "./service/auth/account.service";
 import {Router} from "@angular/router";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {take} from "rxjs";
 
 @Component({
       selector: 'app-root',
@@ -11,26 +12,19 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 })
 export class AppComponent implements OnInit {
 
-      inSession?: Boolean;
-
       constructor(private readonly accountRepository: AccountService, private readonly router: Router, private readonly snackBar: MatSnackBar) {
 
       }
 
       ngOnInit(): void {
-            this.accountRepository.accountObservable.subscribe(account => {
-                  if (account) {
-                        this.router.navigate(['/home']);
-                        this.inSession = true;
-                  } else {
-                        if (this.inSession) {
-
-                        } else {
-                              this.router.navigate(["/auth/login"], {replaceUrl: true});
-                        }
-                        this.inSession = false;
-                  }
-            })
+            this.accountRepository.accountObservable.pipe(take(1))
+                    .subscribe(account => {
+                          if (account) {
+                                this.router.navigate(['/home']);
+                          } else {
+                                this.router.navigate(["/auth/login"], {replaceUrl: true});
+                          }
+                    })
       }
 
 

@@ -28,7 +28,6 @@ export class CredentialInterceptor implements HttpInterceptor {
       private currentRefresh?: Observable<Account>;
 
       constructor(private readonly tokenStore: TokenStore, private readonly client: HttpClient) {
-            console.log("11111111111111111111111")
       }
 
 
@@ -63,6 +62,9 @@ export class CredentialInterceptor implements HttpInterceptor {
                                   this.currentRefresh = undefined;
                                   this.accessToken = body.accessToken
                             }),
+                            finalize(() => {
+                                  this.currentRefresh = undefined;
+                            })
                     );
             return this.currentRefresh
       }
