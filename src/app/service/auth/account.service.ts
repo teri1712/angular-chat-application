@@ -235,12 +235,6 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
                     map((account) => {
                           this.onAccountLogin(account)
                           return true
-                    }),
-                    catchError((error: HttpErrorResponse) => {
-                          if (error.status === 401 || error.status === 403) {
-                                this.onAccountLogout()
-                          }
-                          throw error
                     }));
       }
 

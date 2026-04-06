@@ -21,7 +21,7 @@ export class UploadService {
 
       upload(filename: string, file: File): Observable<FileIntegrity> {
             const presignUrl = environment.API_URL + '/files/upload?filename=' + encodeURIComponent(filename);
-            return this.httpClient.post<PresignedUpload>(presignUrl, {observe: 'body'}).pipe(
+            return this.httpClient.post<PresignedUpload>(presignUrl, {}, {observe: 'body'}).pipe(
                     switchMap((presigned: PresignedUpload) => {
                           return from(fetch(presigned.presignedUploadUrl, {
                                 method: 'PUT',
@@ -30,6 +30,8 @@ export class UploadService {
                                       'Content-Type': 'application/octet-stream'
                                 }
                           })).pipe(map((response) => {
+                                if (!response.ok)
+                                      throw new Error('Failed to upload file');
                                 const eTag = response.headers.get("ETag");
                                 return ({
                                       eTag: eTag,
