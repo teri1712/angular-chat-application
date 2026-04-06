@@ -34,7 +34,6 @@ import {ImageHandler} from "../../service/image-handler";
             GroupService,
             ChatRepository,
             DirectRepository,
-            LogStream,
             ConversationRepository,
             CacheService,
             DialogService,
@@ -44,6 +43,10 @@ import {ImageHandler} from "../../service/image-handler";
             LogTrailerService,
             MessageService,
             SearchRepository,
+            {
+                  provide: LogStream,
+                  useExisting: LogTrailerService
+            },
             {
                   provide: HANDLERS,
                   useClass: TextHandler,

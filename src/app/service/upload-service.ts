@@ -5,11 +5,12 @@ import {from, map, Observable, switchMap} from "rxjs";
 
 export type PresignedUpload = {
       presignedUploadUrl: string;
-      downloadUrl: string;
+      fileKey: string;
 };
 
-export type DownloadUrl = {
-      path: string;
+export type FileIntegrity = {
+      fileKey: string;
+      eTag: string;
 };
 
 
@@ -18,9 +19,9 @@ export class UploadService {
       constructor(private readonly httpClient: HttpClient) {
       }
 
-      upload(filename: string, file: File): Observable<DownloadUrl> {
-            const presignUrl = environment.API_URL + '/files/upload-urls?filename=' + encodeURIComponent(filename);
-            return this.httpClient.post<PresignedUpload>(presignUrl, {observe: 'body'}).pipe(
+      upload(filename: string, file: File): Observable<FileIntegrity> {
+            const presignUrl = environment.API_URL + '/files/upload?filename=' + encodeURIComponent(filename);
+            return this.httpClient.post<PresignedUpload>(presignUrl, {}, {observe: 'body'}).pipe(
                     switchMap((presigned: PresignedUpload) => {
                           return from(fetch(presigned.presignedUploadUrl, {
                                 method: 'PUT',
@@ -28,12 +29,15 @@ export class UploadService {
                                 headers: {
                                       'Content-Type': 'application/octet-stream'
                                 }
-                          })).pipe(map(() => presigned.downloadUrl));
-                    }),
-                    map((downloadUrl: string) => {
-                          return {
-                                path: downloadUrl
-                          }
+                          })).pipe(map((response) => {
+                                if (!response.ok)
+                                      throw new Error('Failed to upload file');
+                                const eTag = response.headers.get("ETag");
+                                return ({
+                                      eTag: eTag,
+                                      fileKey: presigned.fileKey
+                                }) as FileIntegrity
+                          }));
                     })
             );
       }

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AccountRepository} from './account-repository';
-import {BehaviorSubject, catchError, filter, map, Observable, of, switchMap, throwError} from "rxjs";
+import {BehaviorSubject, catchError, filter, from, map, Observable, of, switchMap, throwError} from "rxjs";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../environments";
 import {Authenticator} from "./authenticator";
@@ -11,6 +11,7 @@ import {Profile} from "../../model/dto/profile";
 import {ITokenStore, TokenListener} from "./token.store";
 import {distinctUntilChanged} from "rxjs/operators";
 import {CredentialInterceptor} from "./credential.interceptor";
+import {FileIntegrity, PresignedUpload} from "../upload-service";
 
 
 @Injectable({
@@ -24,7 +25,6 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
       constructor(private readonly httpClient: HttpClient, private readonly tokenStore: ITokenStore, private readonly credentialInterceptor: CredentialInterceptor) {
             this.tokenStore.addTokenListener(this)
             this.init()
-            console.log("22222222222222222222")
       }
 
       onTokenChange(token: string) {
@@ -92,27 +92,66 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
             )
       }
 
-      signUp(body: SignUpRequest): Observable<Profile> {
+      private createAvatar(username: string, password: string, presignUrl: string, avatar: File): Observable<Profile> {
+            const headers = new HttpHeaders({
+                  Authorization: 'Basic ' + btoa(`${username}:${password}`)
+            });
+            return this.httpClient.post<PresignedUpload>(presignUrl, {}, {observe: 'body', headers: headers}).pipe(
+                    switchMap((presigned: PresignedUpload) => {
+                                  return from(fetch(presigned.presignedUploadUrl, {
+                                        method: 'PUT',
+                                        body: avatar,
+                                        headers: {
+                                              'Content-Type': 'application/octet-stream'
+                                        }
+                                  })).pipe(map((response) => {
+                                        const eTag = response.headers.get("ETag");
+                                        return ({
+                                              eTag: eTag,
+                                              fileKey: presigned.fileKey
+                                        }) as FileIntegrity
+                                  }));
+                            }
+                    ),
+                    switchMap((file) => {
+
+                          return this.httpClient.patch<Profile>(environment.API_URL + "/profiles/me", {
+                                avatar: file,
+                          }, {
+                                headers: headers,
+                                observe: 'body'
+                          })
+                    })
+            )
+      }
+
+      signUp(request: SignUpRequest): Observable<Profile> {
             if (this.accountSubject.value) {
                   throw new Error('There is already a user.');
             }
-            const payload = {
-                  username: body.username,
-                  password: body.password,
-                  name: body.name,
-                  gender: body.gender,
-                  dob: body.dob,
-                  avatar: body.avatar
-            };
+            const username = request.username;
+            const password = request.password;
 
-            return this.httpClient.post(environment.API_URL + "/users", payload, {
-                  observe: 'response',
-                  responseType: 'text'
+            return this.httpClient.post<Profile>(environment.API_URL + "/users", {
+                  username: username,
+                  password: password,
+                  name: request.name,
+                  gender: request.gender,
+                  dob: request.dob
+            }, {
+                  observe: 'body',
             }).pipe(
-                    switchMap((response) => {
+                    switchMap((profile) => {
+                          const avatar = request.avatar;
+                          if (!avatar)
+                                return of(profile);
+                          const presignUrl = environment.API_URL + '/files/upload?filename=' + encodeURIComponent(avatar.name);
+                          return this.createAvatar(username, password, presignUrl, avatar);
+                    }),
+                    switchMap(() => {
                           return this.signIn({
-                                username: body.username,
-                                password: body.password
+                                username: username,
+                                password: password
                           })
                     })
             )
@@ -170,7 +209,10 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
       }
 
       changePassword(oldPassword: string, newPassword: string): Observable<any> {
-
+            if (!this.accountSubject.value) {
+                  throw new Error('There is no such account');
+            }
+            const username = this.accountSubject.value.username;
             const params = new HttpParams()
                     .set('password', oldPassword)
                     .set('new_password', newPassword);
@@ -178,7 +220,22 @@ export class AccountService implements AccountRepository, Authenticator, TokenLi
                   headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                   }
-            });
+            }).pipe(switchMap(() => {
+
+                          const params = new HttpParams()
+                                  .set('password', newPassword)
+                                  .set('username', username);
+                          return this.httpClient.post<Account>(environment.API_URL + "/login", params.toString(), {
+                                observe: 'body',
+                                headers: {
+                                      'Content-Type': 'application/x-www-form-urlencoded'
+                                }
+                          })
+                    }),
+                    map((account) => {
+                          this.onAccountLogin(account)
+                          return true
+                    }));
       }
 
 }

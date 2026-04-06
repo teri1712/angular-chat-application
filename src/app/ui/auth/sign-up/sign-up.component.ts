@@ -4,7 +4,7 @@ import {Router} from "@angular/router";
 import {HttpErrorResponse} from "@angular/common/http";
 import {MatDialog} from "@angular/material/dialog";
 import {ProgressDialogComponent} from "../../progress-dialog/progress-dialog.component";
-import {finalize, map, of, switchMap} from "rxjs";
+import {finalize} from "rxjs";
 import {Authenticator} from "../../../service/auth/authenticator";
 import {UploadService} from "../../../service/upload-service";
 
@@ -45,7 +45,7 @@ export class SignUpComponent {
             this.body.username = info.username
             this.body.password = info.password
             this.body.fullname = info.fullname
-            this.body.dob = info.dob
+            this.body.dob = new Date(info.dob).toISOString()
             this.body.gender = info.gender
       }
 
@@ -62,31 +62,21 @@ export class SignUpComponent {
                   }
             })
 
-            const avatarObs = this.body.file
-                    ? this.uploadService.upload(this.body.file.name, this.body.file).pipe(
-                            map((downloadUrl) => {
-                                  return downloadUrl.path
-                            })
-                    )
-                    : of(null as string | null);
 
-            avatarObs.pipe(
-                    switchMap((avatar: string | null) => {
-                          return this.authenticator.signUp({
-                                username: this.body.username!,
-                                password: this.body.password!,
-                                gender: this.body.gender!,
-                                dob: this.body.dob!,
-                                name: this.body.fullname!,
-                                avatar: avatar
-                          });
-                    }),
+            this.authenticator.signUp({
+                  username: this.body.username!,
+                  password: this.body.password!,
+                  gender: this.body.gender!,
+                  dob: this.body.dob!,
+                  name: this.body.fullname!,
+                  avatar: this.body.file
+            }).pipe(
                     finalize(() => {
                           ref.close()
                     })
             ).subscribe(
-                    (response) => {
-                          this.router.navigate(['/home']);
+                    () => {
+                          this.router.navigate(['/home'])
                     },
                     (error: HttpErrorResponse) => {
                           console.error(error)

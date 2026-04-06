@@ -11,27 +11,33 @@ import {PreferenceMessage} from "../../model/dto/preference-message";
 
 
 @Injectable()
-export class LogTrailerService implements OnDestroy, TokenListener {
+export class LogTrailerService extends LogStream implements OnDestroy, TokenListener {
 
       private stage: ClientStage = ClientStage.DISCONNECTED;
-      private currentSequenceNumber: number;
+      private currentSequence: number;
 
       private client?: Client;
 
 
-      constructor(private readonly tokenStore: ITokenStore, private readonly httpClient: HttpClient, private readonly logStream: LogStream) {
-            this.currentSequenceNumber = Number.MAX_SAFE_INTEGER;
+      constructor(private readonly tokenStore: ITokenStore, private readonly httpClient: HttpClient) {
+            super()
+            this.currentSequence = Number.MAX_SAFE_INTEGER;
             this.tokenStore.addTokenListener(this)
       }
 
       onTokenChange(token: string) {
+            this.disconnect()
+            this.connect(token);
+      }
+
+      private disconnect() {
             this.client?.deactivate();
-            this.init(token);
+            this.client = undefined;
+            this.stage = ClientStage.DISCONNECTED;
       }
 
       onLogout() {
-            this.client?.deactivate();
-            this.client = undefined
+            this.disconnect();
       }
 
       send(chatId: string): void {
@@ -59,7 +65,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
       }
 
 
-      private init(accessToken: string) {
+      private connect(accessToken: string) {
             const client = new Client({
                   brokerURL: environment.WEBSOCKET_HOST + '/handshake',
                   connectHeaders: {
@@ -80,11 +86,11 @@ export class LogTrailerService implements OnDestroy, TokenListener {
                         if (this.stage === ClientStage.CONNECTED)
                               this.emit(log);
                   })
-                  if (this.currentSequenceNumber === Number.MAX_SAFE_INTEGER) {
+                  if (this.currentSequence === Number.MAX_SAFE_INTEGER) {
                         this.stage = ClientStage.CONNECTED;
                   } else {
                         this.stage = ClientStage.RECONNECTING;
-                        this.download(this.currentSequenceNumber + 1).subscribe(
+                        this.download(this.currentSequence + 1).subscribe(
                                 () => {
                                       this.stage = ClientStage.CONNECTED;
                                 })
@@ -103,8 +109,8 @@ export class LogTrailerService implements OnDestroy, TokenListener {
       }
 
       private emit(log: InboxLog) {
-            this.currentSequenceNumber = log.sequenceNumber;
-            this.logStream.publish(log)
+            this.currentSequence = log.sequenceNumber;
+            this.publish(log)
       }
 
       private emitAll(logs: InboxLog[]) {
@@ -136,8 +142,7 @@ export class LogTrailerService implements OnDestroy, TokenListener {
 
       ngOnDestroy(): void {
             this.tokenStore.removeTokenListener(this)
-            this.client?.deactivate()
-            this.client = undefined
+            this.disconnect();
       }
 }
 
