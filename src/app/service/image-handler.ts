@@ -52,10 +52,10 @@ export class ImageHandler extends EventHandler {
             const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/images/' + encodeURIComponent(posting.id);
 
             return this.uploadService.upload(imagePosting.file.name, imagePosting.file).pipe(
-                    switchMap(downloadUrl => {
+                    switchMap(integrity => {
                           return this.httpClient.put<MessageState>(url, {
                                 filename: imagePosting.file.name,
-                                uri: downloadUrl.path,
+                                file: integrity,
                                 width: imagePosting.width,
                                 height: imagePosting.height,
                                 format: imagePosting.format

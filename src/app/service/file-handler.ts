@@ -48,10 +48,10 @@ export class FileHandler extends EventHandler {
             const url = environment.API_URL + '/chats/' + encodeURIComponent(posting.chatId) + '/files/' + encodeURIComponent(posting.id);
 
             return this.uploadService.upload(filePosting.file.name, filePosting.file).pipe(
-                    switchMap(downloadUrl => {
+                    switchMap(integrity => {
                           return this.httpClient.put<MessageState>(url, {
                                 filename: filePosting.file.name,
-                                uri: downloadUrl.path,
+                                file: integrity,
                                 size: filePosting.file.size
                           }, {});
                     })

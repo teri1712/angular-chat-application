@@ -4,5 +4,5 @@ export type SignUpRequest = {
       name: string,
       gender: number,
       dob: string,
-      avatar: string | null,
+      avatar: File | undefined,
 }

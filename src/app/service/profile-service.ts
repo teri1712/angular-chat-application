@@ -1,19 +1,28 @@
-import {Injectable} from "@angular/core";
+import {DestroyRef, inject, Injectable} from "@angular/core";
 import {Profile} from "../model/dto/profile";
 import {AccountRepository} from "./auth/account-repository";
-import {BehaviorSubject, Observable, switchMap, tap} from "rxjs";
+import {BehaviorSubject, filter, Observable, switchMap, tap} from "rxjs";
 import {environment} from "../environments";
 import {HttpClient} from "@angular/common/http";
-import {UploadService} from "./upload-service";
+import {FileIntegrity, UploadService} from "./upload-service";
 import {User} from "../model/dto/user";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable()
 export default class ProfileService {
 
       private readonly profile: BehaviorSubject<Profile>;
+      private readonly destroyRef = inject(DestroyRef)
 
       constructor(accountRepository: AccountRepository, private readonly httpClient: HttpClient, private readonly uploadService: UploadService) {
-            this.profile = new BehaviorSubject<Profile>(accountRepository.currentUser!);
+            this.profile = new BehaviorSubject<Profile>({} as Profile);
+
+            accountRepository.accountObservable
+                    .pipe(takeUntilDestroyed(this.destroyRef)
+                            , filter(account => !!account))
+                    .subscribe(account => {
+                          this.profile.next(account)
+                    })
       }
 
 
@@ -44,9 +53,9 @@ export default class ProfileService {
       updateAvatar(file: File): Observable<Profile> {
             const filename = file.name;
             return this.uploadService.upload(filename, file).pipe(switchMap(
-                    (downloadUrl) =>
+                    (integrity) =>
                             this.updateProfile({
-                                  avatar: downloadUrl.path
+                                  avatar: integrity
                             })));
       }
 
@@ -56,5 +65,5 @@ export type ProfileRequest = {
       name: string,
       gender: number,
       dob: string,
-      avatar: string
+      avatar: FileIntegrity
 };
