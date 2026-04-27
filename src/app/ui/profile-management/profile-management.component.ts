@@ -122,7 +122,6 @@ export class ProfileManagementComponent implements OnInit {
                   this.profileService.updateProfile(changedFields).subscribe({
                         next: (updatedUser) => {
                               this.profile = updatedUser;
-                              this.initialProfileValues = this.profileForm.getRawValue();
                               this.snackBar.open('Profile updated successfully', 'Close', {duration: 3000});
                         },
                         error: (err) => {
