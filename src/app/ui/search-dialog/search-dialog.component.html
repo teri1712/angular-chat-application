@@ -2,30 +2,40 @@
 <mat-dialog-content>
     <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
         <mat-label>Search</mat-label>
-        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)"
+        <input matInput [(ngModel)]="query"
                placeholder="Type to search..." autofocus>
         <mat-icon matSuffix color="primary">search</mat-icon>
     </mat-form-field>
 
+    @if (!results.isLoading() && results.value()?.length) {
 
-    <div class="results-container" *ngIf="!isLoading && searchResults.length > 0">
+        <div class="results-container">
 
-        <app-search-result-item *ngFor="let result of searchResults"
-                                [result]="result"
-                                (selected)="close()"
-        >
-        </app-search-result-item>
-    </div>
+            @for (result of results.value(); track result.sequenceNumber) {
+
+                <app-search-result-item
+                        [result]="result"
+                        (selected)="onClose()"
+                >
+                </app-search-result-item>
+            }
+        </div>
+    }
+
 
     <div class="loading-container mat-body-2">
+        @if (results.isLoading()) {
+            <mat-progress-spinner mode="indeterminate"
+                                  diameter="30">
+            </mat-progress-spinner>
 
-        <mat-progress-spinner *ngIf="isLoading" mode="indeterminate"
-                              diameter="30">
-        </mat-progress-spinner>
+        }
 
     </div>
 
-    <div *ngIf="!isLoading && searchQuery && searchResults.length === 0" class="no-results mat-body-2">
-        No messages found matching "{{ searchQuery }}"
-    </div>
+    @if (query() && !results.isLoading() && !results.value()?.length) {
+        <div class="no-results mat-body-2">
+            No messages found matching "{{ query() }}"
+        </div>
+    }
 </mat-dialog-content>

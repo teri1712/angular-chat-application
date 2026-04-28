@@ -4,16 +4,17 @@
       margin-bottom: 16px;
 }
 
+
+.results-container {
+      display: flex;
+      flex-direction: column;
+}
+
 .loading-container, .no-results {
       padding: 40px 20px;
       display: flex;
       justify-content: center;
       color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.54));
-}
-
-.results-container {
-      display: flex;
-      flex-direction: column;
 }
 
 mat-dialog-content {

@@ -1,5 +1,5 @@
-<app-avatar-container [presence]="(presence | async)" [avatar]="roomAvatar" [chatId]="identifier"
-                      size="45"/>
+<app-avatar-container [presence]="(presence | async) ?? undefined" [avatar]="roomAvatar" [chatId]="identifier"
+                      [size]="45"/>
 <div class="middle">
     <span class="room-name" [style.font-weight]="nameWeight">{{ roomName }}</span>
     <span class="message"

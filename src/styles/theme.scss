@@ -2,7 +2,8 @@
 @use "./_light-theme-colors" as light-colors;
 @use "./_dark-theme-colors" as dark-colors;
 
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 .light-theme {
   --mat-sys-neutral-variant60: rgba(0, 0, 0, 0.05);

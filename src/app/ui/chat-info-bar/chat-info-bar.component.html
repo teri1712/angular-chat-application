@@ -1,8 +1,8 @@
 <div class="partner-container">
-    <app-avatar-container [presence]="presence"
-                          [chatId]="chatIdSubject | async"
-                          [avatar]="roomAvatar"
-                          size="40"/>
+    <app-avatar-container [presence]="presence ?? undefined"
+                          [chatId]="(chatIdSubject | async) ?? undefined"
+                          [avatar]="roomAvatar ?? undefined"
+                          [size]="40"/>
     <div class="partner-info">
         <span class="room-name">{{ roomName }}</span>
         <span class="room-presence" *ngIf="diffOnline < ONE_HOUR_SECONDS">{{

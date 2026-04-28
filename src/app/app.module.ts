@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {NgModule, provideZonelessChangeDetection} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {AppRoutingModule} from './app-routing.module';
@@ -19,37 +19,38 @@ import {UploadService} from "./service/upload-service";
 import {ThemeService} from "./service/theme-service";
 
 @NgModule({
-      declarations: [AppComponent, SplashComponent],
-      imports: [BrowserModule, AppRoutingModule],
-      bootstrap: [AppComponent],
-      providers: [provideAnimationsAsync(),
-            AuthGuard,
-            UploadService,
-            provideHttpClient(withInterceptorsFromDi()),
-            {
-                  provide: HTTP_INTERCEPTORS,
-                  useClass: CredentialInterceptor,
-                  multi: true,
-            },
-            {
-                  provide: AccountRepository,
-                  useExisting: AccountService
-            },
-            {
-                  provide: ITokenStore,
-                  useExisting: TokenStore
-            },
-            {
-                  provide: Authenticator,
-                  useExisting: AccountService
-            },
-            {
-                  provide: RouteReuseStrategy,
-                  useClass: ReuseConversationListStrategy
-            },
-      ],
+    declarations: [AppComponent, SplashComponent],
+    imports: [BrowserModule, AppRoutingModule],
+    bootstrap: [AppComponent],
+    providers: [provideAnimationsAsync(),
+        AuthGuard,
+        UploadService,
+        provideHttpClient(withInterceptorsFromDi()),
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: CredentialInterceptor,
+            multi: true,
+        },
+        {
+            provide: AccountRepository,
+            useExisting: AccountService
+        },
+        {
+            provide: ITokenStore,
+            useExisting: TokenStore
+        },
+        {
+            provide: Authenticator,
+            useExisting: AccountService
+        },
+        {
+            provide: RouteReuseStrategy,
+            useClass: ReuseConversationListStrategy
+        },
+        provideZonelessChangeDetection(),
+    ],
 })
 export class AppModule {
-      constructor(iconRegistry: IconRegistry, themeService: ThemeService,) {
-      }
+    constructor(iconRegistry: IconRegistry, themeService: ThemeService,) {
+    }
 }
