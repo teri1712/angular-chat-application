@@ -1,69 +1,78 @@
-import {DestroyRef, inject, Injectable} from "@angular/core";
+import {inject, Injectable} from "@angular/core";
 import {Profile} from "../model/dto/profile";
-import {AccountRepository} from "./auth/account-repository";
-import {BehaviorSubject, filter, Observable, switchMap, tap} from "rxjs";
+import {catchError, filter, Observable, of, switchMap, tap} from "rxjs";
 import {environment} from "../environments";
 import {HttpClient} from "@angular/common/http";
 import {FileIntegrity, UploadService} from "./upload-service";
 import {User} from "../model/dto/user";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {TokenStore} from "./auth/token-store.service";
+import {toObservable, toSignal} from "@angular/core/rxjs-interop";
 
 @Injectable()
 export default class ProfileService {
 
-      private readonly profile: BehaviorSubject<Profile>;
-      private readonly destroyRef = inject(DestroyRef)
+    private profileStore = inject(TokenStore)
+    private httpClient = inject(HttpClient);
+    private uploadService = inject(UploadService);
 
-      constructor(accountRepository: AccountRepository, private readonly httpClient: HttpClient, private readonly uploadService: UploadService) {
-            this.profile = new BehaviorSubject<Profile>({} as Profile);
-
-            accountRepository.accountObservable
-                    .pipe(takeUntilDestroyed(this.destroyRef)
-                            , filter(account => !!account))
-                    .subscribe(account => {
-                          this.profile.next(account)
-                    })
-      }
+    readonly profile = toSignal(toObservable(
+            this.profileStore.profile
+        )
+            .pipe(
+                filter(profile => !!profile)
+            ),
+        {initialValue: this.profileStore.profile()!}
+    )
 
 
-      thatsMe(user: User | string) {
-            if (typeof user === 'string') {
-                  return this.profile.value.id === user;
-            }
-            return this.profile.value.id === user.id;
-      }
+    constructor() {
 
-      getProfileObservable(): Observable<Profile> {
-            return this.profile.asObservable();
-      }
+    }
 
-      getProfile(): Profile {
-            return this.profile.value;
-      }
+    refresh() {
 
-      updateProfile(user: Partial<ProfileRequest>): Observable<Profile> {
-            return this.httpClient.patch<Profile>(environment.API_URL + "/profiles/me", user).pipe(
-                    tap(updatedUser => {
-                                  this.profile.next(updatedUser);
-                            }
-                    )
-            );
-      }
+        return this.httpClient.get<Profile>(environment.API_URL + "/profiles/me", {observe: 'body'}).pipe(
+            tap(freshProf => {
+                this.profileStore.updateProfile(freshProf);
+            }),
+            catchError(err => {
+                console.error(err)
+                return of(this.profile())
+            })
+        )
+    }
 
-      updateAvatar(file: File): Observable<Profile> {
-            const filename = file.name;
-            return this.uploadService.upload(filename, file).pipe(switchMap(
-                    (integrity) =>
-                            this.updateProfile({
-                                  avatar: integrity
-                            })));
-      }
+    thatsMe(user: User | string) {
+        const me = this.profileStore.profile()?.id;
+        if (typeof user === 'string') {
+            return me === user;
+        }
+        return me === user.id;
+    }
+
+    updateProfile(user: Partial<ProfileRequest>): Observable<Profile> {
+        return this.httpClient.patch<Profile>(environment.API_URL + "/profiles/me", user).pipe(
+            tap(updatedProf => {
+                    this.profileStore.updateProfile(updatedProf);
+                }
+            )
+        );
+    }
+
+    updateAvatar(file: File): Observable<Profile> {
+        const filename = file.name;
+        return this.uploadService.upload(filename, file).pipe(switchMap(
+            (integrity) =>
+                this.updateProfile({
+                    avatar: integrity
+                })));
+    }
 
 }
 
 export type ProfileRequest = {
-      name: string,
-      gender: number,
-      dob: string,
-      avatar: FileIntegrity
+    name: string,
+    gender: number,
+    dob: string,
+    avatar: FileIntegrity
 };

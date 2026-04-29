@@ -1,39 +1,45 @@
-import {Component} from '@angular/core';
+import {Component, inject, model, OnInit} from '@angular/core';
 import {MatIconModule} from "@angular/material/icon";
 import {MatInputModule} from "@angular/material/input";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {Router} from "@angular/router";
-import {searchRoute, threadsRoute} from "../../home-route.module";
 import {MatIconButton} from "@angular/material/button";
 import {FormsModule} from "@angular/forms";
-import {NgIf} from "@angular/common";
+import {toObservable} from "@angular/core/rxjs-interop";
+import {searchRoute, threadsRoute} from "../../home-route.module";
 
 @Component({
-      selector: 'app-search-bar',
-      imports: [MatFormFieldModule, MatInputModule, MatIconModule, MatIconButton, FormsModule, NgIf],
-      templateUrl: './search-bar.component.html',
-      styleUrl: './search-bar.component.scss'
+    selector: 'app-search-bar',
+    imports: [MatFormFieldModule, MatInputModule, MatIconModule, MatIconButton, FormsModule],
+    templateUrl: './search-bar.component.html',
+    styleUrl: './search-bar.component.scss'
 })
-export class SearchBarComponent {
+export class SearchBarComponent implements OnInit {
 
-      protected query: String = ""
+    protected query = model('')
+    private router = inject(Router)
 
-      constructor(private router: Router) {
-      }
+    constructor() {
 
-      protected clear() {
-            this.query = "";
-            this.router.navigate(threadsRoute);
-      }
+        toObservable(this.query)
+            .subscribe({
+                next: (query) => {
+                    if (query) {
+                        console.log(query)
+                        this.router.navigate(searchRoute, {
+                            queryParams: {query: query}
+                        });
+                    } else {
+                        this.router.navigate(threadsRoute)
+                    }
+                }
+            })
+    }
 
-      protected onChange(text: string) {
-            if (text.trim().length > 0) {
-                  this.router.navigate(searchRoute, {
-                        queryParams: {query: text}
-                  });
+    ngOnInit(): void {
+    }
 
-            } else {
-                  this.router.navigate(threadsRoute);
-            }
-      }
+    protected clear() {
+        this.query.set('');
+    }
 }

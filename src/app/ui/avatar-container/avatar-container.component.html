@@ -1,13 +1,11 @@
 <div class="avatar"
-     [matBadgeHidden]="diffOnline >= ONE_HOUR_SECONDS"
-     [matBadge]="diffOnline > ONE_MINUTE_SECONDS ?
-        Math.floor((diffOnline + ONE_MINUTE_SECONDS - 1) / ONE_MINUTE_SECONDS) + 'm' :
-     'o'"
+     [matBadgeHidden]="showBadge()"
+     [matBadge]="timeStatus() ? timeStatus() + 'm' : 'o'"
      [ngStyle]="{
-        'fontSize': diffOnline > ONE_MINUTE_SECONDS ? '0.6rem' : '0rem'
+        'fontSize': timeStatus() ? '0.6rem' : '0rem'
      }"
      matBadgePosition="below after"
 >
-    <img [ngSrc]="avatar?? 'https://i.pinimg.com/webp/1200x/e7/70/51/e77051136cf95616fcb83bbd3f338c93.webp'" alt=""
-         [width]="size" [height]="size">
+    <img [ngSrc]="avatar()?? 'https://i.pinimg.com/webp/1200x/e7/70/51/e77051136cf95616fcb83bbd3f338c93.webp'" alt=""
+         [width]="size()" [height]="size()">
 </div>

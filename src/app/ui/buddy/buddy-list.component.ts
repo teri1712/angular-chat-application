@@ -6,39 +6,42 @@ import {BuddyPresence} from "../../model/dto/buddyPresence";
 import {BuddyComponent} from "../buddy-list/buddy.component";
 
 @Component({
-      selector: 'app-buddy-list',
-      templateUrl: './buddy-list.component.html',
-      imports: [
-            CommonModule, BuddyComponent
-      ],
-      styleUrls: ['./buddy-list.component.css']
+    selector: 'app-buddy-list',
+    templateUrl: './buddy-list.component.html',
+    imports: [
+        CommonModule, BuddyComponent
+    ],
+    styleUrls: ['./buddy-list.component.css']
 })
 export class BuddyListComponent implements OnInit, OnDestroy {
 
-      protected buddies: BuddyPresence[] = [];
-      private timerSubscription?: Subscription;
+    protected buddies: BuddyPresence[] = [];
+    private timerSubscription?: Subscription;
 
-      constructor(private presenceRepository: PresenceRepository,) {
-      }
+    constructor(private presenceRepository: PresenceRepository,) {
+    }
 
-      ngOnInit(): void {
+    ngOnInit(): void {
+        this.fetchOnlineUsers();
+        this.timerSubscription = interval(30000).subscribe(() => {
             this.fetchOnlineUsers();
-            this.timerSubscription = interval(30000).subscribe(() => {
-                  this.fetchOnlineUsers();
-            });
-      }
+        });
+    }
 
-      ngOnDestroy(): void {
-            if (this.timerSubscription) {
-                  this.timerSubscription.unsubscribe();
-            }
-      }
+    ngOnDestroy(): void {
+        if (this.timerSubscription) {
+            this.timerSubscription.unsubscribe();
+        }
+    }
 
-      private fetchOnlineUsers(): void {
-            this.presenceRepository.list().subscribe(buddies => {
-                  this.buddies = buddies
-            });
-      }
+    private fetchOnlineUsers(): void {
+        this.presenceRepository.list().subscribe({
+            next: buddies => {
+                this.buddies = buddies
+            },
+            error: err => console.error('Error fetching online users:', err),
+        });
+    }
 
 
 }

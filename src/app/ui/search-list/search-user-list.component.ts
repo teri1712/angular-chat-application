@@ -1,79 +1,68 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, computed, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {catchError, of, Subject, Subscription, tap} from "rxjs";
+import {catchError, of} from "rxjs";
 import {UserRepository} from "../../service/repository/user-repository";
 import {SearchUserComponent} from "../search-item/search-user.component";
 import {CommonModule} from "@angular/common";
-import {User} from "../../model/dto/user";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {debounceTime, distinctUntilChanged, switchMap} from "rxjs/operators";
+import {debounceTime} from "rxjs/operators";
 import {threadsRoute} from "../../home-route.module";
+import {rxResource, toObservable, toSignal} from "@angular/core/rxjs-interop";
 
 @Component({
-      selector: 'app-search-user-list',
-      imports: [
-            SearchUserComponent,
-            CommonModule,
-            MatProgressSpinner
-      ],
-      templateUrl: './search-user-list.component.html',
-      styleUrl: './search-user-list.component.css'
+    selector: 'app-search-user-list',
+    imports: [
+        SearchUserComponent,
+        CommonModule,
+        MatProgressSpinner
+    ],
+    templateUrl: './search-user-list.component.html',
+    styleUrl: './search-user-list.component.css'
 })
 export class SearchUserListComponent implements OnDestroy, OnInit {
 
-      private searchSubject = new Subject<string>();
-      private searchSubscription?: Subscription;
+    private router = inject(Router)
+    private activatedRoute = inject(ActivatedRoute)
+    private userRepository = inject(UserRepository)
+    private queryParams = toSignal(this.activatedRoute.queryParamMap)
+    private query = computed(() => {
+        const query = this.queryParams()?.get('query');
+        return query ?? '';
+    });
 
-      protected result: User[] = [];
-      protected isLoading: boolean = false;
-      private routeSub: Subscription
+    private debounceQuery = toSignal(toObservable(this.query)
+        .pipe(
+            debounceTime(300),
+        ))
 
-      constructor(
-              private readonly router: Router,
-              private readonly activatedRoute: ActivatedRoute,
-              private readonly userRepository: UserRepository) {
-            this.routeSub = this.activatedRoute.queryParamMap
-                    .subscribe(params => {
-                          const query = params.get('query');
-                          if (query) {
-                                this.searchSubject.next(query);
-                          }
-                    });
-      }
+    results = rxResource({
+        params: () => {
+            const query = this.query();
+            const debounceQuery = this.debounceQuery()?.trim()
+            if (debounceQuery && query === debounceQuery)
+                return ({
+                    query: debounceQuery,
+                })
+            return undefined
+        },
+        stream: (request) => {
+            const params = request.params
+            return this.userRepository.list(params.query).pipe(
+                catchError(err => {
+                    console.error('Search failed', err);
+                    return of([]);
+                })
+            );
+        },
+    });
 
-      ngOnInit(): void {
-            this.searchSubscription = this.searchSubject.pipe(
-                    tap(() => {
-                          this.isLoading = true;
-                    }),
-                    debounceTime(300),
-                    distinctUntilChanged(),
-                    switchMap(query => {
-                          if (!query.trim()) {
-                                this.isLoading = false;
-                                return of([]);
-                          }
-                          return this.userRepository.list(query).pipe(
-                                  catchError(err => {
-                                        console.error('Search failed', err);
-                                        return of([]);
-                                  })
-                          );
-                    })
-            ).subscribe({
-                  next: (result) => {
-                        this.result = result;
-                        this.isLoading = false;
-                  }
-            });
-      }
+    ngOnInit(): void {
+    }
 
-      protected clear() {
-            this.router.navigate(threadsRoute);
-      }
+    protected clear() {
+        this.router.navigate(threadsRoute);
+    }
 
-      ngOnDestroy(): void {
-            this.routeSub.unsubscribe();
-            this.searchSubscription?.unsubscribe();
-      }
+    ngOnDestroy(): void {
+    }
 }

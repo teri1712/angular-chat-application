@@ -1,142 +1,71 @@
-import {
-      HttpClient,
-      HttpErrorResponse,
-      HttpEvent,
-      HttpHandler,
-      HttpInterceptor,
-      HttpParams,
-      HttpRequest,
-      HttpResponse,
-      HttpStatusCode
-} from "@angular/common/http";
-import {catchError, finalize, Observable, switchMap, tap} from "rxjs";
-import {AccessToken} from "../../model/dto/access-token";
-import {environment} from "../../environments";
-import {JwtHelperService} from "@auth0/angular-jwt";
-import {TokenStore} from "./token.store";
-import {Injectable} from "@angular/core";
+import {HttpBackend, HttpClient, HttpErrorResponse, HttpInterceptorFn, HttpParams} from '@angular/common/http';
+import {inject} from '@angular/core';
+import {catchError, EMPTY, switchMap, throwError} from 'rxjs';
+import {TokenStore} from "./token-store.service";
 import {Account} from "../../model/dto/account";
+import {environment} from "../../environments";
 
-@Injectable({
-      providedIn: 'root',
-})
-export class CredentialInterceptor implements HttpInterceptor {
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+    // Inject the concrete AuthService — it IS the token store (extends TokenStore).
+    // The interceptor is the only caller of token-mutation methods during auto-refresh.
+    const tokenStore = inject(TokenStore);
+    const backend = inject(HttpBackend);
 
-      readonly anonymousUrls = new Set(["/login", "/signup", "/tokens/refresh", "/tokens/oauth2"])
+    // Skip refresh retry if session is already known expired
+    if (tokenStore.sessionExpired()) {
+        return next(req);
+    }
 
-      private readonly jwtHelper = new JwtHelperService();
-      private currentRefresh?: Observable<Account>;
+    const token = tokenStore.getAccessToken();
+    const authReq = token
+        ? req.clone({setHeaders: {Authorization: `Bearer ${token}`}})
+        : req;
 
-      constructor(private readonly tokenStore: TokenStore, private readonly client: HttpClient) {
-      }
+    return next(authReq).pipe(
+        catchError((error: HttpErrorResponse) => {
+            const isRefresh = req.url.includes('/tokens/refresh');
+            const isLogin = req.url.includes('/login');
 
+            // If the 401 carries a business-logic detail (e.g. "Wrong password"),
+            // it is NOT a token-expiry error — pass it straight to the caller.
+            const hasProblemDetail = typeof error.error === 'object' && error.error?.detail;
+            if (error.status === 401 && !isRefresh && !isLogin && !hasProblemDetail) {
+                const refreshToken = tokenStore.getRefreshToken();
+                if (!refreshToken) {
+                    tokenStore.markSessionExpired();
+                    return EMPTY;
+                }
 
-      private set accessToken(accessToken: AccessToken) {
-            this.tokenStore.accessToken = accessToken.accessToken
-            this.tokenStore.refreshToken = accessToken.refreshToken
-      }
-
-
-      private refresh(refreshToken: string): Observable<Account> {
-            if (this.currentRefresh) {
-                  return this.currentRefresh;
-            }
-            const params = new HttpParams().set('refresh_token', refreshToken);
-            this.currentRefresh = this.client
+                // Use HttpBackend to bypass interceptor chain for the refresh call
+                const http = new HttpClient(backend);
+                const body = new HttpParams().set('refresh_token', refreshToken);
+                return http
                     .post<Account>(
-                            environment.API_URL + '/tokens/refresh',
-                            params.toString(),
-                            {
-                                  observe: 'body',
-                                  headers: {
-                                        'Content-Type': 'application/x-www-form-urlencoded'
-                                  }
-                            })
+                        `${environment.API_URL}/tokens/refresh`,
+                        body,
+                        {
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        }
+                    )
                     .pipe(
-                            catchError((err: HttpErrorResponse) => {
-                                  this.currentRefresh = undefined;
-                                  this.tokenStore.removeTokens()
-                                  throw err;
-                            }),
-                            tap((body) => {
-                                  this.currentRefresh = undefined;
-                                  this.accessToken = body.accessToken
-                            }),
-                            finalize(() => {
-                                  this.currentRefresh = undefined;
-                            })
+                        switchMap(res => {
+                            tokenStore.updateAccessToken(res.accessToken.accessToken);
+                            const retryReq = req.clone({
+                                setHeaders: {Authorization: `Bearer ${res.accessToken.accessToken}`},
+                            });
+                            return next(retryReq);
+                        }),
+                        catchError(() => {
+                            // Refresh token is invalid/expired — notify app via signal
+                            tokenStore.markSessionExpired();
+                            return EMPTY;
+                        }),
                     );
-            return this.currentRefresh
-      }
-
-
-      private includeToken(req: HttpRequest<any>): HttpRequest<any> {
-            const accessToken = this.tokenStore.accessToken;
-            if (accessToken) {
-                  const headers = req.headers.set('Authorization', `Bearer ${accessToken}`);
-                  req = req.clone({
-                        headers: headers,
-                  });
             }
-            return req
-      }
+            return throwError(() => error);
+        }),
+    );
+};
 
-      intercept(
-              req: HttpRequest<any>,
-              next: HttpHandler
-      ): Observable<HttpEvent<any>> {
-            req = req.clone({
-                  headers: req.headers,
-                  withCredentials: true
-            });
-
-            const pathOnly = new URL(req.url).pathname;
-            if (pathOnly == "/logout") {
-                  const refresh = this.tokenStore.refreshToken;
-                  if (refresh)
-                        req = req.clone({
-                              params: req.params.set('refresh_token', refresh)
-                        });
-                  return next.handle(req).pipe(finalize(() => {
-                        this.tokenStore.removeTokens()
-                  }));
-            }
-            let res: Observable<HttpEvent<any>>;
-            if (this.anonymousUrls.has(pathOnly)) {
-                  res = next.handle(req)
-            } else {
-                  req = this.includeToken(req);
-                  res = next.handle(req).pipe(
-                          catchError((err: HttpErrorResponse) => {
-                                if (err.status == HttpStatusCode.Unauthorized) {
-                                      const refreshToken = this.tokenStore.refreshToken;
-                                      if (
-                                              refreshToken != null &&
-                                              !this.jwtHelper.isTokenExpired(refreshToken)) {
-                                            return this.refresh(refreshToken).pipe(
-                                                    switchMap((token) => {
-                                                          if (!token) {
-                                                                throw err;
-                                                          }
-                                                          req = this.includeToken(req)
-                                                          return next.handle(req);
-                                                    })
-                                            );
-                                      }
-                                }
-                                throw err;
-                          })
-                  );
-
-            }
-
-            return res.pipe(
-                    tap(event => {
-                          if (event instanceof HttpResponse && event.body.accessToken) {
-                                this.accessToken = event.body.accessToken
-                          }
-                    })
-            );
-
-      }
-}

@@ -1,2 +1,2 @@
-<app-avatar-container [presence]="onlineAt" [avatar]="user.avatar" [directId]="user.id" size="35"/>
-<span class="room-name">{{ user.name }}</span>
+<app-avatar-container [presence]="onlineAt" [avatar]="user().avatar" [direct]="user().id" [size]="35"/>
+<span class="room-name">{{ user().name }}</span>

@@ -20,41 +20,35 @@ import {SearchUserListComponent} from "./ui/search-list/search-user-list.compone
 import {ThreadComponent} from "./ui/thread/thread.component";
 import {MessagePanelComponent} from "./ui/message-pannel/message-panel.component";
 import {MatTooltipModule} from "@angular/material/tooltip";
-import {AccountRepository} from "./service/auth/account-repository";
-import {AccountService} from "./service/auth/account.service";
+import {SplashComponent} from "./ui/splash/splash.component";
 
 @NgModule({
-      imports: [
-            HomeRoutingModule,
-            MatButtonModule,
-            CommonModule,
-            MatDividerModule,
-            MatMenuModule,
-            MatCardModule, MatRadioModule,
-            MatCheckboxModule,
-            MatSlideToggleModule,
-            MatIconModule,
-            MatTooltipModule,
-            ThreadComponent,
-            SearchUserListComponent,
-            SettingsItemComponent,
-            ConversationListComponent,
-            FormsModule,
-            ReactiveFormsModule,
-            MessageListComponent,
-            MessagePanelComponent
-      ],
-      declarations: [
-            HomeComponent,
-            SideNavComponent,
-            SettingsComponent,
-      ],
-      providers: [
-            {
-                  provide: AccountRepository,
-                  useExisting: AccountService
-            }
-      ],
+    imports: [
+        HomeRoutingModule,
+        MatButtonModule,
+        CommonModule,
+        MatDividerModule,
+        MatMenuModule,
+        MatCardModule, MatRadioModule,
+        MatCheckboxModule,
+        MatSlideToggleModule,
+        MatIconModule,
+        MatTooltipModule,
+        ThreadComponent,
+        SearchUserListComponent,
+        SettingsItemComponent,
+        ConversationListComponent,
+        FormsModule,
+        ReactiveFormsModule,
+        MessageListComponent,
+        MessagePanelComponent
+    ],
+    declarations: [
+        HomeComponent,
+        SideNavComponent,
+        SettingsComponent,
+        SplashComponent
+    ]
 })
 export class HomeModule {
 }
