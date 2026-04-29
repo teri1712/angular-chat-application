@@ -27,4 +27,4 @@ jobs:
         with:
           start: npm start
           wait-on: 'http://localhost:4200'
-          command: npm run e2e:ci
+          command: npm run cypress:run
