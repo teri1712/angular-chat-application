@@ -23,4 +23,8 @@ jobs:
       - name: build
         run: npm run build
       - name: e2e test
-        run: ng e2e --headless --watch false
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm start
+          wait-on: 'http://localhost:4200'
+          command: npm run e2e:ci

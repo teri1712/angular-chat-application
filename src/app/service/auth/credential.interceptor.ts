@@ -24,7 +24,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(authReq).pipe(
         catchError((error: HttpErrorResponse) => {
             const isRefresh = req.url.includes('/tokens/refresh');
-            const isLogin = req.url.includes('/user-login');
+            const isLogin = req.url.includes('/login');
 
             // If the 401 carries a business-logic detail (e.g. "Wrong password"),
             // it is NOT a token-expiry error — pass it straight to the caller.

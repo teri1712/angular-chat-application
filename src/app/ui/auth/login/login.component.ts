@@ -33,8 +33,6 @@ export class LoginComponent implements OnInit, OnDestroy {
                     }
                 })
 
-            } else {
-                console.log("vcl")
             }
         });
     }

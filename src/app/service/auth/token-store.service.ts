@@ -44,6 +44,7 @@ export class TokenStore implements ITokenStore, IProfileStore {
     clearSession(): void {
         Object.values(KEYS).forEach(k => localStorage.removeItem(k));
         this._profile.set(null);
+        this._accessToken.set(null);
         this._sessionExpired.set(false);
     }
 
