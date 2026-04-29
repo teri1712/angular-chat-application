@@ -35,20 +35,20 @@ jobs:
       - name: Push production image
         run: docker push teri1712/chat-app-client-production
 
-  google-cloud-deployment:
-    needs: build-artifacts
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy to VM
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.GOOGLE_CLOUD_HOST }}
-          username: ${{ secrets.GOOGLE_CLOUD_USER }}
-          key: ${{ secrets.GOOGLE_CLOUD_SSH_KEY }}
-          script: |
-            docker rm -f chat-app-client || true
-            docker pull teri1712/chat-app-client-production:latest
-            docker run -d --name chat-app-client -p 4200:80 --restart unless-stopped teri1712/chat-app-client-production:latest
+#  google-cloud-deployment:
+#    needs: build-artifacts
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#
+#      - name: Deploy to VM
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.GOOGLE_CLOUD_HOST }}
+#          username: ${{ secrets.GOOGLE_CLOUD_USER }}
+#          key: ${{ secrets.GOOGLE_CLOUD_SSH_KEY }}
+#          script: |
+#            docker rm -f chat-app-client || true
+#            docker pull teri1712/chat-app-client-production:latest
+#            docker run -d --name chat-app-client -p 4200:80 --restart unless-stopped teri1712/chat-app-client-production:latest
