@@ -1,34 +1,31 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {AccountService} from "./service/auth/account.service";
-import {Router} from "@angular/router";
+import {Router, RouterOutlet} from "@angular/router";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {take} from "rxjs";
+import {IconRegistry} from "./res/IconRegistry";
+import {ThemeService} from "./service/theme-service";
 
 @Component({
-      selector: 'app-root',
-      templateUrl: './app.component.html',
-      standalone: false,
-      styleUrl: './app.component.css',
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    standalone: true,
+    imports: [
+        RouterOutlet
+    ],
+    styleUrl: './app.component.css',
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
 
-      protected loaded = false;
 
-      constructor(private readonly accountRepository: AccountService, private readonly router: Router, private readonly snackBar: MatSnackBar) {
+    constructor(
+        private readonly accountRepository: AccountService,
+        private readonly router: Router,
+        private readonly snackBar: MatSnackBar,
+        iconRegistry: IconRegistry,
+        themeService: ThemeService,
+    ) {
 
-      }
-
-      ngOnInit(): void {
-            this.accountRepository.accountObservable.pipe(take(1))
-                    .subscribe(account => {
-                          this.loaded = true;
-                          if (account) {
-                                this.router.navigate(['/home']);
-                          } else {
-                                this.router.navigate(["/auth/login"], {replaceUrl: true});
-                          }
-                    })
-      }
+    }
 
 
 }

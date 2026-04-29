@@ -53,6 +53,7 @@ export class ConversationListComponent implements OnInit {
     }
 
     mapLog(log: InboxLog, presence?: ChatPresence): ConversationView {
+        // todo: graceful
         const message = log.messageState;
         return {
             roomName: log.roomName,

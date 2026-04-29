@@ -1,0 +1,14 @@
+{
+  "profile": {
+    "id": 1,
+    "username": "superadmin",
+    "name": "Super Admin",
+    "dob": "1990-01-01",
+    "gender": "MALE",
+    "role": "ADMIN"
+  },
+  "accessToken": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJzdXBlcmFkbWluIiwibmFtZSI6InN1cGVyYWRtaW4iLCJkb2IiOiIxOTkwLTAxLTAxIiwiZ2VuZGVyIjoiTUFMRSIsInJvbGUiOiJBRE1JTiIsImV4cCI6MjUyNDYwODAwMH0.WfqZzEgfd10aBtD-uj7lO-fmY04lJWHbJBx-HMRTb-Q",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJzdXBlcmFkbWluIiwibmFtZSI6InN1cGVyYWRtaW4iLCJkb2IiOiIxOTkwLTAxLTAxIiwiZ2VuZGVyIjoiTUFMRSIsInJvbGUiOiJBRE1JTiIsImV4cCI6MjUyNDYwODAwMH0.WfqZzEgfd10aBtD-uj7lO-fmY04lJWHbJBx-HMRTb-Q"
+  }
+}

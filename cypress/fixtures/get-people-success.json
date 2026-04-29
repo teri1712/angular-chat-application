@@ -1,0 +1,20 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "username": "minh.tri",
+    "name": "Thái Minh Trí",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=tri"
+  },
+  {
+    "id": "7ca34b12-9c12-4f32-8b1a-123456789abc",
+    "username": "backend.dev",
+    "name": "Java Spring Enthusiast",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=dev"
+  },
+  {
+    "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "username": "starcamp_mate",
+    "name": "NAB Colleague",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=nab"
+  }
+]

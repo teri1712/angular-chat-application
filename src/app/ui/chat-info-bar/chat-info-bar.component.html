@@ -15,6 +15,7 @@
 
 <div class="d-flex gap-1 align-items-center">
     <button mat-icon-button aria-label="Search" *ngIf="(chatIdSubject | async) as _chatId"
+            class="search-message"
             (click)="openSearchDialog(_chatId)">
         <mat-icon>search</mat-icon>
     </button>

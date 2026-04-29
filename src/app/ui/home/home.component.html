@@ -1,3 +1,6 @@
+@if (splashing()) {
+    <app-splash/>
+}
 <app-side-nav/>
 <div class="side-bar">
     <router-outlet name="side-bar"/>
@@ -5,3 +8,4 @@
 <div class="conversation">
     <router-outlet name="conversation"/>
 </div>
+
