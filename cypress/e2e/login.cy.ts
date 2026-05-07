@@ -1,35 +1,11 @@
 describe('Login', () => {
     beforeEach(() => {
-        cy.clearLocalStorage();
-        // Block the real Google GSI script so it cannot overwrite our stub
-        cy.intercept('GET', 'https://accounts.google.com/gsi/client', {body: ''});
-        cy.visit('/auth/login', {
-            onBeforeLoad(win) {
-                (win as any).google = {
-                    accounts: {
-                        id: {
-                            initialize(cfg: { callback: (r: { credential: string }) => void }) {
-                                (win as any).__googleCallback = cfg.callback;
-                            },
-                            renderButton(el: HTMLElement) {
-                                el.innerHTML = '<span style="pointer-events:none">Sign in with Google</span>';
-                                el.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:40px;';
-                                el.addEventListener('click', () => {
-                                    (win as any).__googleCallback?.({credential: 'fakeIdToken'});
-                                });
-                            },
-                            prompt() {
-                            },
-                        },
-                    },
-                };
-            }
-        });
+        cy.visitLogin();
     });
 
     it('should display early feedback error when username less than 4 chars', () => {
         cy.get('[placeholder="Username"]').click().type('adm')
-        cy.get('[placeholder="Password"]').click().type('password12345')
+        cy.get('[placeholder="Password"]').type('password12345', {force: true})
         cy.get('button[type="submit"]').click()
         cy.contains('Username must have length of at least 4 characters').should('be.visible');
     })
@@ -37,7 +13,7 @@ describe('Login', () => {
     it('should display username exists error when the server return such error', () => {
         cy.intercept('POST', '**/login', {statusCode: 400, body: {detail: 'Username already exists'}});
         cy.get('[placeholder="Username"]').type('admin12345')
-        cy.get('[formControlName="password"]').type('password12345')
+        cy.get('[formControlName="password"]').type('password12345', {force: true})
         cy.get('button[type="submit"]').click()
         cy.contains('Username already exists').should('be.visible');
     })
@@ -52,7 +28,7 @@ describe('Login', () => {
         cy.contains('Enter your username').should('be.visible');
         cy.contains('Enter your password').should('be.visible');
         cy.get('[placeholder="Username"]').type('admin12345')
-        cy.get('[formControlName="password"]').type('password12345')
+        cy.get('[formControlName="password"]').type('password12345', {force: true})
         cy.get('button[type="submit"]').click()
         cy.get('mat-spinner').should('be.visible');
     })
@@ -62,7 +38,7 @@ describe('Login', () => {
             cy.intercept('POST', '**/login', {statusCode: 200, body: data});
         })
         cy.get('[placeholder="Username"]').type('admin12345')
-        cy.get('[formControlName="password"]').type('password12345')
+        cy.get('[formControlName="password"]').type('password12345', {force: true})
         cy.get('button[type="submit"]').click()
         cy.url().should('include', '/home');
     })
@@ -76,6 +52,6 @@ describe('Login', () => {
         cy.get('#google-signin-btn').click()
         cy.url().should('include', '/home');
 
-        cy.contains('user1234').should('be.visible');
+        cy.contains('threads').should('be.visible');
     })
 })

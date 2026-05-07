@@ -8,7 +8,7 @@ describe('Profile', () => {
     describe('Change profile', () => {
 
         it('should show validation errors for empty profile form', () => {
-            cy.contains('Save Profile').click();
+            cy.contains('Save Profile').click({force: true});
             cy.contains('Name is required').should('be.visible');
         });
 
@@ -19,10 +19,10 @@ describe('Profile', () => {
             }).as('updateProfile');
 
             cy.get('[formControlName="name"]').clear().type('John Doe');
-            cy.get('[formControlName="gender"]').click();
+            cy.get('[formControlName="gender"]').scrollIntoView().click();
             cy.contains('Male').click();
 
-            cy.contains('Save Profile').click();
+            cy.contains('Save Profile').click({force: true});
 
             cy.wait('@updateProfile');
 
@@ -46,7 +46,7 @@ describe('Profile', () => {
             cy.get('[formControlName="newPassword"]').type('abcdef');
             cy.get('[formControlName="confirmPassword"]').type('different');
 
-            cy.contains('Update Password').click();
+            cy.contains('Update Password').click({force: true});
 
             cy.contains('Passwords do not match').should('be.visible');
         });

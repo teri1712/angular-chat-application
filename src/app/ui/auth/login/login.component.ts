@@ -91,7 +91,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.isGoogleLoading.set(true);
 
         this.authenticator.loginOAuth2(idToken).subscribe({
-            next: () => this.router.navigate(['/docs/dashboard']),
+            next: () => this.router.navigate(['/home']),
             error: (err: HttpErrorResponse) => {
                 this.isGoogleLoading.set(false);
                 this.error.set(err.error?.detail);
@@ -143,12 +143,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
         if (this.form.invalid) return;
 
         this.error.set('');
+        this.inProgress.set(true);
         this.authenticator.signIn({
             username: this.form.get("username")?.value as string,
             password: this.form.get("password")?.value as string
         }).subscribe(
             {
                 error: err => {
+                    this.inProgress.set(false);
                     this.error.set(err.error?.detail)
                 }
             }

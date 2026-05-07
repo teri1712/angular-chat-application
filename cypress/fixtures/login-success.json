@@ -1,8 +1,8 @@
 {
   "profile": {
     "id": 1,
-    "username": "superadmin",
-    "name": "Super Admin",
+    "username": "user1234",
+    "name": "user1234",
     "dob": "1990-01-01",
     "gender": "MALE",
     "role": "ADMIN"
