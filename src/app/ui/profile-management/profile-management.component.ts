@@ -42,10 +42,10 @@ export class ProfileManagementComponent {
     passwordForm!: FormGroup;
     private initialProfileValues: any = {};
 
-    private fb = inject(FormBuilder)
-    private profileService = inject(ProfileService)
-    private authenticator = inject(Authenticator)
-    private snackBar = inject(MatSnackBar)
+    private readonly fb = inject(FormBuilder)
+    private readonly profileService = inject(ProfileService)
+    private readonly authenticator = inject(Authenticator)
+    private readonly snackBar = inject(MatSnackBar)
     public dialogRef = inject(MatDialogRef<ProfileManagementComponent>)
 
     profile = rxResource({

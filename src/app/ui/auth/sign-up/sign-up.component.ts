@@ -1,88 +1,72 @@
-import {Component} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {provideNativeDateAdapter} from "@angular/material/core";
 import {Router} from "@angular/router";
-import {HttpErrorResponse} from "@angular/common/http";
 import {MatDialog} from "@angular/material/dialog";
 import {ProgressDialogComponent} from "../../progress-dialog/progress-dialog.component";
 import {finalize} from "rxjs";
 import {Authenticator} from "../../../service/auth/authenticator";
-import {UploadService} from "../../../service/upload-service";
+import {InfoForm} from "./sign-up-info/sign-up-info.component";
+
 
 @Component({
-      selector: 'app-sign-up',
-      standalone: false,
-      providers: [provideNativeDateAdapter()],
-      templateUrl: './sign-up.component.html',
-      styleUrl: './sign-up.component.css'
+    selector: 'app-sign-up',
+    standalone: false,
+    providers: [provideNativeDateAdapter()],
+    templateUrl: './sign-up.component.html',
+    styleUrl: './sign-up.component.css'
 })
 export class SignUpComponent {
+    private readonly authenticator = inject(Authenticator)
+    private readonly router = inject(Router)
+    private readonly matDialog = inject(MatDialog)
 
-      constructor(private authenticator: Authenticator,
-                  private router: Router,
-                  private matDialog: MatDialog,
-                  private uploadService: UploadService) {
-      }
+    private info!: InfoForm
+    private avatar?: File
 
-      private readonly body: {
-            username?: string,
-            password?: string,
-            fullname?: string,
-            gender?: number,
-            dob?: string,
-            file?: File
-      } = {}
-      error?: string
-      progress = 0
+    readonly error = signal('')
+    readonly progress = signal<'info' | 'avatar'>('info')
 
-      protected onCompleteInformation(info: {
-            username: string,
-            password: string,
-            fullname: string,
-            gender: number,
-            dob: string,
-      }) {
-            this.progress = this.progress ^ 1
-            this.body.username = info.username
-            this.body.password = info.password
-            this.body.fullname = info.fullname
-            this.body.dob = new Date(info.dob).toISOString()
-            this.body.gender = info.gender
-      }
+    protected onCompleteInfo(info: InfoForm) {
+        this.progress.set('avatar')
+        this.info = info
+    }
 
-      protected onCompleteAvatar(file: File | undefined) {
-            this.body.file = file
-            this.submit()
-      }
+    protected onCompleteAvatar(avatar?: File) {
+        this.avatar = avatar
+        this.submit()
+    }
 
-      private submit() {
-            const ref = this.matDialog.open(ProgressDialogComponent, {
-                  disableClose: true,
-                  data: {
-                        action_name: "Signing Up",
-                  }
+    private submit() {
+        const ref = this.matDialog.open(ProgressDialogComponent, {
+            disableClose: true,
+            data: {
+                action_name: "Signing Up",
+            }
+        })
+
+
+        this.authenticator.signUp({
+            username: this.info.username,
+            password: this.info.password,
+            gender: this.info.gender,
+            dob: new Date(this.info.dob).toISOString(),
+            name: this.info.fullname,
+            avatar: this.avatar
+        }).pipe(
+            finalize(() => {
+                ref.close()
             })
+        ).subscribe(
+            {
+                next: () => {
 
-
-            this.authenticator.signUp({
-                  username: this.body.username!,
-                  password: this.body.password!,
-                  gender: this.body.gender!,
-                  dob: this.body.dob!,
-                  name: this.body.fullname!,
-                  avatar: this.body.file
-            }).pipe(
-                    finalize(() => {
-                          ref.close()
-                    })
-            ).subscribe(
-                    () => {
-                          this.router.navigate(['/home'])
-                    },
-                    (error: HttpErrorResponse) => {
-                          console.error(error)
-                          this.error = error.error.toString()
-                          this.progress = 0
-                    },
-            )
-      }
+                    this.router.navigate(['/home'])
+                },
+                error: err => {
+                    console.error(err)
+                    this.error.set(err.error?.detail)
+                }
+            }
+        )
+    }
 }

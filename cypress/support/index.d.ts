@@ -6,6 +6,8 @@ declare namespace Cypress {
         login(username?: string, password?: string): Chainable<void>;
 
         visitConversation(conversationId: string): Chainable<void>
+
+        interceptUpload(): Chainable<void>
     }
 }
 

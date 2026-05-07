@@ -20,3 +20,19 @@ Cypress.Commands.add('visitConversation', (conversationId) => {
     cy.get('app-chat-info-bar')
         .should('be.visible')
 })
+
+Cypress.Commands.add('interceptUpload', () => {
+    cy.intercept('POST', '**/files/upload**', {
+        statusCode: 200, body: {
+            presignedUploadUrl: '/presigned-upload-url',
+        }
+    });
+    cy.intercept('PUT', '/presigned-upload-url', {
+        statusCode: 200, body: {
+            presignedUploadUrl: '/presigned-upload-url',
+        },
+        headers: {
+            ETag: 'etag-value',
+        }
+    });
+})
