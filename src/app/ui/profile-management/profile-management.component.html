@@ -159,7 +159,7 @@
                                         <mat-error>Please confirm</mat-error>
                                     }
 
-                                    @if (passwordForm.hasError('mismatch')) {
+                                    @if (confirm?.hasError('mismatch')) {
                                         <mat-error>Passwords do not match</mat-error>
                                     }
                                 </mat-form-field>
@@ -168,7 +168,6 @@
                                         mat-flat-button
                                         color="warn"
                                         type="submit"
-                                        [disabled]="passwordForm.invalid"
                                         class="action-button"
                                 >
                                     <mat-icon>update</mat-icon>

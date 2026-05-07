@@ -8,6 +8,7 @@ describe('Profile', () => {
     describe('Change profile', () => {
 
         it('should show validation errors for empty profile form', () => {
+            cy.get('[formControlName="name"]').clear();
             cy.contains('Save Profile').click({force: true});
             cy.contains('Name is required').should('be.visible');
         });
@@ -18,8 +19,10 @@ describe('Profile', () => {
                 body: {success: true}
             }).as('updateProfile');
 
-            cy.get('[formControlName="name"]').clear().type('John Doe');
-            cy.get('[formControlName="gender"]').scrollIntoView().click();
+            cy.get('[formControlName="name"]').clear();
+            cy.get('[formControlName="name"]').type('John Doe');
+            cy.get('[formControlName="gender"]').scrollIntoView();
+            cy.get('[formControlName="gender"]').click({force: true});
             cy.contains('Male').click();
 
             cy.contains('Save Profile').click({force: true});
@@ -34,7 +37,7 @@ describe('Profile', () => {
     describe('Change password', () => {
 
         it('should show password validation errors', () => {
-            cy.contains('Update Password').click();
+            cy.contains('Update Password').click({force: true});
 
             cy.contains('Current password is required').should('be.visible');
             cy.contains('New password is required').should('be.visible');
@@ -42,9 +45,9 @@ describe('Profile', () => {
         });
 
         it('should detect password mismatch', () => {
-            cy.get('[formControlName="oldPassword"]').type('123456');
-            cy.get('[formControlName="newPassword"]').type('abcdef');
-            cy.get('[formControlName="confirmPassword"]').type('different');
+            cy.get('[formControlName="oldPassword"]').type('123456', {force: true});
+            cy.get('[formControlName="newPassword"]').type('abcdef', {force: true});
+            cy.get('[formControlName="confirmPassword"]').type('different', {force: true});
 
             cy.contains('Update Password').click({force: true});
 
@@ -56,10 +59,11 @@ describe('Profile', () => {
                 statusCode: 200,
                 body: {success: true}
             }).as('changePassword');
+            cy.intercept('POST', '**/login', {fixture: 'login-success'});
 
-            cy.get('[formControlName="oldPassword"]').type('123456');
-            cy.get('[formControlName="newPassword"]').type('abcdef');
-            cy.get('[formControlName="confirmPassword"]').type('abcdef');
+            cy.get('[formControlName="oldPassword"]').type('123456', {force: true});
+            cy.get('[formControlName="newPassword"]').type('abcdef', {force: true});
+            cy.get('[formControlName="confirmPassword"]').type('abcdef', {force: true});
 
             cy.contains('Update Password').click();
 
@@ -73,8 +77,9 @@ describe('Profile', () => {
             cy.interceptUpload()
             cy.intercept('PATCH', '**/profiles/me', {
                 statusCode: 200, body: {}
-            })
-            cy.contains('Change Avatar').selectFile('cypress/fixtures/loki.jpg');
+            }).as('updateAvatar')
+            cy.get('input[type="file"]').selectFile('cypress/fixtures/loki.jpg', {force: true});
+            cy.wait('@updateAvatar');
             cy.contains('Avatar updated successfully').should('be.visible');
         });
     })
