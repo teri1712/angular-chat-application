@@ -1,6 +1,6 @@
 import {HttpBackend, HttpClient, HttpErrorResponse, HttpInterceptorFn, HttpParams} from '@angular/common/http';
 import {inject} from '@angular/core';
-import {catchError, EMPTY, switchMap, throwError} from 'rxjs';
+import {catchError, switchMap, throwError} from 'rxjs';
 import {TokenStore} from "./token-store.service";
 import {Account} from "../../model/dto/account";
 import {environment} from "../../environments";
@@ -33,7 +33,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                 const refreshToken = tokenStore.getRefreshToken();
                 if (!refreshToken) {
                     tokenStore.markSessionExpired();
-                    return EMPTY;
+                    throw error
                 }
 
                 // Use HttpBackend to bypass interceptor chain for the refresh call
@@ -57,10 +57,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                             });
                             return next(retryReq);
                         }),
-                        catchError(() => {
+                        catchError((err) => {
                             // Refresh token is invalid/expired — notify app via signal
                             tokenStore.markSessionExpired();
-                            return EMPTY;
+                            throw err
                         }),
                     );
             }
