@@ -1,20 +1,20 @@
 import {Preference} from "../../model/dto/preference";
 import {TypeMessage} from "../../model/dto/type-message";
 import {Observable} from "rxjs";
+import {Signal} from "@angular/core";
 
 export interface IDialog {
 
-      readonly identifier: string;
-      readonly preference: Observable<Preference>,
-      readonly roomName: Observable<string | undefined>,
-      readonly roomAvatar: Observable<string | undefined>,
-      readonly presence: Observable<Date | undefined>,
-      readonly lastActivity: Observable<Date>,
-      readonly typings: Observable<TypeMessage[]>
+    readonly identifier: string;
+    readonly preference: Observable<Preference>,
+    readonly presence: Observable<Date>,
+    readonly roomName: Signal<string>,
+    readonly roomAvatar: Signal<string>,
+    readonly typings: Observable<TypeMessage[]>
 
-      join(): void
+    join(): void
 
-      ping(): void,
+    ping(): void,
 
-      leave(): void
+    leave(): void
 }

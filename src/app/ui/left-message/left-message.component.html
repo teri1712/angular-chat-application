@@ -1,30 +1,32 @@
 <div class="avatar-holder">
-    <img *ngIf=" frame.position === Position.Single || frame.position === Position.Bottom"
-         [src]="message.sender.avatar"
-         alt="">
+    @if (frame().position === Position.Single || frame().position === Position.Bottom) {
+        <img [src]="message().sender.avatar" alt="">
+    }
 </div>
-<ng-container [ngSwitch]="message.messageType.toLowerCase()">
-    <app-icon-message *ngSwitchCase="'icon'" [iconState]="$any(message)"/>
-    <div *ngSwitchDefault
-         [ngStyle]="{
-                  'overflow': 'hidden',
-                  'border-top-left-radius':  (
-                     frame.position === Position.Single
-                  || frame.position === Position.Top) ? '20px' : '3px',
-                  'border-top-right-radius': '20px',
-                  'border-bottom-right-radius': '20px',
-                  'border-bottom-left-radius':  (
-                     frame.position === Position.Single
-                  || frame.position === Position.Bottom) ? '20px' : '3px',
+
+<ng-content select="[no-cropped-frame]"></ng-content>
+
+<div
+        [ngStyle]="{
+                    'overflow': 'hidden',
+                    'border-top-left-radius':
+                        (frame().position === Position.Single
+                      || frame().position === Position.Top)
+                        ? '20px'
+                        : '3px',
+
+                    'border-top-right-radius': '20px',
+
+                    'border-bottom-right-radius': '20px',
+
+                    'border-bottom-left-radius':
+                        (frame().position === Position.Single
+                      || frame().position === Position.Bottom)
+                        ? '20px'
+                        : '3px'
                 }"
-    >
-        <ng-container [ngSwitch]="message.messageType.toLowerCase()">
-            <app-text-message *ngSwitchCase="'text'" [textState]="$any(message)"/>
-            <app-image-message *ngSwitchCase="'image'" [imageState]="$any(message)"/>
-            <app-file-message *ngSwitchCase="'file'" [fileState]="$any(message)"/>
+>
+    <ng-content select="[cropped-frame]"></ng-content>
 
-        </ng-container>
-    </div>
+</div>
 
-
-</ng-container>

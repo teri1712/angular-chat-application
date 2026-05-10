@@ -1,4 +1,4 @@
-import {Component, Injector, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, inject, Injector, input} from '@angular/core';
 import {ONE_HOUR_SECONDS, ONE_MINUTE_SECONDS} from "../../utils/time";
 import {CommonModule} from "@angular/common";
 import {AvatarContainerComponent} from "../avatar-container/avatar-container.component";
@@ -7,9 +7,9 @@ import {ChatSettingComponent} from '../chat-setting/chat-setting.component';
 import {MatIconButton} from "@angular/material/button";
 import {SearchDialogComponent} from "../search-dialog/search-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
-import {BehaviorSubject, filter, Observable, switchMap} from "rxjs";
-import {Preference} from "../../model/dto/preference";
+import {switchMap} from "rxjs";
 import {DialogService} from "../../service/repository/dialog.service";
+import {rxResource} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-chat-info-bar',
@@ -18,50 +18,38 @@ import {DialogService} from "../../service/repository/dialog.service";
     styleUrl: './chat-info-bar.component.css',
     standalone: true
 })
-export class ChatInfoBarComponent implements OnChanges, OnInit {
-    @Input({required: true}) roomName!: string | null;
-    @Input({required: true}) roomAvatar!: string | null;
+export class ChatInfoBarComponent {
 
-    @Input({required: true})
-    set chatId(value: string | null) {
-        if (value == null) return;
-        this.chatIdSubject.next(value);
-    };
+    private readonly matDialog = inject(MatDialog);
+    private readonly dialogService = inject(DialogService);
+    private readonly injector = inject(Injector);
 
-    @Input({required: true}) presence!: Date | null;
+    roomName = input.required<string>();
+    presence = input<Date>();
+    roomAvatar = input.required<string>();
+    chatId = input.required<string>();
+    preference = rxResource({
+        params: () => {
+            return ({
+                chatId: this.chatId(),
+            })
+        },
+        stream: (request) => {
+            const params = request.params
+            const chatId = params.chatId
+            return this.dialogService.findByChatId(chatId)
+                .pipe(switchMap((dialog) => dialog.preference))
+        },
+    });
 
-    protected preference!: Observable<Preference>;
-    protected chatIdSubject = new BehaviorSubject<string | null>(null);
-
-
-    constructor(
-        private matDialog: MatDialog,
-        private dialogService: DialogService,
-        private injector: Injector
-    ) {
+    constructor() {
     }
-
-    ngOnInit(): void {
-        this.preference = this.chatIdSubject.pipe(
-            filter(chatId => chatId != null),
-            switchMap(chatId => this.dialogService.findByChatId(chatId)),
-            switchMap((dialog) => dialog.preference)
-        )
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['chatId']) {
-            const chatId = changes['chatId'].currentValue;
-            this.chatIdSubject.next(chatId);
-        }
-    }
-
 
     protected get diffOnline(): number {
-        return Date.now() / 1000 - (this.presence?.getTime() ?? 0) / 1000
+        return Date.now() / 1000 - (this.presence()?.getTime() ?? 0) / 1000
     }
 
-    protected openSearchDialog(chatId: string) {
+    protected openSearchDialog() {
         this.matDialog.open(SearchDialogComponent, {
             width: '600px',
             maxWidth: '90vw',
@@ -69,7 +57,7 @@ export class ChatInfoBarComponent implements OnChanges, OnInit {
             maxHeight: '85vh',
             injector: this.injector,
             data: {
-                chatId: chatId,
+                chatId: this.chatId(),
             }
         });
     }

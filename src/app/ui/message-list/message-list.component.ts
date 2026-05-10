@@ -1,4 +1,4 @@
-import {Component, DestroyRef, HostBinding, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, computed, effect, HostBinding, inject, input, signal, untracked, ViewChild} from '@angular/core';
 import {ChatInfoBarComponent} from "../chat-info-bar/chat-info-bar.component";
 import {InputBarComponent} from "../input-bar/input-bar.component";
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
@@ -8,19 +8,7 @@ import {CommonModule} from "@angular/common";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {ReactiveFormsModule} from "@angular/forms";
 import {DialogService} from "../../service/repository/dialog.service";
-import {
-    BehaviorSubject,
-    combineLatest,
-    filter,
-    map,
-    Observable,
-    of,
-    Subject,
-    switchMap,
-    tap,
-    timer,
-    withLatestFrom
-} from "rxjs";
+import {map, Observable, of, Subject, switchMap, timer} from "rxjs";
 import {TypeMessage} from "../../model/dto/type-message";
 import {MessageService} from "../../service/message-service";
 import {DomSanitizer, SafeStyle} from "@angular/platform-browser";
@@ -33,14 +21,17 @@ import {MessageRepository} from "../../service/repository/message-repository.ser
 import {LogStream} from "../../service/repository/log-stream.service";
 import CacheService from "../../service/cache/data/cache-service";
 import {Preference} from "../../model/dto/preference";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AutoSizeVirtualScrollStrategy} from "@angular/cdk-experimental/scrolling";
 import {GroupPipe} from "../pipes/group";
 import {SendMessage, SentMessagesPipe} from "../pipes/sent-message.pipe";
+import {GroupMessageComponent} from "../group-message/group-message.component";
+import {LeftMessageComponent} from "../left-message/left-message.component";
+import {PreferenceMessageComponent} from "../preference-message/preference-message.component";
+import {RightMessageComponent} from "../right-message/right-message.component";
+import {FileMessageComponent} from "../file-message/file-message.component";
+import {IconMessageComponent} from "../icon-message/icon-message.component";
+import {ImageMessageComponent} from "../image-message/image-message.component";
+import {TextMessageComponent} from "../text-message/text-message.component";
 
-export function scrollStrategyFactory() {
-    return new AutoSizeVirtualScrollStrategy(200, 400);
-}
 
 @Component({
     selector: 'app-message-list',
@@ -57,6 +48,14 @@ export function scrollStrategyFactory() {
         CdkFixedSizeVirtualScroll,
         GroupPipe,
         SentMessagesPipe,
+        GroupMessageComponent,
+        LeftMessageComponent,
+        PreferenceMessageComponent,
+        RightMessageComponent,
+        FileMessageComponent,
+        IconMessageComponent,
+        ImageMessageComponent,
+        TextMessageComponent,
 
         // CdkAutoSizeVirtualScroll
     ],
@@ -70,37 +69,63 @@ export function scrollStrategyFactory() {
     templateUrl: './message-list.component.html',
     styleUrl: './message-list.component.css'
 })
-export class MessageListComponent implements OnInit {
+export class MessageListComponent {
 
     @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
 
-    @Input() set chat(chatId: string | null) {
-        if (chatId) {
-            this.expanding = false;
-            this.end = false;
-            this.chatId.next(chatId);
-            this.replace([])
-            this.firstVisibleIndex.next(0);
-        }
+    chatId = input.required<string>()
+    roomName = input.required<string>();
+    roomAvatar = input.required<string>();
+    presence = input<Date>();
+    preference = input<Preference>();
+
+    private readonly messages = signal<Message[]>([])
+    private readonly sendings = signal<ISendingMessage[]>([])
+    private readonly typings = signal<TypeMessage[]>([])
+
+
+    private readonly expanding = signal<boolean>(false);
+    private readonly end = signal<boolean>(false);
+    private readonly messageLength = computed(() => this.messages().length)
+    private readonly firstVisibleIndex = signal<number>(0);
+
+    private readonly cacheStore = inject(CacheService);
+    private readonly dialogService = inject(DialogService);
+    private readonly messageRepository = inject(MessageRepository);
+    private readonly logStream = inject(LogStream);
+    private readonly profileService = inject(ProfileService);
+    private readonly messageService = inject(MessageService);
+    private readonly sanitizer = inject(DomSanitizer);
+
+    constructor() {
+        effect(() => {
+            if (this.chatId()) {
+                untracked(() => {
+                    this.expanding.set(false)
+                    this.end.set(false)
+                    this.messages.set([])
+                    this.firstVisibleIndex.set(0);
+                })
+            }
+        });
+
+        this.defineDisplayPipe();
+        this.definePrependingPipe();
+        this.defineAppendingPipe();
+        this.defineExpandPipe();
     }
 
-    @Input() roomName: string | null = null;
-    @Input() roomAvatar: string | null = null;
-    @Input() presence: Date | null = null;
-    @Input() preference: Preference | null = null;
-
-    protected chatId = new BehaviorSubject<string>('');
 
     /** Applies the per-chat palette class, e.g. "chat-theme-meadow". */
     @HostBinding('class')
     get hostClass(): string {
-        const name = this.preference?.themeName;
+        const name = this.preference()?.themeName;
         return name ? `chat-theme-${name}` : '';
     }
 
     @HostBinding('style')
     get hostStyle(): SafeStyle {
-        const theme = this.preference?.themeBackground;
+        const theme = this.preference()?.themeBackground;
         if (theme) {
             return this.sanitizer.bypassSecurityTrustStyle(`background-image: url('${theme}')`);
         }
@@ -125,44 +150,22 @@ export class MessageListComponent implements OnInit {
         }
     }
 
-    private readonly firstVisibleIndex = new BehaviorSubject<number>(0);
-    private readonly messageLength = new BehaviorSubject<number>(0)
 
     protected onScrollChanged(index: number) {
-        this.firstVisibleIndex.next(index);
+        this.firstVisibleIndex.set(index);
     }
 
-    private messages: Message[] = [];
-    private sendings: ISendingMessage[] = [];
-    private typings: TypeMessage[] = [];
-
-    private expanding: boolean = false;
-    private end: boolean = false;
     private readonly expandTrigger = new Subject<void>();
 
     protected trackByTrackId(index: number, item: MessageRow) {
         switch (item.type) {
-            case "message":
-                return item.message.sequenceNumber;
             case "typing":
                 return item.typeEvent.from;
             case 'loading':
                 return '0';
             default:
-                return 'wtf'
+                return item.message.sequenceNumber
         }
-    }
-
-
-    constructor(
-        private readonly cacheStore: CacheService,
-        private readonly dialogService: DialogService,
-        private readonly messageRepository: MessageRepository,
-        private readonly logStream: LogStream,
-        private readonly profileService: ProfileService,
-        private readonly messageService: MessageService,
-        private readonly sanitizer: DomSanitizer
-    ) {
     }
 
 
@@ -175,12 +178,29 @@ export class MessageListComponent implements OnInit {
             displayTime: false
         }
 
+        const mine = this.profileService.thatsMe(message.sender)
+        const type = message.messageType.toLowerCase()
+        if (type.includes('group') || type.includes('preference')) {
+            return ({
+                type: 'middle-message',
+                mine: mine,
+                message: message,
+                frame: frame
+            } as Message)
+        }
+        if (mine) {
+            return ({
+                type: 'right-message',
+                sent: {
+                    sendState: SendState.Sent,
+                },
+                message: message,
+                frame: frame
+            } as Message)
+
+        }
         return ({
-            type: 'message',
-            sent: {
-                sendState: SendState.Sent,
-            },
-            mine: this.profileService.thatsMe(message.sender),
+            type: 'left-message',
             message: message,
             frame: frame
         } as Message)
@@ -188,7 +208,7 @@ export class MessageListComponent implements OnInit {
 
     toSendingRow(sending: ISendingMessage): MessageRow {
         return {
-            type: 'message',
+            type: 'right-message',
             sent: {
                 sendState: sending.sendState,
             },
@@ -231,127 +251,141 @@ export class MessageListComponent implements OnInit {
         } as MessageRow
     }
 
-    private readonly destroyRef = inject(DestroyRef);
-
-    replace(messages: Message[]) {
-        this.messages = messages;
-        this.messageLength.next(messages.length)
-    }
-
 
     definePrependingPipe() {
-        this.logStream.getChannel().pipe(
-            takeUntilDestroyed(this.destroyRef)
-        ).subscribe(log => {
-            this.cacheStore.put(log.messageState);
+        effect((onCleanup) => {
+
+            const sub = this.logStream.getChannel()
+                .subscribe({
+                    next: log => {
+                        this.cacheStore.put(log.messageState);
+                    }
+                });
+            onCleanup(sub.unsubscribe)
         });
 
-        this.chatId.pipe(
-            takeUntilDestroyed(this.destroyRef),
-            switchMap(chatId => this.logStream.getChatChannel(chatId)),
-        ).subscribe(log => {
-            const message = log.messageState;
-            if (log.action === LogAction.ADDITION) {
-                this.replace(this.prepend(message, this.messages));
-                this.checkKeepScrollBeginning()
-            } else {
-                this.replace(this.update(message, this.messages));
+        effect((onCleanup) => {
+            const chatId = this.chatId()
+            if (chatId) {
+                const sub = this.logStream.getChatChannel(chatId)
+                    .subscribe({
+                        next: log => {
+                            untracked(() => {
+                                const message = log.messageState;
+                                if (log.action === LogAction.ADDITION) {
+                                    this.messages.set(this.prepend(message, this.messages()));
+                                    this.checkKeepScrollBeginning()
+                                } else {
+                                    this.messages.set(this.update(message, this.messages()));
+                                }
+                                this.scrollToBeginning()
+                            })
+                        }
+                    })
+                onCleanup(sub.unsubscribe)
             }
         });
+
     }
 
 
     defineAppendingPipe() {
-        this.expandTrigger.pipe(
-            takeUntilDestroyed(this.destroyRef),
-            withLatestFrom(this.chatId),
-            filter(([trigger, chatId]) => !!chatId),
-            switchMap(([trigger, chatId]) => this.expand(this.messages, chatId)),
-        ).subscribe({
-            next: newMessages => {
-                if (newMessages.length == 0) {
-                    this.end = true;
-                }
-                this.expanding = false;
-                this.replace(this.append(this.messages, newMessages));
-
-            },
-            error: err => {
-                console.error(err)
-                // todo
+        effect((onCleanup) => {
+            if (this.expanding()) {
+                const sub = this.expand()
+                    .subscribe({
+                        next: newMessages => {
+                            untracked(() => {
+                                if (newMessages.length == 0) {
+                                    this.end.set(true);
+                                }
+                                this.expanding.set(false);
+                                this.messages.set(this.append(this.messages(), newMessages));
+                            })
+                        },
+                        error: err => {
+                            console.error(err)
+                        }
+                    })
+                onCleanup(sub.unsubscribe)
             }
         });
     }
 
     defineExpandPipe() {
-        combineLatest([this.firstVisibleIndex, this.messageLength]).pipe(
-            takeUntilDestroyed(this.destroyRef),
-        ).subscribe(([index, length]) => {
+        effect(() => {
+            const index = this.firstVisibleIndex()
+            const length = this.messageLength()
             this.checkAndExpand(index);
+            untracked(() => {
+                this.checkAndExpand(index)
+            })
         });
     }
 
-    protected get rowLength(): number {
-        let length = 0;
-        if (this.expanding && !this.end) {
-            length += 1;
-        }
-        length += this.messages.length;
-        length += this.typings.length;
-        return length;
+    defineDisplayPipe() {
+        effect((onCleanup) => {
+            const chatId = this.chatId()
+            if (chatId) {
+                const sub = this.messageService.getSendingMessages(chatId)
+                    .subscribe({
+                        next: sending => {
+                            untracked(() => {
+                                this.sendings.set(sending);
+                            })
+                        }
+                    })
+                onCleanup(sub.unsubscribe)
+            }
+        });
+        effect((onCleanup) => {
+            const chatId = this.chatId()
+            if (chatId) {
+                const sub = this.dialogService.findByChatId(chatId)
+                    .pipe(
+                        switchMap(dialog => dialog.typings),
+                        map(typings => typings.filter(typing => !this.profileService.thatsMe(typing.from)))
+                    )
+                    .subscribe({
+                        next: typings => {
+                            this.typings.set(typings);
+                            this.checkKeepScrollBeginning()
+                        }
+                    })
+                onCleanup(sub.unsubscribe)
+            }
+        });
+
     }
 
-    protected get messageRows(): MessageRow[] {
+
+    protected messageRows = computed(() => {
         const merged: MessageRow[] = [];
-        if (this.expanding && !this.end) {
+        if (this.expanding() && !this.end()) {
             merged.push(this.toExpandingRow());
         }
         merged.push(
-            ...[...this.messages].reverse(),
-            ...this.sendings.map(s => this.toSendingRow(s)),
-            ...this.typings.map(t => this.toTypingRow(t))
+            ...[...this.messages()].reverse(),
+            ...this.sendings().map(s => this.toSendingRow(s)),
+            ...this.typings().map(t => this.toTypingRow(t))
         );
         return merged;
-    }
+    })
+
+    protected rowLength = computed(() => {
+        return this.messageRows().length
+    })
 
     private checkAndExpand(scrollIndex: number) {
-
-        if (!this.expanding && !this.end && scrollIndex < 5) {
-            this.expanding = true;
+        if (!this.expanding() && !this.end() && scrollIndex < 5) {
+            this.expanding.set(true);
             this.expandTrigger.next();
         }
     }
 
-    defineDisplayPipe() {
-        this.chatId.pipe(
-            takeUntilDestroyed(this.destroyRef),
-            switchMap(chatId => this.messageService.getSendingMessages(chatId)),
-            tap(() => this.scrollToBeginning())
-        ).subscribe(sendings => {
-            this.sendings = sendings;
-        });
-
-        this.chatId.pipe(
-            takeUntilDestroyed(this.destroyRef),
-            switchMap(chatId => this.dialogService.findByChatId(chatId)),
-            switchMap(dialog => dialog.typings),
-            map(typings => typings.filter(typing => !this.profileService.thatsMe(typing.from)))
-        ).subscribe(typings => {
-            this.typings = typings;
-            this.checkKeepScrollBeginning()
-        });
-    }
-
-    ngOnInit(): void {
-        this.defineDisplayPipe();
-        this.definePrependingPipe();
-        this.defineAppendingPipe();
-        this.defineExpandPipe();
-    }
-
-
-    private expand(messages: Message[], chatId: string): Observable<MessageState[]> {
-        const lastSeq = messages.at(-1)?.message?.sequenceNumber;
+    private expand(): Observable<MessageState[]> {
+        const chatId = this.chatId()!
+        const lastSeq = this.messages().at(-1)?.message?.sequenceNumber;
         const anchor = (lastSeq ?? Number.MAX_SAFE_INTEGER) - 1;
 
         const cached = this.cacheStore.list(chatId, anchor);
@@ -389,13 +423,24 @@ type MessageRow =
     | {
     type: 'loading',
     frame: MessageFrame,
-    mine: false,
-    sent?: SendMessage,
+    mine: false
 }
     | {
-    type: 'message';
+    type: 'left-message';
+    message: MessageState,
+    mine: false,
+    frame: MessageFrame
+}
+    | {
+    type: 'middle-message';
     message: MessageState,
     mine: boolean,
+    frame: MessageFrame
+}
+    | {
+    type: 'right-message';
+    message: MessageState,
+    mine: true,
     sent: SendMessage
     frame: MessageFrame
 }
@@ -404,9 +449,8 @@ type MessageRow =
     typeEvent: TypeMessage,
     message: MessageState,
     mine: false,
-    frame: MessageFrame,
-    sent?: SendMessage,
+    frame: MessageFrame
 }
 
 
-type Message = Extract<MessageRow, { type: 'message' }>;
+type Message = Extract<MessageRow, { type: 'left-message' | 'middle-message' | 'right-message' }>;

@@ -1,42 +1,129 @@
-<app-chat-info-bar [roomName]="roomName"
-                   [roomAvatar]="roomAvatar"
-                   [presence]="presence"
-                   [chatId]="chatId | async"/>
-<cdk-virtual-scroll-viewport itemSize="50" #viewport class="list my-2" (scrolledIndexChange)="onScrollChanged($event)">
+@if (chatId(); as chatId) {
+    <app-chat-info-bar [roomName]="roomName()"
+                       [roomAvatar]="roomAvatar()"
+                       [presence]="presence()"
+                       [chatId]="chatId"/>
+}
+
+<cdk-virtual-scroll-viewport itemSize="50" #viewport class="message-list my-2"
+                             (scrolledIndexChange)="onScrollChanged($event)">
     <div
-            *cdkVirtualFor="let item of (messageRows | grouping | sentmessages); trackBy: trackByTrackId">
-        <ng-container [ngSwitch]="item.type">
-
-            <app-message *ngSwitchCase="'message'" class="mx-3" style="margin-top: 2px"
-                         [frame]="$any(item).frame"
-                         [send]="$any(item).sent"
-                         [mine]="$any(item).mine"
-                         [message]="$any(item).message"/>
-
-            <div class="loading" *ngSwitchCase="'loading'">
-                <mat-spinner [diameter]="25"></mat-spinner>
-            </div>
-
-            <div
-                    *ngSwitchCase="'typing'"
-                    style="
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        margin-top: 2px;
-                        "
-                    class="mx-3"
-            >
-                <div class="message-container"
-                     [style.justify-content]="'start'">
-                    <app-typing-message [message]="$any(item).typeEvent"></app-typing-message>
+            *cdkVirtualFor="let item of (messageRows() | grouping | sentmessages); trackBy: trackByTrackId">
+        @let row = $any(item);
+        @switch (item.type) {
+            @case ('loading') {
+                <div class="message-loading">
+                    <mat-spinner [diameter]="25"></mat-spinner>
                 </div>
+            }
+            @case ('typing') {
+                <div
+                        class="mx-3"
+                        style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    margin-top: 2px;
+                "
+                >
+                    <div
+                            class="message-container"
+                            [style.justify-content]="'start'"
+                    >
+                        <app-typing-message
+                                [message]="$any(item).typeEvent">
+                        </app-typing-message>
+                    </div>
+                </div>
+            }
+            @default {
+                @let message = $any(row.message);
+                @let sender = $any(message.sender);
+                @let frame = item.frame;
+                <app-message
+                        class="mx-3"
+                        style="margin-top: 2px"
+                        [frame]="frame">
+                    @switch (item.type) {
+                        @case ('middle-message') {
+                            @switch (message.messageType.toLowerCase()) {
+                                @case ('preference') {
+                                    <app-preference-message
+                                            class="center"
+                                            [maker]="sender">
+                                    </app-preference-message>
+                                }
+                                @case ('group') {
+                                    <app-group-message
+                                            class="center"
+                                            [creator]="sender">
+                                    </app-group-message>
+                                }
+                            }
+                        }
+                        @default {
+                            <ng-template #messagetemplate>
 
-            </div>
+                                @switch (message.messageType.toLowerCase()) {
 
-        </ng-container>
+                                    @case ('icon') {
+                                        <app-icon-message
+                                                [iconState]="message"
+                                                no-cropped-frame
+                                        >
+                                        </app-icon-message>
+                                    }
+                                    @case ('text') {
+                                        <app-text-message
+                                                cropped-frame
+                                                [textState]="message">
+                                        </app-text-message>
+                                    }
+                                    @case ('image') {
+                                        <app-image-message
+                                                cropped-frame
+                                                [imageState]="message">
+                                        </app-image-message>
+                                    }
+                                    @case ('file') {
+                                        <app-file-message
+                                                cropped-frame
+                                                [fileState]="message">
+                                        </app-file-message>
+                                    }
+
+                                }
+
+                            </ng-template>
+
+                            @switch (item.type) {
+                                @case ('left-message') {
+                                    <app-left-message
+                                            [message]="message"
+                                            [frame]="frame">
+                                        <ng-container *ngTemplateOutlet="messagetemplate"/>
+                                    </app-left-message>
+                                }
+                                @case ('right-message') {
+                                    @let sent = $any(row.sent);
+                                    <app-right-message
+                                            [message]="message"
+                                            [frame]="frame"
+                                            [displaySend]="sent?.display"
+                                            [sendState]="sent?.sendState">
+                                        <ng-container *ngTemplateOutlet="messagetemplate"/>
+                                    </app-right-message>
+                                }
+                            }
+                        }
+                    }
+                </app-message>
+            }
+        }
 
     </div>
 </cdk-virtual-scroll-viewport>
-<app-input-bar [chatId]="chatId | async" [iconId]="preference?.iconId ?? 1"/>
+@if (chatId(); as chatId) {
+    <app-input-bar [chatId]="chatId" [iconId]="preference()?.iconId ?? 1"/>
+}
 

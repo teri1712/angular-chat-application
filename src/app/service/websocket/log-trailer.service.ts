@@ -1,7 +1,7 @@
 import {effect, inject, Injectable} from "@angular/core";
 import {Client, Frame, IMessage} from "@stomp/stompjs";
 import {environment} from "../../environments";
-import {delay, finalize, Observable, of, Subject, switchMap, tap} from "rxjs";
+import {delay, Observable, of, switchMap, tap} from "rxjs";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {InboxLog} from "../../model/dto/inbox-log";
 import {LogStream} from "../repository/log-stream.service";
@@ -62,14 +62,21 @@ export class LogTrailerService extends LogStream {
         if (!this.client?.connected) {
             return of();
         }
-        const observable = new Subject<TypeMessage | PreferenceMessage>();
-        const subscription = this.client.subscribe("/room/" + chatId, (msg: IMessage) => {
-            observable.next(JSON.parse(msg.body));
-        }, {})
-        return observable.pipe(
-            finalize(() => {
+        const client = this.client
+        return new Observable<TypeMessage | PreferenceMessage>((observer) => {
+
+            const subscription = client.subscribe(
+                "/room/" + chatId,
+                (msg: IMessage) => {
+                    observer.next(JSON.parse(msg.body));
+                },
+                {}
+            );
+
+            return () => {
                 subscription.unsubscribe();
-            }));
+            };
+        });
     }
 
 

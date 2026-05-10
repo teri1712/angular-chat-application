@@ -1,28 +1,44 @@
-<ng-container [ngSwitch]="message.messageType.toLowerCase()">
-    <app-icon-message *ngSwitchCase="'icon'" [iconState]="$any(message)"/>
+<ng-content select="[no-cropped-frame]"></ng-content>
 
-    <div *ngSwitchDefault [ngSwitch]="message.messageType.toLowerCase()" [ngStyle]="{
+<div [ngStyle]="{
           'overflow': 'hidden',
           'border-top-left-radius':  '20px',
-          'border-top-right-radius': (frame.position === Position.Single || frame.position === Position.Top) ? '20px' : '3px',
-          'border-bottom-right-radius': (frame.position === Position.Single || frame.position === Position.Bottom) ? '20px' : '3px',
+          'border-top-right-radius': (frame().position === Position.Single || frame().position === Position.Top) ? '20px' : '3px',
+          'border-bottom-right-radius': (frame().position === Position.Single || frame().position === Position.Bottom) ? '20px' : '3px',
           'border-bottom-left-radius':  '20px',
 }">
-        <app-text-message *ngSwitchCase="'text'" [textState]="$any(message)"/>
-        <app-image-message *ngSwitchCase="'image'" [imageState]="$any(message)"/>
-        <app-file-message *ngSwitchCase="'file'" [fileState]="$any(message)"/>
-    </div>
-</ng-container>
-<ng-container *ngIf="displaySend" [ngSwitch]="sendState">
-    <span class="error" *ngSwitchCase="SendState.Error">{{ $any(sendState).reason }}</span>
-    <span class="send-state" *ngSwitchCase="SendState.Pending">Pending</span>
-    <span class="send-state" *ngSwitchCase="SendState.Sending">Sending</span>
-    <span class="send-state" *ngSwitchCase="SendState.Sent">Sent</span>
-</ng-container>
-<div class="seen-div">
-    <ng-container *ngFor="let seen of displaySeenBy">
-        <img class="seen mt-2" [src]="seen.avatar"
-             alt="">
-    </ng-container>
+    <ng-content select="[cropped-frame]"/>
+</div>
 
+@if (displaySend()) {
+    @switch (sendState()) {
+
+        @case (SendState.Error) {
+            <span class="error">
+            {{ $any(sendState()).reason }}
+        </span>
+        }
+        @case (SendState.Pending) {
+            <span class="send-state">
+            Pending
+        </span>
+        }
+        @case (SendState.Sending) {
+            <span class="send-state">
+            Sending
+        </span>
+        }
+        @case (SendState.Sent) {
+            <span class="send-state">
+            Sent
+        </span>
+        }
+
+    }
+}
+
+<div class="seen-div">
+    @for (seen of displaySeenBy; track seen.id) {
+        <img class="seen mt-2" [src]="seen.avatar">
+    }
 </div>

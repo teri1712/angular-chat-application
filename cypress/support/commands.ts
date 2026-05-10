@@ -13,9 +13,13 @@ Cypress.Commands.add('login', (username, password) => {
     })
 })
 
-Cypress.Commands.add('visitConversation', (conversationId) => {
-    const url =
-        `/home/(conversation:00000000-0000-0000-0000-000000000001%2B00000000-0000-0000-0000-000000000004//side-bar:thread/list)?roomName=Tony%20Tony%20Chopper&roomAvatar=https:%2F%2Fi.pinimg.com%2F736x%2Fec%2Fa7%2F0f%2Feca70f7274805de4be9553a9632778bf.jpg&presence=Tue%20Apr%2028%202026%2022:10:39%20GMT%2B0700%20(Indochina%20Time)`;
+Cypress.Commands.add('visitConversation', (chatId, roomName, roomAvatar) => {
+    const params = new URLSearchParams({
+        roomName,
+        roomAvatar
+    });
+
+    const url = `/home/(conversation:${encodeURIComponent(chatId)}//side-bar:thread/list)?${params.toString()}`;
     cy.visit(url)
     cy.get('app-chat-info-bar')
         .should('be.visible')

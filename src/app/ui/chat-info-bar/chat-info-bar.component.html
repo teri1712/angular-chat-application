@@ -1,25 +1,31 @@
 <div class="partner-container">
-    <app-avatar-container [presence]="presence ?? undefined"
-                          [chatId]="(chatIdSubject | async) ?? undefined"
-                          [avatar]="roomAvatar ?? undefined"
+    <app-avatar-container [presence]="presence()"
+                          [chatId]="chatId()"
+                          [avatar]="roomAvatar()"
                           [size]="40"/>
     <div class="partner-info">
-        <span class="room-name">{{ roomName }}</span>
-        <span class="room-presence" *ngIf="diffOnline < ONE_HOUR_SECONDS">{{
-                diffOnline >= ONE_MINUTE_SECONDS ?
-                    'Online ' + Math.floor((diffOnline + ONE_MINUTE_SECONDS - 1) / ONE_MINUTE_SECONDS).toString() + ' minutes ago'
-                    : 'Online'
-            }}</span>
+        <span class="room-name">{{ roomName() }}</span>
+        @if (diffOnline < ONE_HOUR_SECONDS) {
+            <span class="room-presence">{{
+                    diffOnline >= ONE_MINUTE_SECONDS ?
+                        'Online ' + Math.floor((diffOnline + ONE_MINUTE_SECONDS - 1) / ONE_MINUTE_SECONDS).toString() + ' minutes ago'
+                        : 'Online'
+                }}</span>
+        }
+
     </div>
 </div>
 
 <div class="d-flex gap-1 align-items-center">
-    <button mat-icon-button aria-label="Search" *ngIf="(chatIdSubject | async) as _chatId"
+    <button mat-icon-button aria-label="Search"
             class="search-message"
-            (click)="openSearchDialog(_chatId)">
+            (click)="openSearchDialog()">
         <mat-icon>search</mat-icon>
     </button>
     <mat-icon>info</mat-icon>
-    <app-chat-setting [chatId]="chatIdSubject | async"
-                      [preference]="preference | async"></app-chat-setting>
+    @if (preference.value(); as preference) {
+
+        <app-chat-setting [chatId]="chatId()"
+                          [preference]="preference"></app-chat-setting>
+    }
 </div>

@@ -1,0 +1,302 @@
+[
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-001",
+    "sender": {
+      "id": "user-001",
+      "name": "Tony Tony Chopper",
+      "avatar": "https://i.pravatar.cc/150?img=1"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 1,
+    "createdAt": "2026-05-10T08:00:00Z",
+    "updatedAt": "2026-05-10T08:00:00Z",
+    "content": "Hey everyone!"
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-002",
+    "sender": {
+      "id": "user-002",
+      "name": "Monkey D. Luffy",
+      "avatar": "https://i.pravatar.cc/150?img=2"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 2,
+    "createdAt": "2026-05-10T08:01:00Z",
+    "updatedAt": "2026-05-10T08:01:00Z",
+    "content": "I'm hungry again."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-003",
+    "sender": {
+      "id": "user-003",
+      "name": "Roronoa Zoro",
+      "avatar": "https://i.pravatar.cc/150?img=3"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 3,
+    "createdAt": "2026-05-10T08:02:00Z",
+    "updatedAt": "2026-05-10T08:02:00Z",
+    "content": "Did anyone see my swords?"
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-004",
+    "sender": {
+      "id": "user-004",
+      "name": "Nami",
+      "avatar": "https://i.pravatar.cc/150?img=4"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 4,
+    "createdAt": "2026-05-10T08:03:00Z",
+    "updatedAt": "2026-05-10T08:03:00Z",
+    "content": "Please stop making a mess on the ship."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-005",
+    "sender": {
+      "id": "user-005",
+      "name": "Sanji",
+      "avatar": "https://i.pravatar.cc/150?img=5"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 5,
+    "createdAt": "2026-05-10T08:04:00Z",
+    "updatedAt": "2026-05-10T08:04:00Z",
+    "content": "Dinner will be ready in 10 minutes."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-006",
+    "sender": {
+      "id": "user-006",
+      "name": "Usopp",
+      "avatar": "https://i.pravatar.cc/150?img=6"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 6,
+    "createdAt": "2026-05-10T08:05:00Z",
+    "updatedAt": "2026-05-10T08:05:00Z",
+    "content": "I totally defeated 100 pirates yesterday."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-007",
+    "sender": {
+      "id": "user-007",
+      "name": "Nico Robin",
+      "avatar": "https://i.pravatar.cc/150?img=7"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 7,
+    "createdAt": "2026-05-10T08:06:00Z",
+    "updatedAt": "2026-05-10T08:06:00Z",
+    "content": "I found an interesting book in the library."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-008",
+    "sender": {
+      "id": "user-008",
+      "name": "Franky",
+      "avatar": "https://i.pravatar.cc/150?img=8"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 8,
+    "createdAt": "2026-05-10T08:07:00Z",
+    "updatedAt": "2026-05-10T08:07:00Z",
+    "content": "SUPER! I upgraded the ship again."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-009",
+    "sender": {
+      "id": "user-009",
+      "name": "Brook",
+      "avatar": "https://i.pravatar.cc/150?img=9"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 9,
+    "createdAt": "2026-05-10T08:08:00Z",
+    "updatedAt": "2026-05-10T08:08:00Z",
+    "content": "Yohohoho! What a lovely day."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-010",
+    "sender": {
+      "id": "user-010",
+      "name": "Jinbe",
+      "avatar": "https://i.pravatar.cc/150?img=10"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 10,
+    "createdAt": "2026-05-10T08:09:00Z",
+    "updatedAt": "2026-05-10T08:09:00Z",
+    "content": "Stay calm and work together."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-011",
+    "sender": {
+      "id": "user-001",
+      "name": "Tony Tony Chopper",
+      "avatar": "https://i.pravatar.cc/150?img=1"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 11,
+    "createdAt": "2026-05-10T08:10:00Z",
+    "updatedAt": "2026-05-10T08:10:00Z",
+    "content": "Does anyone need medical help?"
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-012",
+    "sender": {
+      "id": "user-002",
+      "name": "Monkey D. Luffy",
+      "avatar": "https://i.pravatar.cc/150?img=2"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 12,
+    "createdAt": "2026-05-10T08:11:00Z",
+    "updatedAt": "2026-05-10T08:11:00Z",
+    "content": "Let's go on another adventure!"
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-013",
+    "sender": {
+      "id": "user-003",
+      "name": "Roronoa Zoro",
+      "avatar": "https://i.pravatar.cc/150?img=3"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 13,
+    "createdAt": "2026-05-10T08:12:00Z",
+    "updatedAt": "2026-05-10T08:12:00Z",
+    "content": "I think we're lost again."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-014",
+    "sender": {
+      "id": "user-004",
+      "name": "Nami",
+      "avatar": "https://i.pravatar.cc/150?img=4"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 14,
+    "createdAt": "2026-05-10T08:13:00Z",
+    "updatedAt": "2026-05-10T08:13:00Z",
+    "content": "We need more money for supplies."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-015",
+    "sender": {
+      "id": "user-005",
+      "name": "Sanji",
+      "avatar": "https://i.pravatar.cc/150?img=5"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 15,
+    "createdAt": "2026-05-10T08:14:00Z",
+    "updatedAt": "2026-05-10T08:14:00Z",
+    "content": "Breakfast tomorrow will be amazing."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-016",
+    "sender": {
+      "id": "user-006",
+      "name": "Usopp",
+      "avatar": "https://i.pravatar.cc/150?img=6"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 16,
+    "createdAt": "2026-05-10T08:15:00Z",
+    "updatedAt": "2026-05-10T08:15:00Z",
+    "content": "I once fought a giant sea monster alone."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-017",
+    "sender": {
+      "id": "user-007",
+      "name": "Nico Robin",
+      "avatar": "https://i.pravatar.cc/150?img=7"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 17,
+    "createdAt": "2026-05-10T08:16:00Z",
+    "updatedAt": "2026-05-10T08:16:00Z",
+    "content": "History can reveal many hidden truths."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-018",
+    "sender": {
+      "id": "user-008",
+      "name": "Franky",
+      "avatar": "https://i.pravatar.cc/150?img=8"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 18,
+    "createdAt": "2026-05-10T08:17:00Z",
+    "updatedAt": "2026-05-10T08:17:00Z",
+    "content": "The Sunny is running perfectly."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-019",
+    "sender": {
+      "id": "user-009",
+      "name": "Brook",
+      "avatar": "https://i.pravatar.cc/150?img=9"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 19,
+    "createdAt": "2026-05-10T08:18:00Z",
+    "updatedAt": "2026-05-10T08:18:00Z",
+    "content": "May I see your panties? Yohohoho!"
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-020",
+    "sender": {
+      "id": "user-010",
+      "name": "Jinbe",
+      "avatar": "https://i.pravatar.cc/150?img=10"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 20,
+    "createdAt": "2026-05-10T08:19:00Z",
+    "updatedAt": "2026-05-10T08:19:00Z",
+    "content": "The sea is calm today."
+  }
+]
