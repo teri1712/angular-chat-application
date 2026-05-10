@@ -1,14 +1,15 @@
 <h3 class="pb-3 ps-2">Settings</h3>
-<app-settings-item [icon]="themeService.theme?'light_mode':'dark_mode'" info="Light mode">
+<app-settings-item [icon]="light()?'light_mode':'dark_mode'" info="Light mode">
     <mat-slide-toggle
             setting-action
-            [(ngModel)]="themeService.theme"
+            [checked]="light()"
+            (change)="toggle()"
             [disabled]="false">
     </mat-slide-toggle>
 </app-settings-item>
 
 <app-settings-item icon="person" info="Profile Management">
-    <button mat-icon-button setting-action (click)="openProfileManagement()">
+    <button aria-label="Change Profile" mat-icon-button setting-action (click)="openProfileManagement()">
         <mat-icon>chevron_right</mat-icon>
     </button>
 </app-settings-item>

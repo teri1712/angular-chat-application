@@ -42,10 +42,10 @@ export class ProfileManagementComponent {
     passwordForm!: FormGroup;
     private initialProfileValues: any = {};
 
-    private fb = inject(FormBuilder)
-    private profileService = inject(ProfileService)
-    private authenticator = inject(Authenticator)
-    private snackBar = inject(MatSnackBar)
+    private readonly fb = inject(FormBuilder)
+    private readonly profileService = inject(ProfileService)
+    private readonly authenticator = inject(Authenticator)
+    private readonly snackBar = inject(MatSnackBar)
     public dialogRef = inject(MatDialogRef<ProfileManagementComponent>)
 
     profile = rxResource({
@@ -87,11 +87,21 @@ export class ProfileManagementComponent {
 
 
     passwordMatchValidator(g: FormGroup) {
-        return g.get('newPassword')?.value === g.get('confirmPassword')?.value
-            ? null : {'mismatch': true};
+        const confirmCtrl = g.get('confirmPassword');
+        if (g.get('newPassword')?.value !== confirmCtrl?.value) {
+            confirmCtrl?.setErrors({...(confirmCtrl?.errors || {}), mismatch: true});
+            return {mismatch: true};
+        }
+        if (confirmCtrl?.hasError('mismatch')) {
+            const errors = {...confirmCtrl.errors};
+            delete errors['mismatch'];
+            confirmCtrl.setErrors(Object.keys(errors).length ? errors : null);
+        }
+        return null;
     }
 
     onProfileSubmit(): void {
+        this.profileForm.markAllAsTouched();
         if (this.profileForm.valid) {
             const formValue = {...this.profileForm.value};
             const changedFields: any = {};
@@ -141,6 +151,7 @@ export class ProfileManagementComponent {
     }
 
     onPasswordSubmit(): void {
+        this.passwordForm.markAllAsTouched();
         if (this.passwordForm.valid) {
             const {oldPassword, newPassword} = this.passwordForm.value;
             this.authenticator.changePassword(oldPassword, newPassword).subscribe({

@@ -5,7 +5,11 @@ declare namespace Cypress {
     interface Chainable {
         login(username?: string, password?: string): Chainable<void>;
 
+        visitLogin(): Chainable<void>
+
         visitConversation(conversationId: string): Chainable<void>
+
+        interceptUpload(): Chainable<void>
     }
 }
 

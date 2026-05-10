@@ -20,3 +20,47 @@ Cypress.Commands.add('visitConversation', (conversationId) => {
     cy.get('app-chat-info-bar')
         .should('be.visible')
 })
+
+Cypress.Commands.add('interceptUpload', () => {
+    cy.intercept('POST', '**/files/upload**', {
+        statusCode: 200, body: {
+            presignedUploadUrl: '/presigned-upload-url',
+        }
+    });
+    cy.intercept('PUT', '/presigned-upload-url', {
+        statusCode: 200, body: {
+            presignedUploadUrl: '/presigned-upload-url',
+        },
+        headers: {
+            ETag: 'etag-value',
+        }
+    });
+})
+
+Cypress.Commands.add('visitLogin', () => {
+    cy.clearLocalStorage();
+    // Block the real Google GSI script so it cannot overwrite our stub
+    cy.intercept('GET', 'https://accounts.google.com/gsi/client*', {body: ''});
+    cy.visit('/auth/login', {
+        onBeforeLoad(win) {
+            (win as any).google = {
+                accounts: {
+                    id: {
+                        initialize(cfg: { callback: (r: { credential: string }) => void }) {
+                            (win as any).__googleCallback = cfg.callback;
+                        },
+                        renderButton(el: HTMLElement) {
+                            el.innerHTML = '<span style="pointer-events:none">Sign in with Google</span>';
+                            el.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:40px;';
+                            el.addEventListener('click', () => {
+                                (win as any).__googleCallback?.({credential: 'fakeIdToken'});
+                            });
+                        },
+                        prompt() {
+                        },
+                    },
+                },
+            };
+        }
+    });
+})

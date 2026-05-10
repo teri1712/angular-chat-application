@@ -1,42 +1,40 @@
-import {Injectable} from "@angular/core";
-import {BehaviorSubject, Observable} from "rxjs";
+import {effect, Injectable, signal, WritableSignal} from "@angular/core";
 
 
 const THEME_KEY = "theme";
 const DARK_CLASS = "light-theme";
 const LIGHT_CLASS = "dark-theme";
 
+export type theme = 'dark' | 'light'
+
 @Injectable({
-      providedIn: 'root'
+    providedIn: 'root'
 })
 export class ThemeService {
 
-      private _themeSubject: BehaviorSubject<boolean>;
+    private readonly _theme: WritableSignal<theme>;
 
-      constructor() {
-            const localTheme = localStorage.getItem(THEME_KEY);
-            const initialTheme = localTheme ? JSON.parse(localTheme) : false;
-            this._themeSubject = new BehaviorSubject<boolean>(initialTheme);
+    constructor() {
+        const localTheme = localStorage.getItem(THEME_KEY);
+        const initialTheme = localTheme ? JSON.parse(localTheme) : 'dark';
+        this._theme = signal(initialTheme);
 
-            this.applyTheme(initialTheme);
-      }
+        effect(() => {
+            this.applyTheme(this._theme())
+        });
+    }
 
-      set theme(theme: boolean) {
-            localStorage.setItem(THEME_KEY, JSON.stringify(theme))
-            this._themeSubject.next(theme);
-            this.applyTheme(theme);
-      }
+    setTheme(theme: theme) {
+        this._theme.set(theme);
+    }
 
-      get theme() {
-            return this._themeSubject.value;
-      }
+    get theme() {
+        return this._theme.asReadonly();
+    }
 
-      get themeObservable(): Observable<boolean> {
-            return this._themeSubject.asObservable();
-      }
-
-      private applyTheme(theme: boolean): void {
-            document.body.classList.toggle(DARK_CLASS, theme)
-            document.body.classList.toggle(LIGHT_CLASS, !theme)
-      }
+    private applyTheme(theme: theme): void {
+        localStorage.setItem(THEME_KEY, JSON.stringify(theme))
+        document.body.classList.toggle(DARK_CLASS, theme === 'dark')
+        document.body.classList.toggle(LIGHT_CLASS, theme === 'light')
+    }
 }

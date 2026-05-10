@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {catchError, from, map, Observable, of, switchMap, throwError} from "rxjs";
+import {catchError, from, map, Observable, of, switchMap} from "rxjs";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../environments";
 import {Authenticator} from "./authenticator";
@@ -110,9 +110,6 @@ export class AccountService extends TokenStore implements Authenticator {
             map((account) => {
                 this.storeSession(account.profile, account.accessToken)
                 return account.profile
-            }), catchError((err: HttpErrorResponse) => {
-                const problem = err.error;
-                return throwError(() => new Error(problem.detail));
             })
         )
     }

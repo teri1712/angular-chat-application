@@ -3,9 +3,9 @@
 <div class="image-container">
 
     <div class="mask">
-        <img [src]="uri" alt="">
+        <img [src]="preview()" alt="">
     </div>
-    <button mat-mini-fab (click)="fileInput.click()">
+    <button class="file-selector" mat-mini-fab (click)="fileInput.click()">
         <mat-icon>add_a_photo</mat-icon>
     </button>
     <input #fileInput type="file" hidden (change)="onAvatarSelected($event)"/>
