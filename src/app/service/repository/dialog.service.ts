@@ -1,4 +1,4 @@
-import {DestroyRef, inject, Injectable, Signal} from "@angular/core";
+import {DestroyRef, inject, Injectable, signal} from "@angular/core";
 import {BehaviorSubject, filter, Observable, Subscription, timer} from "rxjs";
 import {PresenceRepository} from "./presence-repository.service";
 import {Preference} from "../../model/dto/preference";
@@ -10,7 +10,7 @@ import {InboxLog} from "../../model/dto/inbox-log";
 import {LogStream} from "./log-stream.service";
 import {Chat} from "../../model/dto/chat";
 import {PreferenceMessage} from "../../model/dto/preference-message";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable()
 export class DialogService {
@@ -19,8 +19,8 @@ export class DialogService {
 
     private logObserver = (log: InboxLog) => {
         const dialog = this.find(log.chatId).value
-        dialog._roomAvatar.next(log.roomAvatar);
-        dialog._roomName.next(log.roomName)
+        dialog.roomAvatar.set(log.roomAvatar);
+        dialog.roomName.set(log.roomName)
     }
 
     private destroyRef = inject(DestroyRef);
@@ -64,8 +64,8 @@ class Dialog implements IDialog {
     readonly _preference = new BehaviorSubject<Preference | undefined>(undefined)
     readonly _presence = new BehaviorSubject<Date | undefined>(undefined)
     readonly _typings = new BehaviorSubject<TypeMessage[]>([])
-    readonly _roomName = new BehaviorSubject<string>('')
-    readonly _roomAvatar = new BehaviorSubject<string>('')
+    readonly roomName = signal<string>('')
+    readonly roomAvatar = signal<string>('')
 
     constructor(
         private readonly realtimeClient: LogTrailerService,
@@ -73,18 +73,6 @@ class Dialog implements IDialog {
         private readonly presenceRepo: PresenceRepository,
         readonly identifier: string,
     ) {
-    }
-
-    get roomName(): Signal<string> {
-        return toSignal(this._roomName, {
-            initialValue: ''
-        })
-    }
-
-    get roomAvatar(): Signal<string> {
-        return toSignal(this._roomAvatar, {
-            initialValue: ''
-        })
     }
 
     get presence(): Observable<Date> {
@@ -132,6 +120,9 @@ class Dialog implements IDialog {
         this.chatRepository.get(this.identifier).subscribe({
             next: (chat: Chat) => {
                 this._preference.next(chat.preference);
+                this.roomName.set(chat.roomName);
+                this.roomAvatar.set(chat.roomAvatar);
+
             },
             error: (err) => {
                 console.error(err)

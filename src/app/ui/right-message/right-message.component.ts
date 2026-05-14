@@ -1,4 +1,4 @@
-import {Component, HostBinding, inject, input} from '@angular/core';
+import {Component, HostBinding, inject, input, TemplateRef} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {MessageFrame, Position} from "../format/Formatter";
 import {MessageState} from "../../model/dto/message-state";
@@ -20,6 +20,7 @@ export class RightMessageComponent {
     private readonly profileService = inject(ProfileService)
     message = input.required<MessageState>()
     frame = input.required<MessageFrame>()
+    contentTemplate = input.required<TemplateRef<any>>()
     sendState = input<SendState>()
     displaySend = input<boolean>()
 

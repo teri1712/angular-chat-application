@@ -10,6 +10,7 @@ declare namespace Cypress {
         visitConversation(chatId: string, roomName: string, roomAvatar: string): Chainable<void>
 
         interceptUpload(): Chainable<void>
+
     }
 }
 

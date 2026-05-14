@@ -1,16 +1,16 @@
-<div class="file-card" *ngIf="fileState">
+<div class="file-card">
     <div class="file-info">
         <mat-icon class="file-icon">insert_drive_file</mat-icon>
         <div class="meta">
-            <div class="name" [title]="fileState.filename">{{ fileState.filename }}</div>
+            <div class="name" [title]="fileState().filename">{{ fileState().filename }}</div>
             <div class="size"
-                 *ngIf="fileState.size !== undefined && fileState.size !== null">{{ readableSize(fileState.size) }}
+                 *ngIf="fileState().size">{{ readableSize(fileState().size) }}
             </div>
         </div>
     </div>
     <a class="download" mat-button color="primary"
-       [href]="fileState.uri"
-       [attr.download]="fileState.filename || true"
+       [href]="fileState().uri"
+       [attr.download]="fileState().filename || true"
        target="_blank" rel="noopener noreferrer">
         <mat-icon>download</mat-icon>
         <span>Download</span>

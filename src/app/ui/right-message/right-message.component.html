@@ -1,14 +1,16 @@
-<ng-content select="[no-cropped-frame]"></ng-content>
-
-<div [ngStyle]="{
-          'overflow': 'hidden',
-          'border-top-left-radius':  '20px',
-          'border-top-right-radius': (frame().position === Position.Single || frame().position === Position.Top) ? '20px' : '3px',
-          'border-bottom-right-radius': (frame().position === Position.Single || frame().position === Position.Bottom) ? '20px' : '3px',
-          'border-bottom-left-radius':  '20px',
-}">
-    <ng-content select="[cropped-frame]"/>
-</div>
+@if (message().messageType.toLowerCase() === 'icon') {
+    <ng-container *ngTemplateOutlet="contentTemplate()"></ng-container>
+} @else {
+    <div [ngStyle]="{
+              'overflow': 'hidden',
+              'border-top-left-radius':  '20px',
+              'border-top-right-radius': (frame().position === Position.Single || frame().position === Position.Top) ? '20px' : '3px',
+              'border-bottom-right-radius': (frame().position === Position.Single || frame().position === Position.Bottom) ? '20px' : '3px',
+              'border-bottom-left-radius':  '20px',
+    }">
+        <ng-container *ngTemplateOutlet="contentTemplate()"></ng-container>
+    </div>
+}
 
 @if (displaySend()) {
     @switch (sendState()) {

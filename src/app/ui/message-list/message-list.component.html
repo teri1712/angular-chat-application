@@ -63,45 +63,28 @@
                         }
                         @default {
                             <ng-template #messagetemplate>
-
                                 @switch (message.messageType.toLowerCase()) {
-
                                     @case ('icon') {
-                                        <app-icon-message
-                                                [iconState]="message"
-                                                no-cropped-frame
-                                        >
-                                        </app-icon-message>
+                                        <app-icon-message [iconState]="message"></app-icon-message>
                                     }
                                     @case ('text') {
-                                        <app-text-message
-                                                cropped-frame
-                                                [textState]="message">
-                                        </app-text-message>
+                                        <app-text-message [textState]="message"></app-text-message>
                                     }
                                     @case ('image') {
-                                        <app-image-message
-                                                cropped-frame
-                                                [imageState]="message">
-                                        </app-image-message>
+                                        <app-image-message [imageState]="message"></app-image-message>
                                     }
                                     @case ('file') {
-                                        <app-file-message
-                                                cropped-frame
-                                                [fileState]="message">
-                                        </app-file-message>
+                                        <app-file-message [fileState]="message"></app-file-message>
                                     }
-
                                 }
-
                             </ng-template>
 
                             @switch (item.type) {
                                 @case ('left-message') {
                                     <app-left-message
                                             [message]="message"
-                                            [frame]="frame">
-                                        <ng-container *ngTemplateOutlet="messagetemplate"/>
+                                            [frame]="frame"
+                                            [contentTemplate]="messagetemplate">
                                     </app-left-message>
                                 }
                                 @case ('right-message') {
@@ -110,8 +93,8 @@
                                             [message]="message"
                                             [frame]="frame"
                                             [displaySend]="sent?.display"
-                                            [sendState]="sent?.sendState">
-                                        <ng-container *ngTemplateOutlet="messagetemplate"/>
+                                            [sendState]="sent?.sendState"
+                                            [contentTemplate]="messagetemplate">
                                     </app-right-message>
                                 }
                             }
@@ -126,4 +109,3 @@
 @if (chatId(); as chatId) {
     <app-input-bar [chatId]="chatId" [iconId]="preference()?.iconId ?? 1"/>
 }
-

@@ -31,6 +31,7 @@ import {FileMessageComponent} from "../file-message/file-message.component";
 import {IconMessageComponent} from "../icon-message/icon-message.component";
 import {ImageMessageComponent} from "../image-message/image-message.component";
 import {TextMessageComponent} from "../text-message/text-message.component";
+import {rxResource} from "@angular/core/rxjs-interop";
 
 
 @Component({
@@ -80,7 +81,21 @@ export class MessageListComponent {
     preference = input<Preference>();
 
     private readonly messages = signal<Message[]>([])
-    private readonly sendings = signal<ISendingMessage[]>([])
+    private readonly sendings = rxResource({
+        params: () => {
+            const chatId = this.chatId()
+            if (chatId)
+                return ({
+                    chatId: this.chatId(),
+                })
+            return undefined
+        },
+        stream: (request) => {
+            const params = request.params
+            const chatId = params.chatId
+            return this.messageService.getSendingMessages(chatId)
+        },
+    });
     private readonly typings = signal<TypeMessage[]>([])
 
 
@@ -96,6 +111,7 @@ export class MessageListComponent {
     private readonly profileService = inject(ProfileService);
     private readonly messageService = inject(MessageService);
     private readonly sanitizer = inject(DomSanitizer);
+    private sendingSize = 0;
 
     constructor() {
         effect(() => {
@@ -106,6 +122,14 @@ export class MessageListComponent {
                     this.messages.set([])
                     this.firstVisibleIndex.set(0);
                 })
+            }
+        });
+        effect(() => {
+            const sendings = this.sendings.value()
+            const currentSize = this.sendingSize
+            this.sendingSize = sendings?.length ?? 0
+            if (this.sendingSize > currentSize) {
+                this.scrollToBeginning()
             }
         });
 
@@ -133,20 +157,22 @@ export class MessageListComponent {
     }
 
     private scrollToBeginning(): void {
-        timer(100).subscribe(() => {
+        timer(1000).subscribe(() => {
+            if (!this.viewport) return;
             const lastIndex = this.viewport.getDataLength() - 1;
             if (lastIndex >= 0) this.viewport.scrollToIndex(lastIndex);
         })
     }
 
-    private checkKeepScrollBeginning(): void {
-        if (this.viewport) {
-            const range = this.viewport.getRenderedRange();
-            const total = this.viewport.getDataLength();
+    private isAtBottom(): boolean {
+        if (!this.viewport) return false;
+        // If we are within 100px of the bottom, we consider it "focused on bottom"
+        return this.viewport.measureScrollOffset('bottom') < 100;
+    }
 
-            const isLastItemVisible = range.end >= total;
-            if (isLastItemVisible)
-                this.scrollToBeginning();
+    private checkKeepScrollBeginning(): void {
+        if (this.isAtBottom()) {
+            this.scrollToBeginning();
         }
     }
 
@@ -261,7 +287,7 @@ export class MessageListComponent {
                         this.cacheStore.put(log.messageState);
                     }
                 });
-            onCleanup(sub.unsubscribe)
+            onCleanup(() => sub.unsubscribe())
         });
 
         effect((onCleanup) => {
@@ -273,16 +299,20 @@ export class MessageListComponent {
                             untracked(() => {
                                 const message = log.messageState;
                                 if (log.action === LogAction.ADDITION) {
+                                    const isMine = this.profileService.thatsMe(message.sender);
+
                                     this.messages.set(this.prepend(message, this.messages()));
-                                    this.checkKeepScrollBeginning()
+
+                                    if (isMine) {
+                                        this.scrollToBeginning();
+                                    }
                                 } else {
                                     this.messages.set(this.update(message, this.messages()));
                                 }
-                                this.scrollToBeginning()
                             })
                         }
                     })
-                onCleanup(sub.unsubscribe)
+                onCleanup(() => sub.unsubscribe())
             }
         });
 
@@ -299,7 +329,9 @@ export class MessageListComponent {
                                 if (newMessages.length == 0) {
                                     this.end.set(true);
                                 }
+
                                 this.expanding.set(false);
+                                this.checkKeepScrollBeginning()
                                 this.messages.set(this.append(this.messages(), newMessages));
                             })
                         },
@@ -307,7 +339,7 @@ export class MessageListComponent {
                             console.error(err)
                         }
                     })
-                onCleanup(sub.unsubscribe)
+                onCleanup(() => sub.unsubscribe())
             }
         });
     }
@@ -327,20 +359,6 @@ export class MessageListComponent {
         effect((onCleanup) => {
             const chatId = this.chatId()
             if (chatId) {
-                const sub = this.messageService.getSendingMessages(chatId)
-                    .subscribe({
-                        next: sending => {
-                            untracked(() => {
-                                this.sendings.set(sending);
-                            })
-                        }
-                    })
-                onCleanup(sub.unsubscribe)
-            }
-        });
-        effect((onCleanup) => {
-            const chatId = this.chatId()
-            if (chatId) {
                 const sub = this.dialogService.findByChatId(chatId)
                     .pipe(
                         switchMap(dialog => dialog.typings),
@@ -348,11 +366,11 @@ export class MessageListComponent {
                     )
                     .subscribe({
                         next: typings => {
-                            this.typings.set(typings);
                             this.checkKeepScrollBeginning()
+                            this.typings.set(typings);
                         }
                     })
-                onCleanup(sub.unsubscribe)
+                onCleanup(() => sub.unsubscribe())
             }
         });
 
@@ -366,7 +384,7 @@ export class MessageListComponent {
         }
         merged.push(
             ...[...this.messages()].reverse(),
-            ...this.sendings().map(s => this.toSendingRow(s)),
+            ...(this.sendings.value() ?? []).map(s => this.toSendingRow(s)),
             ...this.typings().map(t => this.toTypingRow(t))
         );
         return merged;

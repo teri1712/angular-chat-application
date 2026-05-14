@@ -61,7 +61,7 @@ export class InputBarComponent {
                         dialog.ping()
                     }
                 })
-                onCleanup(sub.unsubscribe)
+                onCleanup(() => sub.unsubscribe())
             }
         });
     }
