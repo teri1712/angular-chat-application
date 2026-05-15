@@ -8,9 +8,9 @@
 <cdk-virtual-scroll-viewport itemSize="50" #viewport class="message-list my-2"
                              (scrolledIndexChange)="onScrollChanged($event)">
     <div
-            *cdkVirtualFor="let item of (messageRows() | grouping | sentmessages); trackBy: trackByTrackId">
+            *cdkVirtualFor="let item of (messageRows() | grouping | mymessages); trackBy: trackByTrackId">
         @let row = $any(item);
-        @switch (item.type) {
+        @switch (row.type) {
             @case ('loading') {
                 <div class="message-loading">
                     <mat-spinner [diameter]="25"></mat-spinner>
@@ -31,7 +31,7 @@
                             [style.justify-content]="'start'"
                     >
                         <app-typing-message
-                                [message]="$any(item).typeEvent">
+                                [message]="row.typeEvent">
                         </app-typing-message>
                     </div>
                 </div>
@@ -39,12 +39,12 @@
             @default {
                 @let message = $any(row.message);
                 @let sender = $any(message.sender);
-                @let frame = item.frame;
+                @let frame = row.frame;
                 <app-message
                         class="mx-3"
                         style="margin-top: 2px"
                         [frame]="frame">
-                    @switch (item.type) {
+                    @switch (row.type) {
                         @case ('middle-message') {
                             @switch (message.messageType.toLowerCase()) {
                                 @case ('preference') {
@@ -79,7 +79,7 @@
                                 }
                             </ng-template>
 
-                            @switch (item.type) {
+                            @switch (row.type) {
                                 @case ('left-message') {
                                     <app-left-message
                                             [message]="message"
@@ -88,12 +88,13 @@
                                     </app-left-message>
                                 }
                                 @case ('right-message') {
-                                    @let sent = $any(row.sent);
+                                    @let myMessageFrame = $any(row.myMessageFrame);
+                                    @let sending = $any(row.sending);
                                     <app-right-message
                                             [message]="message"
                                             [frame]="frame"
-                                            [displaySend]="sent?.display"
-                                            [sendState]="sent?.sendState"
+                                            [send]="sending"
+                                            [displaySend]="myMessageFrame.display"
                                             [contentTemplate]="messagetemplate">
                                     </app-right-message>
                                 }

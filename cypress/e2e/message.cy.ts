@@ -45,4 +45,16 @@ describe('Message', () => {
         // Preference Message
         cy.contains('has changed the chat preferences').should('exist');
     });
+    
+    it('should display pending message and switch to sent when clicking send button', () => {
+
+        cy.intercept('PUT', '**/chats/*/texts/*', {statusCode: 200, body: {}, delay: 2000})
+        cy.visitConversation('123', 'hello', 'world')
+
+        cy.get('[placeholder="Type something"]').type('Hello world!')
+        cy.get('.text-button').click()
+        cy.contains('Sending').should('be.visible');
+        cy.contains('Sent').should('be.visible');
+    });
+
 })

@@ -22,7 +22,7 @@ import {LogStream} from "../../service/repository/log-stream.service";
 import CacheService from "../../service/cache/data/cache-service";
 import {Preference} from "../../model/dto/preference";
 import {GroupPipe} from "../pipes/group";
-import {SendMessage, SentMessagesPipe} from "../pipes/sent-message.pipe";
+import {MyMessageFrame, MymessagesPipe} from "../pipes/sent-message.pipe";
 import {GroupMessageComponent} from "../group-message/group-message.component";
 import {LeftMessageComponent} from "../left-message/left-message.component";
 import {PreferenceMessageComponent} from "../preference-message/preference-message.component";
@@ -48,7 +48,7 @@ import {rxResource} from "@angular/core/rxjs-interop";
         TypingMessageComponent,
         CdkFixedSizeVirtualScroll,
         GroupPipe,
-        SentMessagesPipe,
+        MymessagesPipe,
         GroupMessageComponent,
         LeftMessageComponent,
         PreferenceMessageComponent,
@@ -183,7 +183,7 @@ export class MessageListComponent {
 
     private readonly expandTrigger = new Subject<void>();
 
-    protected trackByTrackId(index: number, item: MessageRow) {
+    protected trackByTrackId(index: number, item: any) {
         switch (item.type) {
             case "typing":
                 return item.typeEvent.from;
@@ -217,8 +217,10 @@ export class MessageListComponent {
         if (mine) {
             return ({
                 type: 'right-message',
-                sent: {
+                mine: true,
+                myMessageFrame: {
                     sendState: SendState.Sent,
+                    display: true
                 },
                 message: message,
                 frame: frame
@@ -228,6 +230,7 @@ export class MessageListComponent {
         return ({
             type: 'left-message',
             message: message,
+            mine: false,
             frame: frame
         } as Message)
     }
@@ -235,9 +238,11 @@ export class MessageListComponent {
     toSendingRow(sending: ISendingMessage): MessageRow {
         return {
             type: 'right-message',
-            sent: {
+            myMessageFrame: {
                 sendState: sending.sendState,
+                display: true
             },
+            sending: sending,
             mine: true,
             message: sending.mockState,
             frame: {
@@ -254,6 +259,7 @@ export class MessageListComponent {
         return {
             type: 'typing',
             typeEvent: typing,
+            mine: false,
             frame: {
                 forceSplit: true,
                 receiveTime: new Date(typing.time),
@@ -267,6 +273,7 @@ export class MessageListComponent {
     toExpandingRow(): MessageRow {
         return {
             type: 'loading',
+            mine: false,
             frame: {
                 forceSplit: false,
                 receiveTime: new Date(),
@@ -441,33 +448,37 @@ type MessageRow =
     | {
     type: 'loading',
     frame: MessageFrame,
-    mine: false
+    mine: false,
+    myMessageFrame?: MyMessageFrame
 }
     | {
     type: 'left-message';
     message: MessageState,
     mine: false,
-    frame: MessageFrame
+    frame: MessageFrame,
+    myMessageFrame?: MyMessageFrame
 }
     | {
     type: 'middle-message';
     message: MessageState,
     mine: boolean,
-    frame: MessageFrame
+    frame: MessageFrame,
+    myMessageFrame?: MyMessageFrame
 }
     | {
     type: 'right-message';
     message: MessageState,
     mine: true,
-    sent: SendMessage
+    sending?: ISendingMessage,
+    myMessageFrame: MyMessageFrame
     frame: MessageFrame
 }
     | {
     type: 'typing';
     typeEvent: TypeMessage,
-    message: MessageState,
     mine: false,
-    frame: MessageFrame
+    frame: MessageFrame,
+    myMessageFrame?: MyMessageFrame
 }
 
 

@@ -13,11 +13,11 @@
 }
 
 @if (displaySend()) {
-    @switch (sendState()) {
+    @switch (send()?.sendState) {
 
         @case (SendState.Error) {
             <span class="error">
-            {{ $any(sendState()).reason }}
+            {{ $any(send()).reason }}
         </span>
         }
         @case (SendState.Pending) {

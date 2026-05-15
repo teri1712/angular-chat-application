@@ -27,15 +27,17 @@
        (keydown.enter)="onSendClicked()"
 >
 @if (textContent()) {
-    <button class="right-button" mat-icon-button
+    <button class="right-button text-button" mat-icon-button
             (click)="onSendClicked()">
         <mat-icon [svgIcon]="'send'"
                   color="primary"></mat-icon>
     </button>
-}
+} @else {
 
-<button class="right-button" mat-icon-button
-        (click)="onIconClicked()">
-    <mat-icon [svgIcon]="getIcon(iconId())"
-              color="primary"></mat-icon>
-</button>
+    <button class="right-button icon-button" mat-icon-button
+            (click)="onIconClicked()">
+        <mat-icon [svgIcon]="getIcon(iconId())"
+                  color="primary"></mat-icon>
+    </button>
+
+}

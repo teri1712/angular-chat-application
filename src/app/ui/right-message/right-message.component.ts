@@ -2,7 +2,7 @@ import {Component, HostBinding, inject, input, TemplateRef} from '@angular/core'
 import {CommonModule} from "@angular/common";
 import {MessageFrame, Position} from "../format/Formatter";
 import {MessageState} from "../../model/dto/message-state";
-import {SendState} from "../../model/message";
+import {ISendingMessage, SendState} from "../../model/message";
 import ProfileService from "../../service/profile-service";
 import {User} from "../../model/dto/user";
 
@@ -21,8 +21,11 @@ export class RightMessageComponent {
     message = input.required<MessageState>()
     frame = input.required<MessageFrame>()
     contentTemplate = input.required<TemplateRef<any>>()
-    sendState = input<SendState>()
+    send = input<ISendingMessage>()
     displaySend = input<boolean>()
+
+    constructor() {
+    }
 
     get displaySeenBy(): User[] {
         return this.message().seenBy.filter(user => !this.profileService.thatsMe(user))

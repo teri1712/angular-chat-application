@@ -71,6 +71,7 @@ export class InputBarComponent {
         if (!text.length) {
             this.lastChange.set(Date.now())
         }
+        this.textContent.set(text)
     }
 
     protected onIconClicked() {
