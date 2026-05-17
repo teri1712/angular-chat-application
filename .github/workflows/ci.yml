@@ -1,4 +1,4 @@
-name: Angular Chat Application CD
+name: Angular Chat Application CI
 
 on:
   pull_request:
