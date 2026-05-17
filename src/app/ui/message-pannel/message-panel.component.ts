@@ -1,4 +1,14 @@
-import {Component, computed, effect, HostListener, inject, OnDestroy, signal, ViewChild} from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    HostListener,
+    inject,
+    OnDestroy,
+    signal,
+    untracked,
+    ViewChild
+} from '@angular/core';
 import {CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
 import {CommonModule} from "@angular/common";
 import {ReactiveFormsModule} from "@angular/forms";
@@ -9,6 +19,8 @@ import {rxResource} from "@angular/core/rxjs-interop";
 import {IDialog} from "../../service/repository/IDialog";
 import {MessageService} from "../../service/message-service";
 import {SeenPosting} from "../../service/seen-handler";
+import ProfileService from "../../service/profile-service";
+import {LogStream} from "../../service/repository/log-stream.service";
 
 @Component({
     selector: 'app-message-panel',
@@ -38,7 +50,8 @@ export class MessagePanelComponent implements OnDestroy {
 
     protected chatId = signal('');
 
-
+    private readonly logStream = inject(LogStream)
+    private readonly profileService = inject(ProfileService)
     private readonly dialogService = inject(DialogService)
     private readonly activatedRoute = inject(ActivatedRoute)
     private readonly messageService = inject(MessageService)
@@ -105,10 +118,11 @@ export class MessagePanelComponent implements OnDestroy {
                 onCleanup(dialog.leave)
             }
         });
+
         effect(() => {
             const at = this.seenAt()
-            const chatId = this.chatId()
-            if (chatId) {
+            const chatId = untracked(() => this.chatId())
+            if (chatId && at) {
                 this.onSeen(at, chatId)
             }
         });
@@ -129,6 +143,24 @@ export class MessagePanelComponent implements OnDestroy {
             if (presence)
                 this.routePresence.set(new Date(presence));
         })
+
+        effect((onCleanup) => {
+            const chatId = this.chatId();
+            if (chatId) {
+                this.readyToBeSeen = true;
+                const sub = this.logStream.getChatChannel(chatId)
+                    .subscribe({
+                        next: (log) => {
+                            if (!this.profileService.thatsMe(log.sender))
+                                this.readyToBeSeen = true;
+                        },
+                        error: err => {
+                            console.error(err)
+                        }
+                    })
+                onCleanup(() => sub.unsubscribe())
+            }
+        });
     }
 
     private curr?: IDialog
@@ -138,12 +170,15 @@ export class MessagePanelComponent implements OnDestroy {
         this.curr = undefined;
     }
 
-    private readonly seenAt = signal(new Date())
+    private readonly seenAt = signal<Date | undefined>(undefined)
+    private readyToBeSeen: boolean = false
 
     @HostListener('focusin')
     onFocus() {
-        // this.seen.next(new Date());
-        // TODO
+        if (this.readyToBeSeen) {
+            this.seenAt.set(new Date());
+            this.readyToBeSeen = false;
+        }
     }
 
 

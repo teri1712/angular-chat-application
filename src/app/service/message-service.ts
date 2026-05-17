@@ -182,6 +182,7 @@ export class MessageService {
         if (handler) {
             this.onSending(posting);
 
+
             handler.handle(posting).subscribe({
                 next: () => {
                     this.onSent(posting);

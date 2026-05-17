@@ -8,6 +8,7 @@ import {settingRoute, threadsRoute} from "../../home-route.module";
 import ProfileService from "../../service/profile-service";
 import {CreateGroupDialogComponent} from "../create-group-dialog/create-group-dialog.component";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {ITokenStore} from "../../service/auth/token-store.interface";
 
 enum Routes {
     THREAD, SETTINGS, SEARCH
@@ -31,14 +32,22 @@ export class SideNavComponent implements OnInit, OnDestroy {
     private matDialog = inject(MatDialog)
     protected profile = this.profileService.profile
     protected currentRoute = signal<Routes>(Routes.THREAD);
+    private tokenStore = inject(ITokenStore)
     private routeSub!: Subscription;
 
     constructor() {
         effect(() => {
-            if (!this.profile()) {
+            if (this.tokenStore.sessionExpired()) {
                 const ref = this.snackBar.open("Account Session has expired!", "Logout");
                 ref.onAction().subscribe(() => {
-                    this.router.navigate(["/auth/login"], {replaceUrl: true});
+                    this.authenticator.logout().subscribe({
+                        next: () => {
+                            this.router.navigate(["/auth/login"], {replaceUrl: true});
+                        },
+                        error: () => {
+                            this.router.navigate(["/auth/login"], {replaceUrl: true});
+                        }
+                    })
                 });
             }
         });
