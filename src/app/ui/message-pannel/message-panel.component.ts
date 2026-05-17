@@ -150,7 +150,7 @@ export class MessagePanelComponent implements OnDestroy {
                 const sub = this.logStream.getChatChannel(chatId)
                     .subscribe({
                         next: (log) => {
-                            if (!this.profileService.thatsMe(log.senderId))
+                            if (!this.profileService.thatsMe(log.sender))
                                 this.readyToBeSeen = true;
                         },
                         error: err => {
