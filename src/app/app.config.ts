@@ -30,13 +30,14 @@ const routes: Routes = [
 export const appConfig: ApplicationConfig = {
     providers: [
         provideAnimationsAsync(),
-        UploadService,
-        provideHttpClient(withInterceptorsFromDi()),
+        UploadService, provideHttpClient(withInterceptorsFromDi()),
+
         {
             provide: HTTP_INTERCEPTORS,
             useClass: CredentialInterceptor,
-            multi: true
+            multi: true,
         },
+
         {
             provide: TokenStore,
             useExisting: AccountService

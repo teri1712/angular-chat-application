@@ -2,38 +2,42 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {SendState} from "../../model/message";
 
 @Pipe({
-      name: 'sentmessages',
-      standalone: true
+    name: 'mymessages',
+    standalone: true
 })
-export class SentMessagesPipe implements PipeTransform {
+export class MymessagesPipe implements PipeTransform {
 
-      constructor() {
-      }
+    constructor() {
+    }
 
-      transform<T extends SendFrame>(messages: T[] | null): T[] {
-            if (!messages || messages.length === 0) return messages ?? [];
-            let firstMet = false;
-            for (let i = messages.length - 1; i >= 0; i--) {
-                  const sent = messages[i]?.sent;
-                  const mine = messages[i]?.mine;
-                  if (mine && sent?.sendState == SendState.Sent)
-                        if (!firstMet) {
-                              firstMet = true;
-                              sent.display = true;
-                        } else {
-                              sent.display = false;
-                        }
+    transform<T extends SendFrame>(messages: T[] | null): T[] {
+        if (!messages || messages.length === 0) return messages ?? [];
+        let firstMet = false;
+        for (let i = messages.length - 1; i >= 0; i--) {
+            const myMessageFrame = messages[i]?.myMessageFrame;
+            if (myMessageFrame) {
+
+                if (myMessageFrame?.sendState == SendState.Error) {
+                    myMessageFrame.display = true;
+                    continue
+                }
+                if (!firstMet) {
+                    firstMet = true;
+                    myMessageFrame.display = true;
+                } else {
+                    myMessageFrame.display = false;
+                }
             }
-            return messages;
-      }
+        }
+        return messages;
+    }
 }
 
 export type SendFrame = {
-      sent?: SendMessage,
-      mine: boolean
+    myMessageFrame?: MyMessageFrame
 }
 
-export type SendMessage = {
-      sendState: SendState
-      display: boolean
+export type MyMessageFrame = {
+    sendState: SendState
+    display: boolean
 }

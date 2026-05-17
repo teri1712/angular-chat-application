@@ -25,7 +25,6 @@ export class SearchBarComponent implements OnInit {
             .subscribe({
                 next: (query) => {
                     if (query) {
-                        console.log(query)
                         this.router.navigate(searchRoute, {
                             queryParams: {query: query}
                         });

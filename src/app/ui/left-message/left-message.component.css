@@ -3,6 +3,7 @@
       flex-direction: row;
       align-items: end;
       gap: 0.5rem;
+      margin-right: auto;
 }
 
 .avatar-holder {

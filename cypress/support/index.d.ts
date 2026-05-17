@@ -7,7 +7,7 @@ declare namespace Cypress {
 
         visitLogin(): Chainable<void>
 
-        visitConversation(conversationId: string): Chainable<void>
+        visitConversation(chatId: string, roomName: string, roomAvatar: string): Chainable<void>
 
         interceptUpload(): Chainable<void>
     }

@@ -1,0 +1,68 @@
+[
+  {
+    "chatId": "123",
+    "postingId": "text-1",
+    "sender": { "id": "user-1", "name": "Alice", "avatar": "alice.png" },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 1,
+    "createdAt": "2026-05-14T10:00:00Z",
+    "updatedAt": "2026-05-14T10:00:00Z",
+    "content": "Hello world!"
+  },
+  {
+    "chatId": "123",
+    "postingId": "image-1",
+    "sender": { "id": "user-2", "name": "Bob", "avatar": "bob.png" },
+    "messageType": "IMAGE",
+    "seenBy": [],
+    "sequenceNumber": 2,
+    "createdAt": "2026-05-14T10:01:00Z",
+    "updatedAt": "2026-05-14T10:01:00Z",
+    "image": {
+      "uri": "https://example.com/image.png",
+      "filename": "image.png",
+      "width": 800,
+      "height": 600,
+      "format": "png"
+    }
+  },
+  {
+    "chatId": "123",
+    "postingId": "file-1",
+    "sender": { "id": "user-1", "name": "Alice", "avatar": "alice.png" },
+    "messageType": "FILE",
+    "seenBy": [],
+    "sequenceNumber": 3,
+    "createdAt": "2026-05-14T10:02:00Z",
+    "updatedAt": "2026-05-14T10:02:00Z",
+    "filename": "document.pdf",
+    "uri": "https://example.com/document.pdf",
+    "size": 1024576
+  },
+  {
+    "chatId": "123",
+    "postingId": "icon-1",
+    "sender": { "id": "user-2", "name": "Bob", "avatar": "bob.png" },
+    "messageType": "ICON",
+    "seenBy": [],
+    "sequenceNumber": 4,
+    "createdAt": "2026-05-14T10:03:00Z",
+    "updatedAt": "2026-05-14T10:03:00Z",
+    "iconId": 1
+  },
+  {
+    "chatId": "123",
+    "postingId": "pref-1",
+    "sender": { "id": "user-1", "name": "Alice", "avatar": "alice.png" },
+    "messageType": "PREFERENCE",
+    "seenBy": [],
+    "sequenceNumber": 5,
+    "createdAt": "2026-05-14T10:04:00Z",
+    "updatedAt": "2026-05-14T10:04:00Z",
+    "iconId": 2,
+    "roomName": "New Group Name",
+    "roomAvatar": "new-avatar.png",
+    "theme": "DARK"
+  }
+]

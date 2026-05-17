@@ -2,7 +2,7 @@ import {DestroyRef, effect, inject, Inject, Injectable} from "@angular/core";
 import {EventHandler, HANDLERS} from "./event-handler";
 
 import {v4 as uuidv4} from "uuid";
-import {ISendingMessage, SendState} from "../model/message";
+import {IErrorMessage, ISendingMessage, SendState} from "../model/message";
 import {BehaviorSubject, fromEvent, map, merge, Observable, shareReplay} from "rxjs";
 import {LogStream} from "./repository/log-stream.service";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
@@ -100,11 +100,12 @@ export class MessageService {
 
         sendings.next(sendings.value.map(sending => {
             if (sending.postingId === posting.id) {
-                return {
+                return ({
                     postingId: posting.id,
                     mockState: sending.mockState,
-                    sendState: SendState.Error
-                };
+                    sendState: SendState.Error,
+                    reason: "Failed to send the message"
+                }) as IErrorMessage;
             }
             return sending;
         }))
@@ -180,6 +181,7 @@ export class MessageService {
 
         if (handler) {
             this.onSending(posting);
+
 
             handler.handle(posting).subscribe({
                 next: () => {

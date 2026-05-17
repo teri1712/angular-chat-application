@@ -1,0 +1,13 @@
+{
+  "identifier": "chat-001",
+  "preference": {
+    "iconId": 1,
+    "customName": "Straw Hat Crew",
+    "customAvatar": "https://i.pravatar.cc/300?img=11",
+    "themeBackground": "#1E293B",
+    "themeName": "Ocean Blue"
+  },
+  "roomName": "Going Merry",
+  "roomAvatar": "https://i.pravatar.cc/300?img=12",
+  "lastActivity": "2026-05-10T08:19:00Z"
+}

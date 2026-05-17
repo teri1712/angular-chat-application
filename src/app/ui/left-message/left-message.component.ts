@@ -1,28 +1,24 @@
-import {Component, Input} from '@angular/core';
-import {IconMessageComponent} from "../icon-message/icon-message.component";
-import {ImageMessageComponent} from "../image-message/image-message.component";
+import {Component, input, TemplateRef} from '@angular/core';
 import {CommonModule} from "@angular/common";
-import {TextMessageComponent} from "../text-message/text-message.component";
-import {FileMessageComponent} from "../file-message/file-message.component";
 import {MessageState} from "../../model/dto/message-state";
 import {MessageFrame, Position} from "../format/Formatter";
 
 @Component({
-      selector: 'app-left-message',
-      imports: [
-            IconMessageComponent,
-            CommonModule,
-            TextMessageComponent,
-            ImageMessageComponent,
-            FileMessageComponent
-      ],
-      templateUrl: './left-message.component.html',
-      styleUrl: './left-message.component.css'
+    selector: 'app-left-message',
+    imports: [
+        CommonModule
+    ],
+    templateUrl: './left-message.component.html',
+    styleUrl: './left-message.component.css'
 })
 export class LeftMessageComponent {
 
-      @Input({required: true,}) message!: MessageState
-      @Input({required: true,}) frame!: MessageFrame
+    message = input.required<MessageState>()
+    frame = input.required<MessageFrame>()
+    contentTemplate = input.required<TemplateRef<any>>()
 
-      protected readonly Position = Position;
+    protected readonly Position = Position;
+
+    constructor() {
+    }
 }

@@ -1,3 +1,7 @@
+:host {
+      margin-left: auto;
+}
+
 .send-state {
       color: grey;
       margin: 0.25rem 1rem;
