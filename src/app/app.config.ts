@@ -1,9 +1,9 @@
 import {ApplicationConfig, provideZonelessChangeDetection} from '@angular/core';
 import {provideRouter, Routes} from '@angular/router';
-import {provideHttpClient, withInterceptors} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {authGuard} from './auth.guard';
-import {authInterceptor} from "./service/auth/credential.interceptor";
+import {CredentialInterceptor} from "./service/auth/credential.interceptor";
 import {AccountService} from "./service/auth/account.service";
 import {TokenStore} from "./service/auth/token-store.service";
 import {IProfileStore, ITokenStore} from "./service/auth/token-store.interface";
@@ -30,8 +30,14 @@ const routes: Routes = [
 export const appConfig: ApplicationConfig = {
     providers: [
         provideAnimationsAsync(),
-        UploadService,
-        provideHttpClient(withInterceptors([authInterceptor])),
+        UploadService, provideHttpClient(withInterceptorsFromDi()),
+
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: CredentialInterceptor,
+            multi: true,
+        },
+
         {
             provide: TokenStore,
             useExisting: AccountService
