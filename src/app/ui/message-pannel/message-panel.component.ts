@@ -60,10 +60,10 @@ export class MessagePanelComponent implements OnDestroy {
     });
 
     roomName = computed(() => {
-        return this.dialog.value()?.roomName() ?? this.routeRoomName()
+        return this.dialog.value()?.roomName() || this.routeRoomName()
     })
     roomAvatar = computed(() => {
-        return this.dialog.value()?.roomAvatar() ?? this.routeRoomAvatar()
+        return this.dialog.value()?.roomAvatar() || this.routeRoomAvatar()
     })
 
     protected readonly presence = rxResource({
@@ -121,6 +121,7 @@ export class MessagePanelComponent implements OnDestroy {
             const roomName = query.get('roomName');
             const roomAvatar = query.get('roomAvatar');
             const presence = query.get('presence');
+            console.log(roomName)
             if (roomName)
                 this.routeRoomName.set(roomName);
             if (roomAvatar)

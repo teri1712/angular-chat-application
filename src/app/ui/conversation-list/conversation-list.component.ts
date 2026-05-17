@@ -1,9 +1,9 @@
-import {Component, DestroyRef, inject, OnInit, ViewChild} from '@angular/core';
+import {Component, computed, effect, inject, signal, untracked, ViewChild} from '@angular/core';
 import {CdkVirtualScrollViewport, ScrollingModule} from "@angular/cdk/scrolling";
 import {CommonModule} from "@angular/common";
 import {ConversationComponent} from "../dialog/conversation.component";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {BehaviorSubject, catchError, combineLatest, map, Observable, of, Subject, switchMap, tap} from "rxjs";
+import {catchError, map, Observable, of, switchMap} from "rxjs";
 import {ConversationRepository} from "../../service/repository/conversation-repository.service";
 import {InboxLog, LogAction} from "../../model/dto/inbox-log";
 import {LogStream} from "../../service/repository/log-stream.service";
@@ -11,12 +11,9 @@ import {MessageState} from "../../model/dto/message-state";
 import CacheStore from "../../service/cache/data/cache-service";
 import {Conversation} from "../../model/dto/Conversation";
 import {PresenceMap, PresenceRepository} from "../../service/repository/presence-repository.service";
-import {ChatPresence} from "../../model/dto/chat-presence";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged} from "rxjs/operators";
 
 @Component({
-    selector: 'app-dialog-list',
+    selector: 'app-conversation-list',
     imports: [
         ScrollingModule,
         CommonModule,
@@ -26,113 +23,109 @@ import {debounceTime, distinctUntilChanged} from "rxjs/operators";
     templateUrl: './conversation-list.component.html',
     styleUrl: './conversation-list.component.css'
 })
-export class ConversationListComponent implements OnInit {
+export class ConversationListComponent {
 
     @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
 
-    private readonly scrollIndex = new BehaviorSubject<number>(0);
+    private readonly scrollIndex = signal(0);
 
     protected onScrollChanged(index: number) {
-        this.scrollIndex.next(index);
+        this.scrollIndex.set(index);
     }
 
-    private readonly conversations: Conversations = new RevisionList();
+    private readonly displayedConversations: Conversations = new RevisionList();
+    private readonly presences: PresenceMap = {}
     private readonly history: History = new RevisionList();
 
-    private expanding: boolean = false;
-    private end: boolean = false;
+    protected expanding = signal(false);
+    protected end = signal(false);
 
-    private readonly expandTrigger = new Subject<void>();
+    private readonly repository = inject(ConversationRepository)
+    private readonly presenceRepo = inject(PresenceRepository)
+    private readonly cacheStore = inject(CacheStore)
+    private readonly logStream = inject(LogStream)
 
+    constructor() {
 
-    constructor(
-        private readonly repository: ConversationRepository,
-        private readonly presenceRepo: PresenceRepository,
-        private readonly cacheStore: CacheStore,
-        private readonly logStream: LogStream,) {
+        this.definePrependingPipe();
+        this.defineAppendingPipe();
+        this.defineExpandPipe();
     }
 
-    mapLog(log: InboxLog, presence?: ChatPresence): ConversationView {
-        // todo: graceful
+    private presenceOf(chatId: string): Date {
+        return new Date(this.presences[chatId]?.at ?? 0);
+    }
+
+    mapLog(log: InboxLog): ConversationView {
         const message = log.messageState;
         return {
             roomName: log.roomName,
             roomAvatar: log.roomAvatar,
             chatId: log.chatId,
-            presence: new Date(),
+            presence: this.presenceOf(log.chatId),
             revisionNumber: log.revisionNumber,
             newest: message,
         }
-
     }
 
-    mapConversation(conversation: Conversation, presence?: ChatPresence): ConversationView {
+    mapConversation(conversation: Conversation): ConversationView {
         const newest = conversation.recents[0];
-        let presenceAt = new Date(0);
-        if (presence?.at)
-            presenceAt = new Date(presence.at);
         return {
             roomName: conversation.roomName,
             roomAvatar: conversation.roomAvatar,
             chatId: conversation.identifier,
-            presence: presenceAt,
+            presence: this.presenceOf(conversation.identifier),
             revisionNumber: conversation.revisionNumber,
             newest: newest,
         }
     }
 
     compareAndTruncate(conversations: Conversation[], revision?: Revision): Conversation[] {
-        if (conversations.length != 0 && revision && revision.revisionNumber !== conversations[0].revisionNumber) {
-            return []
-        }
-        if (revision)
+        if (conversations.length != 0 && revision && revision.revisionNumber === conversations[0].revisionNumber) {
             return conversations.slice(1)
+        }
         return conversations;
     }
 
-
-    protected get conversationRows(): ConversationRow[] {
-        const list = this.conversations.getAll().map((conversation) =>
+    protected conversationRows = computed(() => {
+        const list = this.displayedConversations.values.map((conversation) =>
             ({type: 'conversation', conversation: conversation} as ConversationRow));
-        if (this.expanding && !this.end) list.push({type: 'loading'});
+        if (this.expanding() && !this.end()) list.push({type: 'loading'});
         return list;
-    }
+    })
 
-    private checkAndExpand(scrollIndex: number, length: number) {
-        if (!this.expanding && !this.end &&
-            scrollIndex + 10 >= length) {
-            this.expanding = true;
-            this.expandTrigger.next();
-        }
-    }
 
     defineExpandPipe() {
-        combineLatest([this.scrollIndex, this.history.lengthSubject]).pipe(
-            takeUntilDestroyed(this.destroyRef),
-            debounceTime(500),
-            distinctUntilChanged(),
-        ).subscribe(([index, length]) => {
-            this.checkAndExpand(index, length);
-        })
+        effect(() => {
+            const index = this.scrollIndex();
+            const length = this.history.length();
+            console.log(this.expanding())
+            if (!this.expanding() && !this.end() && index + 10 >= length) {
+                untracked(() => {
+                    this.expanding.set(true)
+                })
+            }
+        });
     }
 
     definePrependingPipe() {
-        this.logStream.getChannel()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe(log => {
-                const conversation = this.mapLog(log);
-                if (log.action === LogAction.ADDITION) {
-                    this.prepend(this.conversations, conversation);
-                    this.prependHistory(this.history, conversation);
-                } else {
-                    this.update(this.conversations, conversation);
-                    this.updateHistory(this.history, conversation);
+        effect((onCleanup) => {
+            const sub = this.logStream.getChannel().subscribe({
+                next: log => {
+                    const conversation = this.mapLog(log);
+                    if (log.action === LogAction.ADDITION) {
+                        this.prepend(conversation);
+                    } else {
+                        this.update(conversation);
+                    }
                 }
             })
+            onCleanup(() => sub.unsubscribe())
+        });
     }
 
 
-    fetchPresences(conversations: Conversation[]) {
+    fetchPresences(conversations: Conversation[]): Observable<PresenceMap> {
         const chatIds = conversations.map(conversation => conversation.identifier);
         if (chatIds.length === 0)
             return of({})
@@ -144,26 +137,35 @@ export class ConversationListComponent implements OnInit {
     }
 
     defineAppendingPipe() {
-        this.expandTrigger.pipe(
-            takeUntilDestroyed(this.destroyRef),
-            switchMap(() => this.expand(this.history.last())),
-            tap(newConversations => {
-                newConversations.forEach((conversation) => {
-                    this.cacheStore.putAll(conversation.recents);
-                })
-            }),
-            switchMap(newConversations =>
-                this.fetchPresences(newConversations).pipe(
-                    map(presences => ({newConversations, presences}))
-                )
-            ))
-            .subscribe(({newConversations, presences}) => {
-                if (newConversations.length == 0)
-                    this.end = true;
-                this.expanding = false;
-                this.append(this.conversations, newConversations, presences);
-                this.appendHistory(this.history, newConversations);
-            })
+        effect((onCleanup) => {
+            if (this.expanding()) {
+                const sub = this.expand(this.history.last())
+                    .pipe(
+                        switchMap(conversations =>
+                            this.fetchPresences(conversations).pipe(
+                                map(presences => ({conversations, presences}))
+                            )
+                        )
+                    ).subscribe({
+                        next: ({conversations, presences}) => {
+
+                            Object.assign(this.presences, presences)
+
+                            conversations.forEach((conversation) => {
+                                this.cacheStore.putAll(conversation.recents);
+                            })
+                            this.append(conversations);
+                            if (conversations.length == 0) this.end.set(true);
+                            this.expanding.set(false);
+                        },
+                        error: err => {
+                            console.error(err)
+                            this.expanding.set(false)
+                        }
+                    })
+                onCleanup(() => sub.unsubscribe())
+            }
+        });
     }
 
     expand(revision?: Revision): Observable<Conversation[]> {
@@ -181,24 +183,23 @@ export class ConversationListComponent implements OnInit {
     }
 
 
-    private readonly destroyRef = inject(DestroyRef);
-
-    ngOnInit(): void {
-        this.definePrependingPipe();
-        this.defineAppendingPipe();
-        this.defineExpandPipe();
-    }
-
-
     protected trackBy(index: number, item: ConversationRow) {
         if (item.type === 'loading') {
-            return '0';
+            return 'loading';
         } else {
-            return item.conversation;
+            return item.conversation.chatId;
         }
     }
 
-    private appendHistory(history: History, conversations: Conversation[]): History {
+    private append(conversations: Conversation[]) {
+
+        conversations.map(conversation =>
+            this.mapConversation(conversation))
+            .forEach(conversation => {
+                this.displayedConversations.append(conversation, Existing.KEEP);
+            });
+
+
         conversations.map((conversation) => {
             return {
                 chatId: conversation.identifier,
@@ -206,44 +207,22 @@ export class ConversationListComponent implements OnInit {
                 newest: conversation.recents[0]
             }
         }).forEach((conversation) => {
-            history.append(conversation, Existing.DELETE);
+            this.history.append(conversation, Existing.DELETE);
         });
-        return history
     }
 
 
-    private append(conversations: Conversations, newConversations: Conversation[], presences: PresenceMap): Conversations {
-
-        newConversations.map(conversation =>
-            this.mapConversation(conversation, presences[conversation.identifier]))
-            .forEach(conversation => {
-                conversations.append(conversation, Existing.KEEP);
-            });
-
-        return conversations
+    private prepend(conversation: ConversationView) {
+        this.displayedConversations.prepend(conversation, Existing.DELETE);
+        this.history.prepend(conversation, Existing.DELETE);
     }
 
 
-    private prepend(conversations: Conversations, conversation: ConversationView) {
-        conversations.prepend(conversation, Existing.DELETE);
-        return conversations
-    }
+    private update(conversation: ConversationView) {
+        this.displayedConversations.replace(conversation);
+        this.history.replace(conversation);
 
-    private prependHistory(history: History, conversation: ConversationView) {
-        history.prepend(conversation, Existing.DELETE);
-        return history
     }
-
-    private update(conversations: Conversations, conversation: ConversationView) {
-        conversations.replace(conversation);
-        return conversations
-    }
-
-    private updateHistory(history: History, conversation: ConversationView) {
-        history.replace(conversation);
-        return history
-    }
-
 
 }
 
@@ -268,63 +247,68 @@ type Revision = {
 }
 
 class RevisionList<R extends Revision> {
-    private list: R[] = [];
-    private readonly length = new BehaviorSubject<number>(0)
-
-
-    get lengthSubject() {
-        return this.length.asObservable();
-    }
+    private readonly _list = signal<R[]>([]);
+    readonly length = computed(() => this._list().length)
 
     compare(value: R, other: R) {
         return value.chatId === other.chatId;
     }
 
     append(value: R, existing: Existing = Existing.KEEP) {
-        if (this.deduplicate(value, existing))
-            this.list.push(value);
-        this.length.next(this.list.length);
-    }
-
-    private deduplicate(value: R, existing: Existing = Existing.KEEP): boolean {
-        const index = this.list.findIndex((revision) => this.compare(revision, value));
-        if (index >= 0) {
-            if (existing === Existing.REPLACE) {
-                this.list[index] = value;
-                return false;
-            } else if (existing === Existing.DELETE) {
-                this.list.splice(index, 1);
-                return true;
+        this._list.update(list => {
+            const index = list.findIndex(r => this.compare(r, value));
+            if (index >= 0) {
+                if (existing === Existing.REPLACE) {
+                    const newList = [...list];
+                    newList[index] = value;
+                    return newList;
+                } else if (existing === Existing.DELETE) {
+                    return list.filter((_, i) => i !== index).concat(value);
+                }
+                return list;
             }
-            return false;
-        }
-        return true;
+            return [...list, value];
+        });
     }
-
 
     replace(value: R) {
-        const index = this.list.findIndex((revision) => this.compare(revision, value));
-        if (index >= 0) {
-            const item = this.list[index];
-            item.revisionNumber = value.revisionNumber
-            if (item.newest.sequenceNumber == value.newest.sequenceNumber) {
-                item.newest = value.newest;
+        this._list.update(list => {
+            const index = list.findIndex(r => this.compare(r, value));
+            if (index >= 0) {
+                const newList = [...list];
+                const item = {...newList[index]};
+                item.revisionNumber = value.revisionNumber
+                if (value.newest.sequenceNumber >= item.newest.sequenceNumber) {
+                    item.newest = value.newest;
+                }
+                newList[index] = item;
+                return newList;
             }
-        }
+            return list;
+        });
     }
 
     prepend(value: R, existing: Existing = Existing.KEEP) {
-        if (this.deduplicate(value, existing))
-            this.list.unshift(value);
-        this.length.next(this.list.length);
+        this._list.update(list => {
+            const index = list.findIndex(r => this.compare(r, value));
+            let workingList = list;
+            if (index >= 0) {
+                if (existing === Existing.REPLACE || existing === Existing.DELETE) {
+                    workingList = list.filter((_, i) => i !== index);
+                } else {
+                    return list;
+                }
+            }
+            return [value, ...workingList];
+        });
     }
 
-    getAll(): R[] {
-        return this.list;
+    get values(): R[] {
+        return this._list();
     }
 
     last(): R | undefined {
-        return this.list.at(-1);
+        return this._list().at(-1);
     }
 }
 
