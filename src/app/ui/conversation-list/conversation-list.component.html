@@ -3,23 +3,22 @@
                              (scrolledIndexChange)="onScrollChanged($event)"
 >
 
-    <div
-            *cdkVirtualFor="let item of conversationRows; let i = index; trackBy: trackBy"
-    >
-        <ng-container [ngSwitch]="item.type">
-            <div class="loading" *ngSwitchCase="'loading'">
-                <mat-spinner [diameter]="25"></mat-spinner>
-            </div>
-            <app-conversation *ngSwitchCase="'conversation'"
-
-                              [identifier]="$any(item).conversation.chatId"
-                              [roomName]="$any(item).conversation.roomName"
-                              [roomAvatar]="$any(item).conversation.roomAvatar"
-                              [newest]="$any(item).conversation.newest"
-                              [initialPresence]="$any(item).conversation.presence"
-
-
-            />
-        </ng-container>
+    <div *cdkVirtualFor="let item of conversationRows(); trackBy: trackBy">
+        @switch (item.type) {
+            @case ('loading') {
+                <div class="loading">
+                    <mat-spinner [diameter]="25"></mat-spinner>
+                </div>
+            }
+            @case ('conversation') {
+                <app-conversation
+                        [identifier]="item.conversation.chatId"
+                        [roomName]="item.conversation.roomName"
+                        [roomAvatar]="item.conversation.roomAvatar"
+                        [newest]="item.conversation.newest"
+                        [initialPresence]="item.conversation.presence"
+                />
+            }
+        }
     </div>
 </cdk-virtual-scroll-viewport>

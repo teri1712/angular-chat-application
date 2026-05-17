@@ -19,8 +19,8 @@ import {rxResource} from "@angular/core/rxjs-interop";
 import {IDialog} from "../../service/repository/IDialog";
 import {MessageService} from "../../service/message-service";
 import {SeenPosting} from "../../service/seen-handler";
-import {LogStream} from "../../service/repository/log-stream.service";
 import ProfileService from "../../service/profile-service";
+import {LogStream} from "../../service/repository/log-stream.service";
 
 @Component({
     selector: 'app-message-panel',
@@ -50,7 +50,6 @@ export class MessagePanelComponent implements OnDestroy {
 
     protected chatId = signal('');
 
-
     private readonly logStream = inject(LogStream)
     private readonly profileService = inject(ProfileService)
     private readonly dialogService = inject(DialogService)
@@ -74,10 +73,10 @@ export class MessagePanelComponent implements OnDestroy {
     });
 
     roomName = computed(() => {
-        return this.dialog.value()?.roomName() ?? this.routeRoomName()
+        return this.dialog.value()?.roomName() || this.routeRoomName()
     })
     roomAvatar = computed(() => {
-        return this.dialog.value()?.roomAvatar() ?? this.routeRoomAvatar()
+        return this.dialog.value()?.roomAvatar() || this.routeRoomAvatar()
     })
 
     protected readonly presence = rxResource({
@@ -119,6 +118,7 @@ export class MessagePanelComponent implements OnDestroy {
                 onCleanup(dialog.leave)
             }
         });
+
         effect(() => {
             const at = this.seenAt()
             const chatId = untracked(() => this.chatId())
@@ -135,6 +135,7 @@ export class MessagePanelComponent implements OnDestroy {
             const roomName = query.get('roomName');
             const roomAvatar = query.get('roomAvatar');
             const presence = query.get('presence');
+            console.log(roomName)
             if (roomName)
                 this.routeRoomName.set(roomName);
             if (roomAvatar)
