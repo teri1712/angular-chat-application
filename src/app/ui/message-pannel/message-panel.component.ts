@@ -1,14 +1,4 @@
-import {
-    Component,
-    computed,
-    effect,
-    HostListener,
-    inject,
-    OnDestroy,
-    signal,
-    untracked,
-    ViewChild
-} from '@angular/core';
+import {Component, computed, effect, HostListener, inject, signal, untracked, ViewChild} from '@angular/core';
 import {CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
 import {CommonModule} from "@angular/common";
 import {ReactiveFormsModule} from "@angular/forms";
@@ -16,7 +6,6 @@ import {ActivatedRoute} from "@angular/router";
 import {DialogService} from "../../service/repository/dialog.service";
 import {MessageListComponent} from "../message-list/message-list.component";
 import {rxResource} from "@angular/core/rxjs-interop";
-import {IDialog} from "../../service/repository/IDialog";
 import {MessageService} from "../../service/message-service";
 import {SeenPosting} from "../../service/seen-handler";
 import ProfileService from "../../service/profile-service";
@@ -40,7 +29,7 @@ import {LogStream} from "../../service/repository/log-stream.service";
     templateUrl: './message-panel.component.html',
     styleUrl: './message-panel.component.css'
 })
-export class MessagePanelComponent implements OnDestroy {
+export class MessagePanelComponent {
 
     @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
 
@@ -115,7 +104,7 @@ export class MessagePanelComponent implements OnDestroy {
             const dialog = this.dialog.value()
             if (dialog) {
                 dialog.join();
-                onCleanup(dialog.leave)
+                onCleanup(() => dialog.leave())
             }
         });
 
@@ -161,13 +150,6 @@ export class MessagePanelComponent implements OnDestroy {
                 onCleanup(() => sub.unsubscribe())
             }
         });
-    }
-
-    private curr?: IDialog
-
-    ngOnDestroy(): void {
-        this.curr?.leave()
-        this.curr = undefined;
     }
 
     private readonly seenAt = signal<Date | undefined>(undefined)

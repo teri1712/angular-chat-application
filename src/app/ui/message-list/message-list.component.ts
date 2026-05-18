@@ -22,7 +22,7 @@ import {LogStream} from "../../service/repository/log-stream.service";
 import CacheService from "../../service/cache/data/cache-service";
 import {Preference} from "../../model/dto/preference";
 import {GroupPipe} from "../pipes/group";
-import {MyMessageFrame, MymessagesPipe} from "../pipes/sent-message.pipe";
+import {MymessagesPipe, SendFrame} from "../pipes/sent-message.pipe";
 import {GroupMessageComponent} from "../group-message/group-message.component";
 import {LeftMessageComponent} from "../left-message/left-message.component";
 import {PreferenceMessageComponent} from "../preference-message/preference-message.component";
@@ -32,6 +32,7 @@ import {IconMessageComponent} from "../icon-message/icon-message.component";
 import {ImageMessageComponent} from "../image-message/image-message.component";
 import {TextMessageComponent} from "../text-message/text-message.component";
 import {rxResource} from "@angular/core/rxjs-interop";
+import {MiddleMessageComponent} from "../middle-message/middle-message.component";
 
 
 @Component({
@@ -57,6 +58,7 @@ import {rxResource} from "@angular/core/rxjs-interop";
         IconMessageComponent,
         ImageMessageComponent,
         TextMessageComponent,
+        MiddleMessageComponent,
 
         // CdkAutoSizeVirtualScroll
     ],
@@ -206,20 +208,24 @@ export class MessageListComponent {
 
         const mine = this.profileService.thatsMe(message.sender)
         const type = message.messageType.toLowerCase()
-        if (type.includes('group') || type.includes('preference')) {
+        if (type.includes('group')
+            || type.includes('preference')) {
             return ({
                 type: 'middle-message',
                 mine: mine,
                 message: message,
-                frame: frame
+                frame: {
+                    ...frame,
+                    forceSplit: true
+                }
             } as Message)
         }
         if (mine) {
             return ({
                 type: 'right-message',
                 mine: true,
-                myMessageFrame: {
-                    sendState: SendState.Sent,
+                sendFrame: {
+                    sendState: SendState.Received,
                     display: true
                 },
                 message: message,
@@ -238,11 +244,10 @@ export class MessageListComponent {
     toSendingRow(sending: ISendingMessage): MessageRow {
         return {
             type: 'right-message',
-            myMessageFrame: {
+            sendFrame: {
                 sendState: sending.sendState,
                 display: true
             },
-            sending: sending,
             mine: true,
             message: sending.mockState,
             frame: {
@@ -447,38 +452,33 @@ export class MessageListComponent {
 type MessageRow =
     | {
     type: 'loading',
-    frame: MessageFrame,
-    mine: false,
-    myMessageFrame?: MyMessageFrame
+    frame: MessageFrame
+    mine: false
 }
     | {
     type: 'left-message';
     message: MessageState,
     mine: false,
-    frame: MessageFrame,
-    myMessageFrame?: MyMessageFrame
+    frame: MessageFrame
 }
     | {
     type: 'middle-message';
     message: MessageState,
     mine: boolean,
-    frame: MessageFrame,
-    myMessageFrame?: MyMessageFrame
+    frame: MessageFrame
 }
     | {
     type: 'right-message';
     message: MessageState,
     mine: true,
-    sending?: ISendingMessage,
-    myMessageFrame: MyMessageFrame
+    sendFrame: SendFrame
     frame: MessageFrame
 }
     | {
     type: 'typing';
     typeEvent: TypeMessage,
     mine: false,
-    frame: MessageFrame,
-    myMessageFrame?: MyMessageFrame
+    frame: MessageFrame
 }
 
 

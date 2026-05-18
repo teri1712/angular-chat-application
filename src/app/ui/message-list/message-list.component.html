@@ -46,20 +46,22 @@
                         [frame]="frame">
                     @switch (row.type) {
                         @case ('middle-message') {
-                            @switch (message.messageType.toLowerCase()) {
-                                @case ('preference') {
-                                    <app-preference-message
-                                            class="center"
-                                            [maker]="sender">
-                                    </app-preference-message>
+                            <app-middle-message>
+                                @switch (message.messageType.toLowerCase()) {
+                                    @case ('preference') {
+                                        <app-preference-message
+                                                class="center"
+                                                [maker]="sender">
+                                        </app-preference-message>
+                                    }
+                                    @case ('group') {
+                                        <app-group-message
+                                                class="center"
+                                                [creator]="sender">
+                                        </app-group-message>
+                                    }
                                 }
-                                @case ('group') {
-                                    <app-group-message
-                                            class="center"
-                                            [creator]="sender">
-                                    </app-group-message>
-                                }
-                            }
+                            </app-middle-message>
                         }
                         @default {
                             <ng-template #messagetemplate>
@@ -88,13 +90,12 @@
                                     </app-left-message>
                                 }
                                 @case ('right-message') {
-                                    @let myMessageFrame = $any(row.myMessageFrame);
-                                    @let sending = $any(row.sending);
+                                    @let sendFrame = $any(row.sendFrame);
                                     <app-right-message
                                             [message]="message"
                                             [frame]="frame"
-                                            [send]="sending"
-                                            [displaySend]="myMessageFrame.display"
+                                            [displaySend]="sendFrame.display"
+                                            [sendState]="sendFrame.sendState"
                                             [contentTemplate]="messagetemplate">
                                     </app-right-message>
                                 }

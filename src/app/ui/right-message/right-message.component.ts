@@ -21,8 +21,8 @@ export class RightMessageComponent {
     message = input.required<MessageState>()
     frame = input.required<MessageFrame>()
     contentTemplate = input.required<TemplateRef<any>>()
-    send = input<ISendingMessage>()
-    displaySend = input<boolean>()
+    displaySend = input.required<boolean>()
+    sendState = input.required<SendState>()
 
     constructor() {
     }

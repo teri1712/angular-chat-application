@@ -10,11 +10,11 @@ export class MymessagesPipe implements PipeTransform {
     constructor() {
     }
 
-    transform<T extends SendFrame>(messages: T[] | null): T[] {
+    transform<T extends Frame>(messages: T[] | null): T[] {
         if (!messages || messages.length === 0) return messages ?? [];
         let firstMet = false;
         for (let i = messages.length - 1; i >= 0; i--) {
-            const myMessageFrame = messages[i]?.myMessageFrame;
+            const myMessageFrame = messages[i]?.sendFrame;
             if (myMessageFrame) {
 
                 if (myMessageFrame?.sendState == SendState.Error) {
@@ -33,11 +33,12 @@ export class MymessagesPipe implements PipeTransform {
     }
 }
 
-export type SendFrame = {
-    myMessageFrame?: MyMessageFrame
+type Frame = {
+    sendFrame?: SendFrame
+    mine?: boolean
 }
 
-export type MyMessageFrame = {
+export type SendFrame = {
     sendState: SendState
     display: boolean
 }
