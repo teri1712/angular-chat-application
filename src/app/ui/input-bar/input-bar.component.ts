@@ -68,7 +68,7 @@ export class InputBarComponent {
 
 
     protected onChange(text: string) {
-        if (!text.length) {
+        if (text.length) {
             this.lastChange.set(Date.now())
         }
         this.textContent.set(text)

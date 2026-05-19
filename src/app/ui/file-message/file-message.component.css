@@ -12,6 +12,7 @@
   border-radius: 12px;
   min-width: 220px;
   max-width: 320px;
+  color: inherit !important;
 }
 
 .file-info {
@@ -21,8 +22,8 @@
   min-width: 0; /* allow truncation */
 }
 
-.file-icon {
-  color: var(--mat-sys-primary);
+mat-icon {
+  color: inherit !important;
 }
 
 .meta {
@@ -47,4 +48,5 @@
 
 .download {
   white-space: nowrap;
+  color: inherit !important;
 }

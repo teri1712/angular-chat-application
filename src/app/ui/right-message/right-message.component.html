@@ -13,11 +13,11 @@
 }
 
 @if (displaySend()) {
-    @switch (send()?.sendState) {
+    @switch (sendState()) {
 
         @case (SendState.Error) {
             <span class="error">
-            {{ $any(send()).reason }}
+            There was an error sending your message.
         </span>
         }
         @case (SendState.Pending) {
@@ -34,6 +34,16 @@
             <span class="send-state">
             Sent
         </span>
+        }
+        @case (SendState.Sent) {
+            <span class="send-state">
+            Sent
+        </span>
+        }
+        @case (SendState.Received) {
+            <span class="send-state">
+            Received
+            </span>
         }
 
     }

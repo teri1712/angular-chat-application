@@ -13,7 +13,7 @@
     <button class="left-button" mat-icon-button
             [disabled]="!chatId()"
             [ngStyle]="{
-    'scale': !textContent? '1' : '0',
+    'scale': !textContent()? '1' : '0',
 }" (click)="fileInput.click()">
         <mat-icon>attach_file</mat-icon>
         <input #fileInput type="file" hidden (change)="sendFile($event)">
