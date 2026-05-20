@@ -274,10 +274,12 @@ class RevisionList<R extends Revision> {
     replace(value: R) {
         this._list.update(list => {
             const index = list.findIndex(r => this.compare(r, value));
+
             if (index >= 0) {
                 const newList = [...list];
                 const item = {...newList[index]};
                 item.revisionNumber = value.revisionNumber
+
                 if (value.newest.sequenceNumber >= item.newest.sequenceNumber) {
                     item.newest = value.newest;
                 }

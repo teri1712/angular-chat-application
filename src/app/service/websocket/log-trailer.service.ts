@@ -58,15 +58,36 @@ export class LogTrailerService extends LogStream {
         }
     }
 
-    subscribeRoom(chatId: string): Observable<TypeMessage | PreferenceMessage> {
+    subscribeRoom(chatId: string): Observable<TypeMessage> {
         if (!this.client?.connected) {
             return of();
         }
         const client = this.client
-        return new Observable<TypeMessage | PreferenceMessage>((observer) => {
+        return new Observable<TypeMessage>((observer) => {
 
             const subscription = client.subscribe(
                 "/room/" + chatId,
+                (msg: IMessage) => {
+                    observer.next(JSON.parse(msg.body));
+                },
+                {}
+            );
+
+            return () => {
+                subscription.unsubscribe();
+            };
+        });
+    }
+
+    subscribeSettings(chatId: string): Observable<PreferenceMessage> {
+        if (!this.client?.connected) {
+            return of();
+        }
+        const client = this.client
+        return new Observable<PreferenceMessage>((observer) => {
+
+            const subscription = client.subscribe(
+                "/setting/" + chatId,
                 (msg: IMessage) => {
                     observer.next(JSON.parse(msg.body));
                 },

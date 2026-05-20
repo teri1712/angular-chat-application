@@ -86,7 +86,6 @@ export class CreateGroupDialogComponent {
             }
             return users;
         });
-        this.searchQuery.set('');
     }
 
     removeUser(user: User): void {

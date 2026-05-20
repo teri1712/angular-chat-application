@@ -8,7 +8,6 @@ describe('Conversation', () => {
         cy.login();
 
         cy.wait('@getConversations');
-
         cy.get('app-conversation').should('have.length', 2);
         cy.get('app-conversation')
             .eq(0)
@@ -41,38 +40,66 @@ describe('Conversation', () => {
     });
     describe('Groups', () => {
         beforeEach(() => {
-            cy.get('[aria-label="Create Group"]').click();
+            // Ensure we are on /home and the page is loaded before clicking
+            cy.url().should('include', '/home');
+            cy.get('[aria-label="Create Group"]', {timeout: 10000})
+                .should('be.visible')
+                .click();
+            
+            // Wait for dialog to appear
+            cy.contains('Create Group').should('be.visible');
+
             cy.intercept('GET', '**/people**',
                 {fixture: 'get-people-success.json', delay: 2000})
                 .as('people')
         })
         it('should be able open group dialog when click create group button', () => {
-            cy.get('Create Group').should('be.visible');
+            cy.contains('Create Group').should('be.visible');
         });
         it('should be able to find other people to add to group', () => {
-            cy.get('[placeholder="Search by name..."]').type('Meo meo');
+            cy.get('[placeholder="Search by name..."]')
+                .should('be.visible')
+                .click()
+                .type('Meo meo', {delay: 50});
+            
+            cy.wait('@people');
             cy.contains('Thái Minh Trí').should('be.visible');
             cy.contains('NAB Colleague').should('be.visible');
-            cy.wait('@people')
         });
         it('should should be able to add suggested user as partner', () => {
-            cy.get('[placeholder="Search by name..."]').type('Meo meo');
-            cy.contains('Thái Minh Trí').click()
+            cy.get('[placeholder="Search by name..."]')
+                .should('be.visible')
+                .click()
+                .type('Meo meo', {delay: 50});
+            
+            cy.wait('@people');
+            cy.contains('Thái Minh Trí').should('be.visible').click();
+            
             cy.get('.selected-members')
-                .find('Thái Minh Trí')
+                .contains('Thái Minh Trí')
                 .should('be.visible');
         });
         it('should be able to create group when group name is non empty and selected partner >= 1', () => {
             cy.intercept('POST', '**/groups', {statusCode: 200, body: {}})
                 .as('create-group');
-            cy.get('[placeholder="Enter group name"]').type('Test Group');
 
-            cy.get('[placeholder="Search by name..."]').type('Meo meo');
-            cy.contains('Thái Minh Trí').click()
-            cy.contains('NAB Colleague').click()
+            cy.get('[placeholder="Enter group name"]')
+                .should('be.visible')
+                .click()
+                .type('Test Group', {delay: 50});
 
-            cy.contains(/^Create$/).click()
-            cy.wait('@create-group')
+            cy.get('[placeholder="Search by name..."]')
+                .should('be.visible')
+                .click()
+                .type('Meo meo', {delay: 50});
+            
+            cy.wait('@people');
+            
+            cy.contains('Thái Minh Trí').should('be.visible').click();
+            cy.contains('NAB Colleague').should('be.visible').click();
+
+            cy.contains(/^Create$/).should('not.be.disabled').click();
+            cy.wait('@create-group');
         });
     })
 })

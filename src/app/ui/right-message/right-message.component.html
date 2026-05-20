@@ -51,6 +51,6 @@
 
 <div class="seen-div">
     @for (seen of displaySeenBy; track seen.id) {
-        <img class="seen mt-2" [src]="seen.avatar">
+        <img class="seen mt-2" [src]="seen.avatar" [alt]="'Avatar of ' + seen.name">
     }
 </div>
