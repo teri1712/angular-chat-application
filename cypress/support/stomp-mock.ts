@@ -19,6 +19,11 @@ export interface StompMock {
      * Emits a message to a /room/{chatId} destination.
      */
     emitRoomEvent(chatId: string, event: any): void;
+
+    /**
+     * Emits a preference update to a /setting/{chatId} destination.
+     */
+    emitPreferenceEvent(chatId: string, event: any): void;
 }
 
 let activeUrl: string | null = null;
@@ -96,6 +101,9 @@ Cypress.Commands.add('mockStomp', (url: string) => {
         },
         emitRoomEvent(chatId: string, event: any) {
             sendStompMessage(`/room/${chatId}`, event);
+        },
+        emitPreferenceEvent(chatId: string, event: any) {
+            sendStompMessage(`/setting/${chatId}`, event);
         }
     });
 });

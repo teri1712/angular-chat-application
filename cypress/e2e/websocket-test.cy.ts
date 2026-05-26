@@ -115,5 +115,25 @@ describe('WebSocket Log Events', () => {
             cy.get('app-message').last().should('contain', 'Hey everyone!');
             cy.get('app-message').first().should('contain', 'Vcl!');
         });
+
+        it('should update theme and background when preference event is emitted', () => {
+            // Initial state from fixture: themeName: "Ocean Blue"
+            // Wait, fixture says "Ocean Blue", but CSS says "ocean-breeze" etc.
+            // Let's just verify that it changes TO what we emit.
+            cy.get('app-message-list').should('not.have.class', 'chat-theme-meadow');
+
+            // Emit PREFERENCE update
+            cy.fixture('stomp-preference-update').then((pref) => {
+                cy.get<StompMock>('@stomp').then((stomp) => {
+                    stomp.emitPreferenceEvent('chat-001', pref);
+                });
+            });
+
+            // Assert: UI updated
+            cy.get('app-message-list').should('have.class', 'chat-theme-meadow');
+            cy.get('app-message-list')
+                .should('have.attr', 'style')
+                .and('include', 'background-image: url("https://example.com/meadow.jpg")');
+        });
     });
 });
