@@ -80,13 +80,6 @@ export class ConversationListComponent {
         }
     }
 
-    compareAndTruncate(conversations: Conversation[], revision?: Revision): Conversation[] {
-        if (conversations.length != 0 && revision && revision.revisionNumber === conversations[0].revisionNumber) {
-            return conversations.slice(1)
-        }
-        return conversations;
-    }
-
     protected conversationRows = computed(() => {
         const list = this.displayedConversations.values.map((conversation) =>
             ({type: 'conversation', conversation: conversation} as ConversationRow));
@@ -136,6 +129,7 @@ export class ConversationListComponent {
             }));
     }
 
+
     defineAppendingPipe() {
         effect((onCleanup) => {
             if (this.expanding()) {
@@ -173,8 +167,6 @@ export class ConversationListComponent {
         return this.repository
             .list(revision?.revisionNumber)
             .pipe(
-                map(conversations =>
-                    this.compareAndTruncate(conversations, revision)),
                 catchError((error) => {
                     console.error("Error fetching conversations", error);
                     return of([]);
