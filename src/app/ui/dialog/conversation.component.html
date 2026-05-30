@@ -9,7 +9,7 @@
     <div class="seen-div">
         @for (seen of displaySeenBy(); track seen.id) {
             <img class="seen mt-2" [src]="seen.avatar"
-                 alt="">
+                 [alt]="'Avatar of ' + seen.name">
         }
     </div>
 }

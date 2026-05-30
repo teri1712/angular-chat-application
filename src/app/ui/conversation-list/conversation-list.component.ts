@@ -80,13 +80,6 @@ export class ConversationListComponent {
         }
     }
 
-    compareAndTruncate(conversations: Conversation[], revision?: Revision): Conversation[] {
-        if (conversations.length != 0 && revision && revision.revisionNumber === conversations[0].revisionNumber) {
-            return conversations.slice(1)
-        }
-        return conversations;
-    }
-
     protected conversationRows = computed(() => {
         const list = this.displayedConversations.values.map((conversation) =>
             ({type: 'conversation', conversation: conversation} as ConversationRow));
@@ -99,7 +92,6 @@ export class ConversationListComponent {
         effect(() => {
             const index = this.scrollIndex();
             const length = this.history.length();
-            console.log(this.expanding())
             if (!this.expanding() && !this.end() && index + 10 >= length) {
                 untracked(() => {
                     this.expanding.set(true)
@@ -136,6 +128,7 @@ export class ConversationListComponent {
             }));
     }
 
+
     defineAppendingPipe() {
         effect((onCleanup) => {
             if (this.expanding()) {
@@ -148,7 +141,6 @@ export class ConversationListComponent {
                         )
                     ).subscribe({
                         next: ({conversations, presences}) => {
-
                             Object.assign(this.presences, presences)
 
                             conversations.forEach((conversation) => {
@@ -173,8 +165,6 @@ export class ConversationListComponent {
         return this.repository
             .list(revision?.revisionNumber)
             .pipe(
-                map(conversations =>
-                    this.compareAndTruncate(conversations, revision)),
                 catchError((error) => {
                     console.error("Error fetching conversations", error);
                     return of([]);
@@ -274,10 +264,12 @@ class RevisionList<R extends Revision> {
     replace(value: R) {
         this._list.update(list => {
             const index = list.findIndex(r => this.compare(r, value));
+
             if (index >= 0) {
                 const newList = [...list];
                 const item = {...newList[index]};
                 item.revisionNumber = value.revisionNumber
+
                 if (value.newest.sequenceNumber >= item.newest.sequenceNumber) {
                     item.newest = value.newest;
                 }

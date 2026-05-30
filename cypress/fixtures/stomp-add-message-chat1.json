@@ -1,0 +1,31 @@
+{
+  "postingId": "msg-new-001",
+  "sequenceNumber": 100,
+  "chatId": "chat-001",
+  "roomName": "Straw Hat Pirates",
+  "roomAvatar": "https://i.pravatar.cc/300?img=12",
+  "revisionNumber": 10,
+  "sender": {
+    "id": "user-002",
+    "username": "luffy",
+    "name": "Monkey D. Luffy",
+    "avatar": "https://i.pravatar.cc/150?img=2"
+  },
+  "action": "ADDITION",
+  "messageState": {
+    "chatId": "chat-001",
+    "postingId": "msg-new-001",
+    "sender": {
+      "id": "user-002",
+      "username": "luffy",
+      "name": "Monkey D. Luffy",
+      "avatar": "https://i.pravatar.cc/150?img=2"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 100,
+    "createdAt": "2026-05-19T12:00:00.000Z",
+    "updatedAt": "2026-05-19T12:00:00.000Z",
+    "content": "Where is the meat?!"
+  }
+}

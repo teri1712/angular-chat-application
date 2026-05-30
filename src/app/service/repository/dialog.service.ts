@@ -1,4 +1,4 @@
-import {DestroyRef, inject, Injectable, signal} from "@angular/core";
+import {effect, inject, Injectable, signal} from "@angular/core";
 import {BehaviorSubject, filter, Observable, Subscription, timer} from "rxjs";
 import {PresenceRepository} from "./presence-repository.service";
 import {Preference} from "../../model/dto/preference";
@@ -10,30 +10,33 @@ import {InboxLog} from "../../model/dto/inbox-log";
 import {LogStream} from "./log-stream.service";
 import {Chat} from "../../model/dto/chat";
 import {PreferenceMessage} from "../../model/dto/preference-message";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable()
 export class DialogService {
 
     private knownDialog = new Map<string, BehaviorSubject<Dialog>>();
 
-    private logObserver = (log: InboxLog) => {
+    private updateDialog(log: InboxLog) {
         const dialog = this.find(log.chatId).value
-        dialog.roomAvatar.set(log.roomAvatar);
-        dialog.roomName.set(log.roomName)
+        dialog._roomAvatar.set(log.roomAvatar);
+        dialog._roomName.set(log.roomName)
     }
 
-    private destroyRef = inject(DestroyRef);
+    private realtimeClient = inject(LogTrailerService);
+    private presenceRepo = inject(PresenceRepository);
+    private chatRepository = inject(ChatRepository);
+    private logStream = inject(LogStream);
 
-    constructor(
-        private realtimeClient: LogTrailerService,
-        private presenceRepo: PresenceRepository,
-        private chatRepository: ChatRepository,
-        private logStream: LogStream,
-    ) {
-        this.logStream.getChannel()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe(this.logObserver);
+    constructor() {
+        effect((onCleanup) => {
+            const sub = this.logStream.getChannel()
+                .subscribe({
+                    next: log => {
+                        this.updateDialog(log)
+                    }
+                })
+            onCleanup(() => sub.unsubscribe())
+        });
     }
 
     private find(chatId: string): BehaviorSubject<Dialog> {
@@ -58,14 +61,19 @@ export class DialogService {
 class Dialog implements IDialog {
 
     private roomSub?: Subscription;
+    private settingSub?: Subscription;
     private chatSub?: Subscription;
     private activityTimer?: Subscription
+    private countTenant = 0;
 
     readonly _preference = new BehaviorSubject<Preference | undefined>(undefined)
     readonly _presence = new BehaviorSubject<Date | undefined>(undefined)
     readonly _typings = new BehaviorSubject<TypeMessage[]>([])
-    readonly roomName = signal<string>('')
-    readonly roomAvatar = signal<string>('')
+    readonly _roomName = signal<string>('')
+    readonly _roomAvatar = signal<string>('')
+
+    readonly roomName = this._roomName.asReadonly()
+    readonly roomAvatar = this._roomAvatar.asReadonly()
 
     constructor(
         private readonly realtimeClient: LogTrailerService,
@@ -120,8 +128,8 @@ class Dialog implements IDialog {
         this.chatRepository.get(this.identifier).subscribe({
             next: (chat: Chat) => {
                 this._preference.next(chat.preference);
-                this.roomName.set(chat.roomName);
-                this.roomAvatar.set(chat.roomAvatar);
+                this._roomName.set(chat.roomName);
+                this._roomAvatar.set(chat.roomAvatar);
 
             },
             error: (err) => {
@@ -147,13 +155,18 @@ class Dialog implements IDialog {
         this.roomSub = this.realtimeClient.subscribeRoom(this.identifier)
             .subscribe({
                 next: (message) => {
-                    if ("from" in message) {
-                        this.onTyping(message as TypeMessage);
-
-                    } else if ("iconId" in message) {
-                        this._preference.next(message as PreferenceMessage);
-                    }
+                    this.onTyping(message as TypeMessage);
                     console.debug("Received typing: ", message, "")
+                },
+                error: err => {
+                    console.error(err)
+                }
+            })
+        this.settingSub = this.realtimeClient.subscribeSettings(this.identifier)
+            .subscribe({
+                next: (message) => {
+                    this._preference.next(message as PreferenceMessage);
+                    console.debug("Received preference: ", message, "")
                 },
                 error: err => {
                     console.error(err)
@@ -167,14 +180,20 @@ class Dialog implements IDialog {
 
     join(): void {
         this.fetchSync();
-        this.subscribeChat();
+        if (this.countTenant == 0)
+            this.subscribeChat();
+        this.countTenant++;
     }
 
     leave(): void {
-        this.roomSub?.unsubscribe();
-        this.chatSub?.unsubscribe();
-        this.activityTimer?.unsubscribe();
-        this._typings.next([]);
+        this.countTenant--;
+        if (this.countTenant == 0) {
+            this.roomSub?.unsubscribe();
+            this.settingSub?.unsubscribe();
+            this.chatSub?.unsubscribe();
+            this.activityTimer?.unsubscribe();
+            this._typings.next([]);
+        }
     }
 
     ping(): void {
@@ -182,4 +201,3 @@ class Dialog implements IDialog {
     }
 
 }
-

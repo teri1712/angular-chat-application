@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject} from '@angular/core';
+import {Component, computed, effect, inject, signal, untracked} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -48,11 +48,14 @@ export class ProfileManagementComponent {
     private readonly snackBar = inject(MatSnackBar)
     public dialogRef = inject(MatDialogRef<ProfileManagementComponent>)
 
+    formReady = signal(false);
+
     profile = rxResource({
         params: () => {
             return ({})
         },
         stream: (request) => {
+            this.formReady.set(false);
             return this.profileService.refresh()
         },
     });
@@ -63,24 +66,32 @@ export class ProfileManagementComponent {
     });
 
     constructor() {
+        this.profileForm = this.fb.group({
+            username: ['', [Validators.required]],
+            name: ['', [Validators.required]],
+            gender: ['Male', [Validators.required]],
+            dob: [new Date()]
+        });
+        this.passwordForm = this.fb.group({
+            oldPassword: ['', [Validators.required]],
+            newPassword: ['', [Validators.required, Validators.minLength(6)]],
+            confirmPassword: ['', [Validators.required]]
+        }, {validator: this.passwordMatchValidator});
+
         effect(() => {
             const profile = this.profile.value()
             if (profile) {
+                untracked(() => {
+                    this.profileForm.patchValue({
+                        username: profile.username || '',
+                        name: profile.name || '',
+                        gender: profile.gender || 'Male',
+                        dob: profile.dob ? new Date(profile.dob) : new Date()
+                    });
 
-                this.profileForm = this.fb.group({
-                    username: [profile.username || '', [Validators.required]],
-                    name: [profile.name || '', [Validators.required]],
-                    gender: [profile.gender || 'Male', [Validators.required]],
-                    dob: [profile.dob ? new Date(profile.dob) : new Date()]
-                });
-
-                this.initialProfileValues = this.profileForm.getRawValue();
-
-                this.passwordForm = this.fb.group({
-                    oldPassword: ['', [Validators.required]],
-                    newPassword: ['', [Validators.required, Validators.minLength(6)]],
-                    confirmPassword: ['', [Validators.required]]
-                }, {validator: this.passwordMatchValidator});
+                    this.initialProfileValues = this.profileForm.getRawValue();
+                    this.formReady.set(true);
+                })
             }
         });
     }

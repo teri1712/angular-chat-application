@@ -26,7 +26,7 @@ describe('Search', () => {
     describe('Searching Message', () => {
         beforeEach(() => {
             cy.url().should('include', 'home')
-            cy.visitConversation('123456789')
+            cy.visitConversation('123456789', 'hello', 'world')
             cy.get('.search-message').click()
         })
         it('should be able to display search dialog when user click search button', () => {

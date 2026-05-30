@@ -1,0 +1,31 @@
+{
+  "postingId": "msg-new-bob",
+  "sequenceNumber": 1000,
+  "chatId": "chat-2",
+  "roomName": "Bob Builder",
+  "roomAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
+  "revisionNumber": 10,
+  "sender": {
+    "id": "user-1",
+    "username": "me",
+    "name": "Me",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"
+  },
+  "action": "ADDITION",
+  "messageState": {
+    "chatId": "chat-2",
+    "postingId": "msg-new-bob",
+    "sender": {
+      "id": "user-1",
+      "username": "me",
+      "name": "Me",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 1000,
+    "createdAt": "2026-05-19T11:00:00.000Z",
+    "updatedAt": "2026-05-19T11:00:00.000Z",
+    "content": "Bob, are you there?"
+  }
+}

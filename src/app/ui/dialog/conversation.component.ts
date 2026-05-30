@@ -10,11 +10,13 @@ import {switchMap} from "rxjs";
 import {DialogService} from "../../service/repository/dialog.service";
 import {toObservable, toSignal} from "@angular/core/rxjs-interop";
 import {MessageState} from "../../model/dto/message-state";
-import {TextState} from "../../model/dto/text-state";
+import {PREVIEWER} from "../../service/preview/previewer";
+import {providePreviewers} from "../../service/preview/provide-previewers";
 
 @Component({
     selector: 'app-conversation',
     imports: [CommonModule, AvatarContainerComponent, MatBadgeModule, MatButtonModule, MatIconModule],
+    providers: [providePreviewers()],
     templateUrl: './conversation.component.html',
     styleUrl: './conversation.component.css'
 })
@@ -29,6 +31,7 @@ export class ConversationComponent {
     private readonly router = inject(Router);
     private readonly profileService = inject(ProfileService);
     private readonly dialogService = inject(DialogService);
+    private readonly previewers = inject(PREVIEWER);
 
     protected presence = toSignal(
         toObservable(this.identifier).pipe(
@@ -50,28 +53,9 @@ export class ConversationComponent {
     protected preview = computed(() => {
         const messageState = this.newest();
         const prefix = this.profileService.thatsMe(messageState.sender) ? "You " : "";
-        let content = "Wtf";
 
-        switch (messageState.messageType.toLowerCase()) {
-            case "text":
-                content = (messageState as TextState).content;
-                break;
-            case "image":
-                content = "has sent an image";
-                break;
-            case "icon":
-                content = "has sent an icon";
-                break;
-            case "preference":
-                content = "has updated preferences";
-                break;
-            case "group":
-                content = "has created the room"
-                break;
-            case "file":
-                content = "has sent a file";
-                break;
-        }
+        const previewer = this.previewers.find(p => p.supports(messageState.messageType));
+        const content = previewer ? previewer.preview(messageState) : "Wtf";
 
         return prefix + content;
     });
