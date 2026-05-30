@@ -1,7 +1,7 @@
 <h2 mat-dialog-title class="dialog-title">Profile Management</h2>
 
 <mat-dialog-content class="profile-dialog-content">
-    @if (profile.isLoading()) {
+    @if (profile.isLoading() || !formReady()) {
         <mat-spinner [diameter]="25"></mat-spinner>
     } @else {
 

@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject} from '@angular/core';
+import {Component, computed, effect, inject, signal, untracked} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -48,11 +48,14 @@ export class ProfileManagementComponent {
     private readonly snackBar = inject(MatSnackBar)
     public dialogRef = inject(MatDialogRef<ProfileManagementComponent>)
 
+    formReady = signal(false);
+
     profile = rxResource({
         params: () => {
             return ({})
         },
         stream: (request) => {
+            this.formReady.set(false);
             return this.profileService.refresh()
         },
     });
@@ -78,14 +81,17 @@ export class ProfileManagementComponent {
         effect(() => {
             const profile = this.profile.value()
             if (profile) {
-                this.profileForm.patchValue({
-                    username: profile.username || '',
-                    name: profile.name || '',
-                    gender: profile.gender || 'Male',
-                    dob: profile.dob ? new Date(profile.dob) : new Date()
-                });
+                untracked(() => {
+                    this.profileForm.patchValue({
+                        username: profile.username || '',
+                        name: profile.name || '',
+                        gender: profile.gender || 'Male',
+                        dob: profile.dob ? new Date(profile.dob) : new Date()
+                    });
 
-                this.initialProfileValues = this.profileForm.getRawValue();
+                    this.initialProfileValues = this.profileForm.getRawValue();
+                    this.formReady.set(true);
+                })
             }
         });
     }
