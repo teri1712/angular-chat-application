@@ -23,7 +23,11 @@ export class ImageMessageComponent {
                 uri: image.uri,
                 filename: image.filename,
             },
-            panelClass: 'image-viewer-dialog'
+            panelClass: 'image-viewer-dialog',
+            width: '100vw',
+            height: '100vh',
+            maxWidth: '100vw',
+            maxHeight: '100vh'
         });
     }
 }

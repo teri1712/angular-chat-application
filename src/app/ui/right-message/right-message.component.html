@@ -2,11 +2,12 @@
     <ng-container *ngTemplateOutlet="contentTemplate()"></ng-container>
 } @else {
     <div class="message-bubble"
+         [class.no-padding]="message().messageType.toLowerCase() === 'image'"
          [ngStyle]="{
-              'border-top-left-radius':  '18px',
-              'border-top-right-radius': (frame().position === Position.Single || frame().position === Position.Top) ? '18px' : '4px',
-              'border-bottom-right-radius': (frame().position === Position.Single || frame().position === Position.Bottom) ? '18px' : '4px',
-              'border-bottom-left-radius':  '18px'
+              'border-top-left-radius':  'var(--radius-xl)',
+              'border-top-right-radius': (frame().position === Position.Single || frame().position === Position.Top) ? 'var(--radius-xl)' : 'var(--radius-xs)',
+              'border-bottom-right-radius': (frame().position === Position.Single || frame().position === Position.Bottom) ? 'var(--radius-xl)' : 'var(--radius-xs)',
+              'border-bottom-left-radius':  'var(--radius-xl)'
          }">
         <ng-container *ngTemplateOutlet="contentTemplate()"></ng-container>
     </div>

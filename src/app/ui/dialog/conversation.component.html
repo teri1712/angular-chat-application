@@ -1,15 +1,18 @@
 <app-avatar-container [presence]="displayPresence()" [avatar]="roomAvatar()" [chatId]="identifier()"
-                      [size]="45"/>
+                      [size]="40"/>
 <div class="middle">
-    <span class="room-name" [style.font-weight]="nameWeight()">{{ roomName() }}</span>
-    <span class="message"
-          [style.font-weight]="contentWeight()">{{ preview() }}</span>
-</div>
-@if (mine()) {
-    <div class="seen-div">
-        @for (seen of displaySeenBy(); track seen.id) {
-            <img class="seen mt-2" [src]="seen.avatar"
-                 [alt]="'Avatar of ' + seen.name">
+    <div class="header">
+        <span class="room-name" [style.font-weight]="nameWeight()">{{ roomName() }}</span>
+        <span class="time">{{ newestDate() | formatTime }}</span>
+    </div>
+    <div class="bottom-row">
+        <span class="message" [style.font-weight]="contentWeight()">{{ preview() }}</span>
+        @if (mine()) {
+            <div class="seen-div">
+                @for (seen of displaySeenBy(); track seen.id) {
+                    <img class="seen" [src]="seen.avatar" [alt]="'Avatar of ' + seen.name">
+                }
+            </div>
         }
     </div>
-}
+</div>

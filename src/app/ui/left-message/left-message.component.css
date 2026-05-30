@@ -5,6 +5,7 @@
     gap: var(--space-sm);
     margin-right: auto;
     max-width: 85%;
+    font-family: var(--font-family);
 }
 
 .avatar-holder {
@@ -18,15 +19,24 @@
     height: 28px;
     border-radius: var(--radius-full);
     object-fit: cover;
+    box-shadow: var(--shadow-sm);
 }
 
 .message-bubble {
     background: var(--color-muted);
     color: var(--color-foreground);
-    padding: 10px 14px;
+    padding: var(--space-sm) var(--space-md);
     font-size: 0.9375rem;
-    line-height: 1.4;
+    line-height: 1.5;
     transition: all 200ms ease;
+    box-shadow: var(--shadow-sm);
 }
 
-/* Logic for radius moved from [ngStyle] to classes if possible, but I'll update [ngStyle] in HTML */
+.message-bubble.no-padding {
+    padding: 0;
+    overflow: hidden;
+}
+
+.message-bubble:hover {
+    box-shadow: var(--shadow-md);
+}

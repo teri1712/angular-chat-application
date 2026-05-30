@@ -11,6 +11,6 @@ export class PreferencePreviewer implements Previewer {
     }
 
     preview(message: MessageState): string {
-        return "has updated preferences";
+        return "updated preferences";
     }
 }

@@ -1,6 +1,8 @@
 :host {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    align-items: center;
+    margin: var(--space-md) 0;
+    font-family: var(--font-family);
 }

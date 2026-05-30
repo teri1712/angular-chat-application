@@ -4,21 +4,32 @@
     align-items: flex-end;
     margin-left: auto;
     max-width: 85%;
+    font-family: var(--font-family);
 }
 
 .message-bubble {
     background: var(--color-primary);
     color: var(--color-on-primary);
-    padding: 10px 14px;
+    padding: var(--space-sm) var(--space-md);
     font-size: 0.9375rem;
-    line-height: 1.4;
+    line-height: 1.5;
     box-shadow: var(--shadow-sm);
     transition: all 200ms ease;
 }
 
+.message-bubble.no-padding {
+    padding: 0;
+    overflow: hidden;
+}
+
+.message-bubble:hover {
+    box-shadow: var(--shadow-md);
+}
+
 .send-state {
-    color: var(--color-muted-foreground);
-    margin: 4px 8px;
+    color: var(--color-foreground);
+    opacity: 0.6;
+    margin: var(--space-xs) var(--space-sm);
     font-size: 0.75rem;
     font-weight: 500;
 }
@@ -33,14 +44,15 @@
 .seen-div {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-top: 4px;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
 }
 
 .seen {
     border-radius: var(--radius-full);
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     object-fit: cover;
-    border: 1px solid var(--color-background);
+    border: 1.5px solid var(--color-background);
+    box-shadow: var(--shadow-sm);
 }

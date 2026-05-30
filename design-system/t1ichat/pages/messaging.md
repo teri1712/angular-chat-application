@@ -1,8 +1,8 @@
 # Messaging Page Overrides
 
 > **PROJECT:** T1iChat
-> **Generated:** 2026-05-30 17:18:33
-> **Page Type:** Landing / Marketing
+> **Generated:** 2026-05-30 22:54:42
+> **Page Type:** Messaging Interface
 
 > ⚠️ **IMPORTANT:** Rules in this file **override** the Master file (`design-system/MASTER.md`).
 > Only deviations from the Master are documented here. For all other rules, refer to the Master.
@@ -11,42 +11,51 @@
 
 ## Page-Specific Rules
 
-### Layout Overrides
+### Component Specs
 
-- **Max Width:** 800px (narrow, focused)
-- **Layout:** Single column, centered
-- **Sections:** 1. Hero (Search focused), 2. Categories, 3. Featured Listings, 4. Trust/Safety, 5. CTA (Become a host/seller)
+#### Message Bubbles
+- **Radius Strategy**: 
+    - Rounded corners: `var(--radius-xl)` (16px)
+    - Group inner corners: `var(--radius-xs)` (2px)
+- **Colors**:
+    - Left: `var(--color-muted)` with `var(--color-foreground)`
+    - Right: `var(--color-primary)` with `var(--color-on-primary)`
+- **Shadow**: `var(--shadow-sm)` on idle, `var(--shadow-md)` on hover.
 
-### Spacing Overrides
+#### Avatars
+- **Message List**: 28px
+- **Chat Info Bar**: 38px
+- **Style**: Circular, `box-shadow: var(--shadow-sm)`
 
-- **Content Density:** Low — focus on clarity
+#### Image Messages
+- **Constraint**: No padding inside bubble.
+- **Visual**: `overflow: hidden` on parent bubble to crop image. `cursor: zoom-in`.
+- **Hover**: Subtle scale (1.02).
 
-### Typography Overrides
+#### File Messages
+- **Layout**: Vertical card with embedded download action.
+- **Visual**: Semi-transparent background (adaptive to bubble color).
 
-- No overrides — use Master typography
+#### Typing Indicator
+- **Animation**: 3-dot pulse, `1.4s infinite ease-in-out`.
+- **Visual**: Opacity `0.3` to `1.0`.
 
-### Color Overrides
-
-- **Strategy:** Search: High contrast. Categories: Visual icons. Trust: Blue/Green.
-
-### Component Overrides
-
-- Avoid: Text input for everything
-- Avoid: Placeholder as only label
-- Avoid: Toasts that never disappear
+#### Chat Info Bar
+- **Layout**: Minimal header, bold room name, accent-colored presence text.
+- **Glassmorphism**: `backdrop-filter: blur(12px)`.
 
 ---
 
-## Page-Specific Components
+## Component Overrides
 
-- No unique components for this page
+- **Avoid**: Fixed padding on image messages (use full-bleed).
+- **Avoid**: Hardcoded bubble colors (use semantic tokens).
+- **Avoid**: Large avatars in list view (prefer 28px).
 
 ---
 
 ## Recommendations
 
-- Effects: Very subtle hover effects, minimal animations, fast page load (no heavy animations), smooth scroll
-- Forms: Use email tel number url etc
-- Forms: Always show label above or beside input
-- Feedback: Auto-dismiss after 3-5 seconds
-- CTA Placement: Hero Search Bar + Navbar 'List your item'
+- **Effects**: 250ms cubic-bezier transitions for all interactive surfaces.
+- **Accessibility**: Ensure 1.5px borders on overlapping avatars (seen indicators) for separation.
+- **UX**: Clickable images must open full-screen viewer (`100vw`/`100vh`).

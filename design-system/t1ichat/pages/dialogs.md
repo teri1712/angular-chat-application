@@ -2,7 +2,7 @@
 
 > **PROJECT:** T1iChat
 > **Generated:** 2026-05-30 22:54:42
-> **Page Type:** Settings / Profile
+> **Page Type:** Sidebar & Modals
 
 > ⚠️ **IMPORTANT:** Rules in this file **override** the Master file (`design-system/MASTER.md`).
 > Only deviations from the Master are documented here. For all other rules, refer to the Master.
@@ -11,38 +11,37 @@
 
 ## Page-Specific Rules
 
-### Layout Overrides
+### Component Specs
 
-- **Max Width:** 800px (narrow, focused)
-- **Layout:** Single column, centered
-- **Sections:** 1. Hero headline, 2. Short description, 3. Benefit bullets (3 max), 4. CTA, 5. Footer
+#### Conversation List Item
+- **Avatar Size**: 40px
+- **Active State**: 
+    - Indicator: 4px vertical bar on the left (`var(--color-primary)`).
+    - Background: `var(--color-muted)`.
+    - Transition: `250ms cubic-bezier(0.4, 0, 0.2, 1)`.
+- **Typography**: 
+    - Room Name: `0.9375rem`, Semi-bold.
+    - Message Preview: `0.8125rem`, Opacity `0.6`.
+    - Time: `0.75rem`, Opacity `0.5`, right-aligned.
 
-### Spacing Overrides
-
-- **Content Density:** Low — focus on clarity
-
-### Typography Overrides
-
-- No overrides — use Master typography
-
-### Color Overrides
-
-- **Strategy:** Minimalist: Brand + white #FFFFFF + accent. Buttons: High contrast 7:1+. Text: Black/Dark grey
-
-### Component Overrides
-
-- Avoid: Delete without confirmation
+#### Image Viewer Dialog
+- **Size**: Full-screen (`100vw` / `100vh`).
+- **Backdrop**: Black background with `blur(12px)` on interactive buttons.
+- **Interaction**: Close on click outside (scrim) or specialized close button.
+- **Transitions**: Scale up on enter, rotation/scale on close button hover.
 
 ---
 
-## Page-Specific Components
+## Component Overrides
 
-- No unique components for this page
+- **Avatar Size**: Standardized to 40px in sidebar for consistent density.
+- **Active Indicator**: Uses vertical bar instead of full border for a "cooler" look.
 
 ---
 
 ## Recommendations
 
-- Effects: font-size: clamp(3rem 10vw 12rem), font-weight: 900, letter-spacing: -0.05em, massive whitespace
-- Interaction: Confirm before delete/irreversible actions
-- CTA Placement: Center, large CTA button
+- **Interaction**: 
+    - Hover on conversation items should subtly lighten the background.
+    - "Seen" indicators in the list should overlap slightly to conserve space.
+- **Typography**: Use tabular figures for the timestamp to prevent layout shifts.
