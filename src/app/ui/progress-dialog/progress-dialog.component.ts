@@ -5,11 +5,10 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {NgIf} from "@angular/common";
 
 @Component({
-      selector: 'app-progress-dialog',
-      standalone: true,
-      imports: [MatButtonModule, MatDialogContent, MatProgressSpinner, NgIf],
-      templateUrl: './progress-dialog.component.html',
-      styleUrl: './progress-dialog.component.css'
+    selector: 'app-progress-dialog',
+    imports: [],
+    templateUrl: './progress-dialog.component.html',
+    styleUrl: './progress-dialog.component.css'
 })
 export class ProgressDialogComponent {
       readonly action_name?: string

@@ -1,12 +1,35 @@
 :host {
-      display: block;
-      height: calc(100% - 150px);
-      width: 100%;
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--color-background);
 }
 
-.message-loading {
-      display: flex;
-      width: 100%;
-      flex-direction: row;
-      justify-content: center;
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-md);
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Hide scrollbar for the viewport to keep it clean */
+cdk-virtual-scroll-viewport {
+    scrollbar-width: none; /* Firefox */
+}
+
+cdk-virtual-scroll-viewport::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
 }

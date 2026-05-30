@@ -1,11 +1,14 @@
-<mat-form-field appearance="outline">
-    <mat-icon matPrefix>search</mat-icon>
-    @if (query().trim()) {
-        <button mat-icon-button matSuffix class="me-1" (click)="clear()">
-            <mat-icon>close</mat-icon>
-        </button>
-    }
-    <input type="text" matInput placeholder="Search someone"
-           [(ngModel)]="query"
-    >
-</mat-form-field>
+<div class="search-container">
+    <div class="input-wrapper">
+        <span class="material-icons prefix">search</span>
+        <input type="text" 
+               placeholder="Search people..." 
+               [(ngModel)]="query"
+               class="search-input">
+        @if (query().trim()) {
+            <button class="clear-btn" (click)="clear()" aria-label="Clear search">
+                <span class="material-icons">close</span>
+            </button>
+        }
+    </div>
+</div>

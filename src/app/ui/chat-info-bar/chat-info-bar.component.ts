@@ -13,7 +13,7 @@ import {rxResource} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-chat-info-bar',
-    imports: [CommonModule, AvatarContainerComponent, MatIcon, ChatSettingComponent, MatIconButton],
+    imports: [CommonModule, AvatarContainerComponent, ChatSettingComponent],
     templateUrl: './chat-info-bar.component.html',
     styleUrl: './chat-info-bar.component.css',
     standalone: true

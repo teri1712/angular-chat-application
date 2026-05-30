@@ -1,19 +1,32 @@
 :host {
-      display: flex;
-      flex-direction: row;
-      align-items: end;
-      gap: 0.5rem;
-      margin-right: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--space-sm);
+    margin-right: auto;
+    max-width: 85%;
 }
 
 .avatar-holder {
-      width: 30px;
-      height: 30px;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
 }
 
 .avatar-holder img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      object-fit: cover;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
 }
+
+.message-bubble {
+    background: var(--color-muted);
+    color: var(--color-foreground);
+    padding: 10px 14px;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    transition: all 200ms ease;
+}
+
+/* Logic for radius moved from [ngStyle] to classes if possible, but I'll update [ngStyle] in HTML */

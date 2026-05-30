@@ -10,7 +10,7 @@ describe('Search', () => {
                 {fixture: 'get-people-success.json', delay: 2000})
                 .as('people')
 
-            cy.get('[placeholder = "Search someone"]').type("luffy")
+            cy.get('[placeholder = "Search people..."]').type("luffy")
             cy.url().should('include', 'search')
             cy.get('.user-search-loading').should('be.visible')
         })
@@ -18,7 +18,7 @@ describe('Search', () => {
             cy.intercept('GET', '**/people**',
                 {fixture: 'get-people-success.json'})
                 .as('people')
-            cy.get('[placeholder = "Search someone"]').type("luffy")
+            cy.get('[placeholder = "Search people..."]').type("luffy")
             cy.get('app-search-user').should('have.length', 3)
             cy.contains('Java Spring Enthusiast').should('be.visible')
         });

@@ -115,7 +115,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         if (control.hasError('required')) {
             this.usernameError.set("Please fill up the field")
         } else if (control.hasError('minlength')) {
-            this.usernameError.set("Username must have length of at least 4 characters")
+            this.usernameError.set("Username must have at least 4 characters")
         } else {
             this.usernameError.set('')
         }
@@ -126,7 +126,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         if (control.hasError('required')) {
             this.passwordError.set("Please fill up the field")
         } else if (control.hasError('minlength')) {
-            this.passwordError.set("Password must have length of at least 4 characters")
+            this.passwordError.set("Password must have at least 4 characters")
         } else {
             this.passwordError.set('')
         }

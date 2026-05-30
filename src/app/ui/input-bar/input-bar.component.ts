@@ -1,13 +1,11 @@
 import {Component, effect, inject, input, signal, untracked} from '@angular/core';
-import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
-import {MatIconModule} from "@angular/material/icon";
+import {MatIconModule, MatIcon} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {FormsModule} from "@angular/forms";
 import {MessageService} from "../../service/message-service";
 import {timer} from "rxjs";
 import {getIcon} from "../../res/icons";
-import {NgStyle} from "@angular/common";
 import {TextPosting} from "../../service/text-handler";
 import {IconPosting} from "../../service/icon-handler";
 import {FilePosting} from "../../service/file-handler";
@@ -17,7 +15,7 @@ import {rxResource} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-input-bar',
-    imports: [MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, FormsModule, NgStyle],
+    imports: [MatInputModule, MatIconModule, MatIcon, MatButtonModule, FormsModule],
     templateUrl: './input-bar.component.html',
     styleUrl: './input-bar.component.css'
 })

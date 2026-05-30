@@ -5,11 +5,11 @@ describe('Signup', () => {
         cy.url().should('include', '/sign-up')
     })
     it('should direct to sign up page and display info form', () => {
-        cy.contains('Enter your username').should('be.visible');
+        cy.contains('Username').should('be.visible');
     });
     it('should display fast feedback error on username when trying to nav to avatar', () => {
-        cy.get('[placeholder="Username"]').type('adm')
-        cy.contains('Next').click({force: true})
+        cy.get('[placeholder="Enter username"]').type('adm')
+        cy.contains('Continue').click({force: true})
         cy.contains('Username must have at least 4 characters').should('be.visible');
     });
     it('should be able to nav to avatar form when finishing info form', () => {
@@ -21,13 +21,11 @@ describe('Signup', () => {
         cy.get('input[formControlName="fullname"]')
             .type('John Fitzgerald Doe');
 
-        cy.get('mat-select[formControlName="gender"]').click();
+        cy.get('select[formControlName="gender"]').select('Male');
 
-        cy.get('mat-option').contains('Male').click();
+        cy.contains('Continue').click();
 
-        cy.contains('Next').click();
-
-        cy.contains('SETTING AVATAR').should('be.visible');
+        cy.contains('set avatar').should('be.visible');
     });
 
     it('should be able to submit sign up form', () => {
@@ -49,11 +47,9 @@ describe('Signup', () => {
         cy.get('input[formControlName="fullname"]')
             .type('John Fitzgerald Doe');
 
-        cy.get('mat-select[formControlName="gender"]').click();
+        cy.get('select[formControlName="gender"]').select('Male');
 
-        cy.get('mat-option').contains('Male').click();
-
-        cy.contains('Next').click();
+        cy.contains('Continue').click();
         cy.get('input[type="file"]').selectFile('cypress/fixtures/signup-success.json', {force: true});
 
         cy.get('button[type="submit"]').click();

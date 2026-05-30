@@ -1,15 +1,18 @@
-<h3 class="pb-3 ps-2">Settings</h3>
-<app-settings-item [icon]="light()?'light_mode':'dark_mode'" info="Light mode">
-    <mat-slide-toggle
-            setting-action
-            [checked]="light()"
-            (change)="toggle()"
-            [disabled]="false">
-    </mat-slide-toggle>
-</app-settings-item>
+<div class="settings-container">
+    <h2 class="settings-title">Settings</h2>
+    
+    <div class="settings-list">
+        <app-settings-item [icon]="light()?'light_mode':'dark_mode'" info="Light mode">
+            <label class="toggle-switch" setting-action>
+                <input type="checkbox" [checked]="light()" (change)="toggle()">
+                <span class="toggle-slider"></span>
+            </label>
+        </app-settings-item>
 
-<app-settings-item icon="person" info="Profile Management">
-    <button aria-label="Change Profile" mat-icon-button setting-action (click)="openProfileManagement()">
-        <mat-icon>chevron_right</mat-icon>
-    </button>
-</app-settings-item>
+        <app-settings-item icon="person" info="Profile Management">
+            <button class="icon-btn" setting-action (click)="openProfileManagement()" aria-label="Change Profile">
+                <span class="material-icons">chevron_right</span>
+            </button>
+        </app-settings-item>
+    </div>
+</div>

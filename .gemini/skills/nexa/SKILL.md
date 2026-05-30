@@ -13,7 +13,8 @@ description: Executes the standard Nexa development lifecycle through incrementa
 
 ### 2. Testing
 
-- **Specification**: Your new proposal must be validated via e2e test specs, implementing test isnt just to make sure
+- **Specification**: Your new proposal must be validated via e2e test specs, you might need to write e2e test to make
+  UI/UX reflect correctly upon the api it calls, implementing test isnt just to make sure
   app works, it is defining what you have done, our expectation, facts that couldnt be wrong and helping regression.
 - **E2E Guard**: Run all previous Cypress E2E tests.
 - **Requirement**: All previous tests **must pass** before the increment is considered safe.

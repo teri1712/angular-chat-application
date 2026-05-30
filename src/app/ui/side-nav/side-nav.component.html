@@ -1,24 +1,39 @@
-<div class="d-flex flex-column gap-2 align-items-center">
-    <button mat-mini-fab aria-label="Thread" (click)="navigateToThreads()" matTooltip="Conversations"
-            [ngClass]="{'un-selected': currentRoute() !== Routes.THREAD}"
-    >
-        <mat-icon>alternate_email</mat-icon>
+<div class="nav-group">
+    <button class="nav-btn" 
+            [class.active]="currentRoute() === Routes.THREAD"
+            (click)="navigateToThreads()"
+            aria-label="Threads">
+        <span class="material-icons">alternate_email</span>
+        <span class="tooltip">Conversations</span>
     </button>
-    <button mat-mini-fab aria-label="Settings" (click)="navigateToSettings()" matTooltip="Setting"
-            [ngClass]="{'un-selected': currentRoute() !== Routes.SETTINGS}">
-        <mat-icon>settings</mat-icon>
+    <button class="nav-btn" 
+            [class.active]="currentRoute() === Routes.SETTINGS"
+            (click)="navigateToSettings()"
+            aria-label="Settings">
+        <span class="material-icons">settings</span>
+        <span class="tooltip">Settings</span>
     </button>
-    <button mat-mini-fab aria-label="Create Group" class="un-selected" (click)="openCreateGroupDialog()"
-            matTooltip="Create Group">
-        <mat-icon>group_add</mat-icon>
+    <button class="nav-btn" 
+            (click)="openCreateGroupDialog()"
+            aria-label="Create Group">
+        <span class="material-icons">group_add</span>
+        <span class="tooltip">Create Group</span>
     </button>
 </div>
 
-<button class="profile-popup" style="background: none; border: none" [matMenuTriggerFor]="user_actions">
-    <img [src]="profile().avatar" alt="avatar">
-</button>
-<mat-menu #user_actions="matMenu">
-    <button mat-menu-item (click)="logout()">Logout</button>
-</mat-menu>
+<div class="profile-section">
+    <button class="profile-btn" (click)="toggleMenu($event)">
+        <img [src]="profile().avatar" alt="avatar">
+    </button>
+    
+    @if (menuOpen()) {
+        <div class="profile-menu" (click)="$event.stopPropagation()">
+            <div class="menu-item" (click)="logout()">
+                <span class="material-icons">logout</span>
+                Logout
+            </div>
+        </div>
+    }
+</div>
 
 

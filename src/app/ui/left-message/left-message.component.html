@@ -1,33 +1,19 @@
 <div class="avatar-holder">
     @if (frame().position === Position.Single || frame().position === Position.Bottom) {
-        <img [src]="message().sender.avatar" alt="">
+        <img [src]="message().sender.avatar" alt="sender avatar">
     }
 </div>
 
 @if (message().messageType.toLowerCase() === 'icon') {
     <ng-container *ngTemplateOutlet="contentTemplate()"></ng-container>
 } @else {
-    <div
+    <div class="message-bubble"
             [ngStyle]="{
-                        'overflow': 'hidden',
-                        'border-top-left-radius':
-                            (frame().position === Position.Single
-                          || frame().position === Position.Top)
-                            ? '20px'
-                            : '3px',
-
-                        'border-top-right-radius': '20px',
-
-                        'border-bottom-right-radius': '20px',
-
-                        'border-bottom-left-radius':
-                            (frame().position === Position.Single
-                          || frame().position === Position.Bottom)
-                            ? '20px'
-                            : '3px'
-                    }"
-    >
+                'border-top-left-radius': (frame().position === Position.Single || frame().position === Position.Top) ? '18px' : '4px',
+                'border-top-right-radius': '18px',
+                'border-bottom-right-radius': '18px',
+                'border-bottom-left-radius': (frame().position === Position.Single || frame().position === Position.Bottom) ? '18px' : '4px'
+            }">
         <ng-container *ngTemplateOutlet="contentTemplate()"></ng-container>
-
     </div>
 }
