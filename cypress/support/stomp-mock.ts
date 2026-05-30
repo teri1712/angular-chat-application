@@ -71,7 +71,11 @@ Cypress.on('window:before:load', (win) => {
 });
 
 function sendStompMessage(destination: string, body: any) {
-    const subId = subscriptions.get(destination) || 'sub-0';
+    const subId = subscriptions.get(destination);
+    if (!subId) {
+        console.warn(`[Mock STOMP] No subscription found for destination: ${destination}. Current subscriptions:`, Array.from(subscriptions.keys()));
+        return;
+    }
     const payload = JSON.stringify(body);
     const frame = [
         'MESSAGE',

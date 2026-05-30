@@ -1,7 +1,7 @@
 import {effect, inject, Injectable} from "@angular/core";
 import {Client, Frame, IMessage} from "@stomp/stompjs";
 import {environment} from "../../environments";
-import {delay, Observable, of, switchMap, tap} from "rxjs";
+import {BehaviorSubject, delay, filter, Observable, of, switchMap, tap} from "rxjs";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {InboxLog} from "../../model/dto/inbox-log";
 import {LogStream} from "../repository/log-stream.service";
@@ -17,6 +17,7 @@ export class LogTrailerService extends LogStream {
     private currentSequence: number;
 
     private client?: Client;
+    private readonly connectionSubject = new BehaviorSubject<Client | undefined>(undefined);
     private tokenStore = inject(ITokenStore)
     private httpClient = inject(HttpClient)
 
@@ -41,6 +42,7 @@ export class LogTrailerService extends LogStream {
     private disconnect() {
         this.client?.deactivate();
         this.client = undefined;
+        this.connectionSubject.next(undefined);
         this.stage = ClientStage.DISCONNECTED;
     }
 
@@ -59,45 +61,49 @@ export class LogTrailerService extends LogStream {
     }
 
     subscribeRoom(chatId: string): Observable<TypeMessage> {
-        if (!this.client?.connected) {
-            return of();
-        }
-        const client = this.client
-        return new Observable<TypeMessage>((observer) => {
+        return this.connectionSubject.pipe(
+            switchMap(client => {
+                if (!client || !client.connected) {
+                    return of();
+                }
+                return new Observable<TypeMessage>((observer) => {
+                    const subscription = client.subscribe(
+                        "/room/" + chatId,
+                        (msg: IMessage) => {
+                            observer.next(JSON.parse(msg.body));
+                        },
+                        {}
+                    );
 
-            const subscription = client.subscribe(
-                "/room/" + chatId,
-                (msg: IMessage) => {
-                    observer.next(JSON.parse(msg.body));
-                },
-                {}
-            );
-
-            return () => {
-                subscription.unsubscribe();
-            };
-        });
+                    return () => {
+                        subscription.unsubscribe();
+                    };
+                });
+            })
+        );
     }
 
     subscribeSettings(chatId: string): Observable<PreferenceMessage> {
-        if (!this.client?.connected) {
-            return of();
-        }
-        const client = this.client
-        return new Observable<PreferenceMessage>((observer) => {
+        return this.connectionSubject.pipe(
+            switchMap(client => {
+                if (!client || !client.connected) {
+                    return of();
+                }
+                return new Observable<PreferenceMessage>((observer) => {
+                    const subscription = client.subscribe(
+                        "/setting/" + chatId,
+                        (msg: IMessage) => {
+                            observer.next(JSON.parse(msg.body));
+                        },
+                        {}
+                    );
 
-            const subscription = client.subscribe(
-                "/setting/" + chatId,
-                (msg: IMessage) => {
-                    observer.next(JSON.parse(msg.body));
-                },
-                {}
-            );
-
-            return () => {
-                subscription.unsubscribe();
-            };
-        });
+                    return () => {
+                        subscription.unsubscribe();
+                    };
+                });
+            })
+        );
     }
 
 
@@ -116,6 +122,7 @@ export class LogTrailerService extends LogStream {
         this.client = client;
 
         client.onConnect = (frame: Frame) => {
+            this.connectionSubject.next(client);
             client.subscribe("/user/queue", (msg: IMessage) => {
                 const log = JSON.parse(msg.body) as InboxLog;
                 console.log('[STOMP] Event:', log);
@@ -134,6 +141,7 @@ export class LogTrailerService extends LogStream {
         }
 
         client.onDisconnect = (frame: Frame) => {
+            this.connectionSubject.next(undefined);
             this.stage = ClientStage.DISCONNECTED;
         }
 

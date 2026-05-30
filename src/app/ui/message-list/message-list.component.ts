@@ -297,6 +297,9 @@ export class MessageListComponent {
                 .subscribe({
                     next: log => {
                         this.cacheStore.put(log.messageState);
+                    },
+                    error: (err) => {
+                        console.error(err);
                     }
                 });
             onCleanup(() => sub.unsubscribe())
