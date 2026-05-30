@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, signal, untracked} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -35,7 +35,8 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
         MatProgressSpinner
     ],
     templateUrl: './profile-management.component.html',
-    styleUrls: ['./profile-management.component.css']
+    styleUrls: ['./profile-management.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileManagementComponent {
     profileForm!: FormGroup;
@@ -60,9 +61,9 @@ export class ProfileManagementComponent {
         },
     });
 
+    customAvatarPreview = signal<string | null>(null);
     avatarPreview = computed(() => {
-        const profile = this.profile.value()
-        return profile?.avatar
+        return this.customAvatarPreview() ?? this.profile.value()?.avatar;
     });
 
     constructor() {
@@ -182,7 +183,7 @@ export class ProfileManagementComponent {
         if (file) {
             const reader = new FileReader();
             reader.onload = (e: any) => {
-                this.avatarPreview = e.target.result;
+                this.customAvatarPreview.set(e.target.result);
             };
             reader.readAsDataURL(file);
 

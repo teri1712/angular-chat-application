@@ -206,3 +206,60 @@ a:hover {
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-md);
 }
+
+/* Modern Dialog Overrides */
+.modern-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: #111111 !important; /* Deep dark from img.png */
+  border-radius: 24px !important;
+  padding: 32px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+  width: var(--dialog-width, 480px) !important;
+  max-width: 95vw !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.profile-dialog {
+  --dialog-width: 680px;
+}
+
+.modern-dialog .mat-mdc-dialog-content {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.modern-dialog .mat-mdc-dialog-actions {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: unset !important;
+}
+
+/* Fix for Like and Send icon clipping and alignment without editing SVG */
+mat-icon[data-mat-icon-name="like"],
+mat-icon[data-mat-icon-name="send"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+mat-icon[data-mat-icon-name="like"] svg,
+mat-icon[data-mat-icon-name="send"] svg {
+  transform: scale(0.85) translateY(-2px) !important;
+  overflow: visible !important;
+}
+
+/* Image Viewer Dialog Overrides */
+.image-viewer-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+}
+
+/* Global Spinner Override to match Design Tokens */
+.mat-mdc-progress-spinner circle,
+.mat-mdc-spinner circle {
+  stroke: var(--color-primary) !important;
+}

@@ -1,15 +1,26 @@
-<h1 mat-dialog-title>Select a theme</h1>
-<div mat-dialog-content>
-    <div *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center; height: 50px;">
-        <mat-spinner diameter="30"></mat-spinner>
+<div class="dialog-container">
+    <div class="dialog-header">
+        <h2 class="dialog-title">select theme</h2>
     </div>
-    <div *ngIf="!isLoading" class="theme-grid">
-        <div *ngFor="let theme of themes" class="theme-item" (click)="selectTheme(theme)">
-            <img class="theme-preview" [src]="theme.background" [alt]="theme.themeName">
-            <div class="theme-label">{{ theme.themeName | themeName }}</div>
+
+    @if (isLoading()) {
+        <div class="loader-container">
+            <mat-spinner diameter="48"></mat-spinner>
         </div>
+    } @else {
+        <div class="theme-grid">
+            @for (theme of themes(); track theme.id) {
+                <div class="theme-item" (click)="selectTheme(theme)">
+                    <img class="theme-preview" [src]="theme.background" [alt]="theme.themeName">
+                    <div class="theme-overlay">
+                        <div class="theme-label">{{ theme.themeName | themeName }}</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="dialog-actions">
+        <button mat-button class="btn-cancel" (click)="onNoClick()">Cancel</button>
     </div>
-</div>
-<div mat-dialog-actions>
-    <button mat-button (click)="onNoClick()">Cancel</button>
 </div>

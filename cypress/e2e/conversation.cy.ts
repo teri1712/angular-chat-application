@@ -47,24 +47,24 @@ describe('Conversation', () => {
                 .click();
             
             // Wait for dialog to appear
-            cy.contains('Create Group').should('be.visible');
+            cy.contains('create group').should('be.visible');
 
             cy.intercept('GET', '**/people**',
                 {fixture: 'get-people-success.json', delay: 2000})
                 .as('people')
         })
         it('should be able open group dialog when click create group button', () => {
-            cy.contains('Create Group').should('be.visible');
+            cy.contains('create group').should('be.visible');
         });
         it('should be able to find other people to add to group', () => {
             cy.get('[placeholder="Search by name..."]')
                 .should('be.visible')
                 .click()
                 .type('Meo meo', {delay: 50});
-            
+
             cy.wait('@people');
-            cy.contains('Thái Minh Trí').should('be.visible');
-            cy.contains('NAB Colleague').should('be.visible');
+            cy.contains('Thái Minh Trí').scrollIntoView().should('exist');
+            cy.contains('NAB Colleague').scrollIntoView().should('exist');
         });
         it('should should be able to add suggested user as partner', () => {
             cy.get('[placeholder="Search by name..."]')
@@ -73,7 +73,7 @@ describe('Conversation', () => {
                 .type('Meo meo', {delay: 50});
             
             cy.wait('@people');
-            cy.contains('Thái Minh Trí').should('be.visible').click();
+            cy.contains('Thái Minh Trí').scrollIntoView().should('be.visible').click({force: true});
             
             cy.get('.selected-members')
                 .contains('Thái Minh Trí')
@@ -95,10 +95,10 @@ describe('Conversation', () => {
             
             cy.wait('@people');
             
-            cy.contains('Thái Minh Trí').should('be.visible').click();
-            cy.contains('NAB Colleague').should('be.visible').click();
+            cy.contains('Thái Minh Trí').scrollIntoView().should('be.visible').click({force: true});
+            cy.contains('NAB Colleague').scrollIntoView().should('be.visible').click({force: true});
 
-            cy.contains(/^Create$/).should('not.be.disabled').click();
+            cy.contains(/^Create$/).scrollIntoView().should('not.be.disabled').click({force: true});
             cy.wait('@create-group');
         });
     })

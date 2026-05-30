@@ -1,4 +1,25 @@
+:host {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 
-mat-icon {
-      color: var(--mat-sys-primary)
+.setting-btn {
+    color: var(--color-primary);
+    transition: all 200ms ease;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+}
+
+.setting-btn:hover:not(:disabled) {
+    transform: rotate(45deg) scale(1.1);
+    opacity: 0.8;
+}
+
+.setting-btn:disabled {
+    color: var(--color-border);
 }

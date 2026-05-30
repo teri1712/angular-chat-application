@@ -8,8 +8,9 @@ describe('Profile', () => {
     describe('Change profile', () => {
 
         it('should show validation errors for empty profile form', () => {
+            cy.get('[formControlName="name"]').should('not.have.value', '');
             cy.get('[formControlName="name"]').clear();
-            cy.contains('Save Profile').click({force: true});
+            cy.contains('Save Changes').click({force: true});
             cy.contains('Name is required').should('be.visible');
         });
 
@@ -25,7 +26,7 @@ describe('Profile', () => {
             cy.get('[formControlName="gender"]').click({force: true});
             cy.contains('Male').click();
 
-            cy.contains('Save Profile').click({force: true});
+            cy.contains('Save Changes').click({force: true});
 
             cy.wait('@updateProfile');
 
@@ -37,21 +38,21 @@ describe('Profile', () => {
     describe('Change password', () => {
 
         it('should show password validation errors', () => {
-            cy.contains('Update Password').click({force: true});
+            cy.contains('Update Password').scrollIntoView().click({force: true});
 
-            cy.contains('Current password is required').should('be.visible');
-            cy.contains('New password is required').should('be.visible');
-            cy.contains('Please confirm').should('be.visible');
+            cy.contains('Current password is required').scrollIntoView().should('be.visible');
+            cy.contains('New password is required').scrollIntoView().should('be.visible');
+            cy.contains('Please confirm').scrollIntoView().should('be.visible');
         });
 
         it('should detect password mismatch', () => {
-            cy.get('[formControlName="oldPassword"]').type('123456', {force: true});
-            cy.get('[formControlName="newPassword"]').type('abcdef', {force: true});
-            cy.get('[formControlName="confirmPassword"]').type('different', {force: true});
+            cy.get('[formControlName="oldPassword"]').scrollIntoView().type('123456', {force: true});
+            cy.get('[formControlName="newPassword"]').scrollIntoView().type('abcdef', {force: true});
+            cy.get('[formControlName="confirmPassword"]').scrollIntoView().type('different', {force: true});
 
-            cy.contains('Update Password').click({force: true});
+            cy.contains('Update Password').scrollIntoView().click({force: true});
 
-            cy.contains('Passwords do not match').should('be.visible');
+            cy.contains('Passwords do not match').scrollIntoView().should('be.visible');
         });
 
         it('should update password successfully', () => {

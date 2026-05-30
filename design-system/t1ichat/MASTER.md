@@ -7,8 +7,8 @@
 ---
 
 **Project:** T1iChat
-**Generated:** 2026-05-30 17:18:33
-**Category:** Freelancer Platform
+**Generated:** 2026-05-30 22:54:42
+**Category:** Chat & Messaging App
 
 ---
 
@@ -20,16 +20,16 @@
 |------|-----|--------------|
 | Primary | `#2563EB` | `--color-primary` |
 | On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#3B82F6` | `--color-secondary` |
+| Secondary | `#6366F1` | `--color-secondary` |
 | Accent/CTA | `#059669` | `--color-accent` |
-| Background | `#F8FAFC` | `--color-background` |
+| Background | `#FFFFFF` | `--color-background` |
 | Foreground | `#0F172A` | `--color-foreground` |
 | Muted | `#F1F5FD` | `--color-muted` |
 | Border | `#E4ECFC` | `--color-border` |
 | Destructive | `#DC2626` | `--color-destructive` |
 | Ring | `#2563EB` | `--color-ring` |
 
-**Color Notes:** Professional blue + deal green
+**Color Notes:** Messenger blue + online green
 
 ### Typography
 
@@ -104,7 +104,7 @@
 
 ```css
 .card {
-  background: #F8FAFC;
+  background: #FFFFFF;
   border-radius: 12px;
   padding: 24px;
   box-shadow: var(--shadow-md);
@@ -158,13 +158,13 @@
 
 ## Style Guidelines
 
-**Style:** Flat Design
+**Style:** Exaggerated Minimalism
 
-**Keywords:** 2D, minimalist, bold colors, no shadows, clean lines, simple shapes, typography-focused, modern, icon-heavy
+**Keywords:** Bold minimalism, oversized typography, high contrast, negative space, loud minimal, statement design
 
-**Best For:** Web apps, mobile apps, cross-platform, startup MVPs, user-friendly, SaaS, dashboards, corporate
+**Best For:** Fashion, architecture, portfolios, agency landing pages, luxury brands, editorial
 
-**Key Effects:** No gradients/shadows, simple hover (color/opacity shift), fast loading, clean transitions (150-200ms ease), minimal icons
+**Key Effects:** font-size: clamp(3rem 10vw 12rem), font-weight: 900, letter-spacing: -0.05em, massive whitespace
 
 ### Page Pattern
 
@@ -178,8 +178,7 @@
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Poor profiles
-- ❌ No reviews
+- ❌ Excessive decoration
 
 ### Additional Forbidden Patterns
 

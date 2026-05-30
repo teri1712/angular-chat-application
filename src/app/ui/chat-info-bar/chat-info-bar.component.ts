@@ -51,15 +51,12 @@ export class ChatInfoBarComponent {
 
     protected openSearchDialog() {
         this.matDialog.open(SearchDialogComponent, {
-            width: '600px',
-            maxWidth: '90vw',
-            height: 'auto',
-            maxHeight: '85vh',
+            panelClass: 'modern-dialog',
             injector: this.injector,
             data: {
                 chatId: this.chatId(),
             }
-        });
+        })
     }
 
     protected readonly ONE_HOUR_SECONDS = ONE_HOUR_SECONDS;

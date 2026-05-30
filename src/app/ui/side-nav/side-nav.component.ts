@@ -92,8 +92,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     protected openCreateGroupDialog(): void {
         this.matDialog.open(CreateGroupDialogComponent, {
-            width: '420px',
-            maxWidth: '95vw',
+            panelClass: 'modern-dialog',
             injector: this.injector,
         });
     }
@@ -110,6 +109,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     protected logout() {
         const ref = this.matDialog.open(ProgressDialogComponent, {
+            panelClass: 'modern-dialog',
             disableClose: true,
             data: {
                 action_name: "Logging Out",

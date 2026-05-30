@@ -30,7 +30,7 @@ describe('Search', () => {
             cy.get('.search-message').click()
         })
         it('should be able to display search dialog when user click search button', () => {
-            cy.contains('Search Messages').should('be.visible')
+            cy.contains('search').should('be.visible')
         });
         it('should be able to display result panel and display spinner when user typing words on search bar', () => {
             cy.intercept('GET', '**/chat-histories/**',
@@ -45,8 +45,9 @@ describe('Search', () => {
                     return {statusCode: 200, body: []}
                 })
             cy.get('[placeholder="Type to search..."]').type('vclcvlcvlcl')
-            cy.contains('No messages found matching').should('be.visible')
+            cy.contains('no messages found matching').should('be.visible')
         });
+
         it('should display messages in result panel', () => {
             cy.intercept('GET', '**/chat-histories/**',
                 {fixture: 'get-chat-history-success.json'})

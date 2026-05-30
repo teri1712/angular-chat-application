@@ -19,9 +19,7 @@ export class SettingsComponent {
 
     openProfileManagement() {
         this.dialog.open(ProfileManagementComponent, {
-            width: '800px',
-            maxWidth: '95vw',
-            maxHeight: '90vh',
+            panelClass: ['modern-dialog', 'profile-dialog'],
             injector: this.injector
         });
     }

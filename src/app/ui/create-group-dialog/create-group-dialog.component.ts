@@ -1,10 +1,6 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
-import {MatListModule} from '@angular/material/list';
-import {MatChipsModule} from '@angular/material/chips';
 import {MatButtonModule} from '@angular/material/button';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {FormsModule} from '@angular/forms';
@@ -21,17 +17,14 @@ import {rxResource, toObservable, toSignal} from '@angular/core/rxjs-interop';
     standalone: true,
     imports: [
         MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
         MatIconModule,
-        MatListModule,
-        MatChipsModule,
         MatButtonModule,
         MatProgressSpinnerModule,
         FormsModule,
     ],
     templateUrl: './create-group-dialog.component.html',
-    styleUrl: './create-group-dialog.component.css'
+    styleUrl: './create-group-dialog.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateGroupDialogComponent {
     private userRepository = inject(UserRepository);
