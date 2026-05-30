@@ -63,24 +63,29 @@ export class ProfileManagementComponent {
     });
 
     constructor() {
+        this.profileForm = this.fb.group({
+            username: ['', [Validators.required]],
+            name: ['', [Validators.required]],
+            gender: ['Male', [Validators.required]],
+            dob: [new Date()]
+        });
+        this.passwordForm = this.fb.group({
+            oldPassword: ['', [Validators.required]],
+            newPassword: ['', [Validators.required, Validators.minLength(6)]],
+            confirmPassword: ['', [Validators.required]]
+        }, {validator: this.passwordMatchValidator});
+
         effect(() => {
             const profile = this.profile.value()
             if (profile) {
-
-                this.profileForm = this.fb.group({
-                    username: [profile.username || '', [Validators.required]],
-                    name: [profile.name || '', [Validators.required]],
-                    gender: [profile.gender || 'Male', [Validators.required]],
-                    dob: [profile.dob ? new Date(profile.dob) : new Date()]
+                this.profileForm.patchValue({
+                    username: profile.username || '',
+                    name: profile.name || '',
+                    gender: profile.gender || 'Male',
+                    dob: profile.dob ? new Date(profile.dob) : new Date()
                 });
 
                 this.initialProfileValues = this.profileForm.getRawValue();
-
-                this.passwordForm = this.fb.group({
-                    oldPassword: ['', [Validators.required]],
-                    newPassword: ['', [Validators.required, Validators.minLength(6)]],
-                    confirmPassword: ['', [Validators.required]]
-                }, {validator: this.passwordMatchValidator});
             }
         });
     }
