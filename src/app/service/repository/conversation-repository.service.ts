@@ -21,7 +21,7 @@ export class ConversationRepository implements ListRepository<Number, Conversati
         return this.httpClient.get<Conversation[]>(environment.API_URL + "/conversations", {
             observe: 'body',
             params: params,
-        }).pipe(map(conversations => this.truncateFirstOne(conversations))
+        }).pipe(map(conversations => this.truncateFirstOne(conversations, revisionNumber))
             , switchMap(conversations => this.resolveStaleness(conversations)));
     }
 

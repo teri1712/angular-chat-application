@@ -92,7 +92,6 @@ export class ConversationListComponent {
         effect(() => {
             const index = this.scrollIndex();
             const length = this.history.length();
-            console.log(this.expanding())
             if (!this.expanding() && !this.end() && index + 10 >= length) {
                 untracked(() => {
                     this.expanding.set(true)
@@ -142,7 +141,6 @@ export class ConversationListComponent {
                         )
                     ).subscribe({
                         next: ({conversations, presences}) => {
-
                             Object.assign(this.presences, presences)
 
                             conversations.forEach((conversation) => {
