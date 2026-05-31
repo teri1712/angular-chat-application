@@ -5,7 +5,7 @@ describe('Navigation flows', () => {
     describe('Logout', () => {
         it('should be able to logout when user click logout on profile popup', () => {
             cy.intercept('POST', '**/logout', {statusCode: 200, body: {}})
-            cy.get('.profile-popup').click()
+            cy.get('.profile-btn').click()
             cy.contains('Logout').click()
 
             cy.url().should('include', '/login')

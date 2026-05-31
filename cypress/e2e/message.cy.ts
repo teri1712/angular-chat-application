@@ -18,7 +18,7 @@ describe('Message', () => {
                 .as('messages-request')
         })
         cy.visitConversation('123', 'hello', 'world')
-        cy.get('app-message-list').find('mat-spinner').should('be.visible');
+        cy.get('app-message-list').find('.spinner').should('be.visible');
         cy.wait('@messages-request')
         cy.contains('Hey everyone!').should('exist');
         cy.get('app-message').should('have.length', 10);
@@ -51,8 +51,8 @@ describe('Message', () => {
         cy.intercept('PUT', '**/chats/*/texts/*', {statusCode: 200, body: {}, delay: 2000})
         cy.visitConversation('123', 'hello', 'world')
 
-        cy.get('[placeholder="Type something"]').type('Hello world!')
-        cy.get('.text-button').click()
+        cy.get('[placeholder="Type a message..."]').type('Hello world!')
+        cy.get('.send-btn').click()
         cy.contains('Sending').should('be.visible');
         cy.contains('Sent').should('be.visible');
     });
@@ -63,7 +63,7 @@ describe('Message', () => {
 
         cy.visitConversation('123', 'hello', 'world')
 
-        cy.get('[placeholder="Type something"]').type('Hello world!')
+        cy.get('[placeholder="Type a message..."]').type('Hello world!')
 
         cy.wait('@seen-request')
     });

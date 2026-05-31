@@ -1,4 +1,4 @@
-import {Component, effect, inject, Injector, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, effect, HostListener, inject, Injector, OnDestroy, OnInit, signal} from '@angular/core';
 import {ActivationEnd, Router} from "@angular/router";
 import {ProgressDialogComponent} from "../progress-dialog/progress-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
@@ -32,6 +32,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     private matDialog = inject(MatDialog)
     protected profile = this.profileService.profile
     protected currentRoute = signal<Routes>(Routes.THREAD);
+    protected menuOpen = signal(false);
     private tokenStore = inject(ITokenStore)
     private routeSub!: Subscription;
 
@@ -73,6 +74,10 @@ export class SideNavComponent implements OnInit, OnDestroy {
                     }
                 }
             });
+        this.activateDefaultRoute()
+    }
+
+    activateDefaultRoute() {
         this.navigateToThreads()
     }
 
@@ -91,14 +96,24 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     protected openCreateGroupDialog(): void {
         this.matDialog.open(CreateGroupDialogComponent, {
-            width: '420px',
-            maxWidth: '95vw',
+            panelClass: 'modern-dialog',
             injector: this.injector,
         });
     }
 
+    protected toggleMenu(event: Event) {
+        event.stopPropagation();
+        this.menuOpen.update(v => !v);
+    }
+
+    @HostListener('document:click')
+    protected closeMenu() {
+        this.menuOpen.set(false);
+    }
+
     protected logout() {
         const ref = this.matDialog.open(ProgressDialogComponent, {
+            panelClass: 'modern-dialog',
             disableClose: true,
             data: {
                 action_name: "Logging Out",

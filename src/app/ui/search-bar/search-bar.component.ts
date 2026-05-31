@@ -10,7 +10,7 @@ import {searchRoute, threadsRoute} from "../../home-route.module";
 
 @Component({
     selector: 'app-search-bar',
-    imports: [MatFormFieldModule, MatInputModule, MatIconModule, MatIconButton, FormsModule],
+    imports: [MatInputModule, MatIconModule, FormsModule],
     templateUrl: './search-bar.component.html',
     styleUrl: './search-bar.component.scss'
 })

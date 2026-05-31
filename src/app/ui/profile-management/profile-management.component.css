@@ -1,107 +1,25 @@
-.profile-dialog-content {
-      padding: 20px 0;
-      overflow-x: hidden;
-}
-
-.profile-card {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      border-radius: 12px !important;
-      transition: box-shadow 0.3s ease;
-}
-
-.profile-card:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.avatar-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-top: 16px;
-}
-
-.avatar-wrapper {
-      position: relative;
-      width: 120px;
-      height: 120px;
-      cursor: pointer;
-      border-radius: 50%;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.avatar-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-}
-
-.avatar-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-}
-
-.avatar-overlay mat-icon {
-      color: white;
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-}
-
-.avatar-wrapper:hover .avatar-overlay {
-      opacity: 1;
-}
-
-.avatar-wrapper:hover .avatar-img {
-      transform: scale(1.1);
-}
-
-.profile-form {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-}
-
-.action-button {
-      margin-top: 16px;
-      height: 48px;
-      border-radius: 24px !important;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-}
-
-.action-button mat-icon {
-      margin-right: 8px;
-}
-
-.dialog-title {
-      font-weight: 500;
-      font-size: 1.5rem;
-      padding-bottom: 8px;
-}
-
-.dialog-actions {
-      padding: 16px 24px !important;
-}
-
-mat-card-header {
-      margin-bottom: 16px;
-}
-
-mat-card-title {
-      font-size: 1.25rem !important;
-      font-weight: 500 !important;
-}
+.dialog-container { color: white; }
+.dialog-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+.dialog-title { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin: 0; text-transform: lowercase; color: white; }
+.close-icon-btn { color: rgba(255, 255, 255, 0.4) !important; }
+.profile-content { display: flex; flex-direction: column; gap: 32px; padding: 0 !important; }
+.section-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; color: white; text-transform: lowercase; }
+.avatar-section { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 16px; }
+.avatar-wrapper { position: relative; width: 120px; height: 120px; border-radius: 24px; overflow: hidden; border: 3px solid #1e293b; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); cursor: pointer; transition: all 300ms ease; }
+.avatar-wrapper:hover { transform: scale(1.05); border-color: var(--color-primary); }
+.avatar-img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-edit-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 200ms ease; }
+.avatar-wrapper:hover .avatar-edit-overlay { opacity: 1; }
+.avatar-edit-overlay mat-icon { color: white; font-size: 32px; width: 32px; height: 32px; }
+.card-minimal { background: #1e293b; border-radius: 16px; padding: 24px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.full-width { grid-column: span 2; }
+.custom-input-group { display: flex; flex-direction: column; gap: 6px; }
+.custom-input-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.4); padding-left: 4px; }
+.custom-input-wrapper { position: relative; display: flex; align-items: center; }
+.custom-input { background: rgba(0, 0, 0, 0.2); border: 2px solid rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 12px 16px; color: white; font-size: 1rem; font-weight: 500; width: 100%; outline: none; transition: all 200ms ease; }
+.custom-input:focus { border-color: var(--color-primary); background: rgba(0, 0, 0, 0.3); }
+.btn-save { background: var(--color-primary) !important; color: white !important; padding: 0 32px !important; height: 48px !important; border-radius: 24px !important; font-weight: 700 !important; font-size: 1rem !important; text-transform: none !important; transition: all 200ms ease !important; }
+.btn-save:hover:not(:disabled) { transform: translateY(-2px); }
+.loading-overlay { display: flex; justify-content: center; align-items: center; height: 300px; }
+.error-msg { color: #ef4444; font-size: 0.75rem; font-weight: 600; margin-top: 4px; padding-left: 4px; }

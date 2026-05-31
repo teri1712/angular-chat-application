@@ -3,9 +3,7 @@ import {MatIcon} from "@angular/material/icon";
 
 @Component({
     selector: 'app-settings-item',
-    imports: [
-        MatIcon
-    ],
+    imports: [],
     templateUrl: './settings-item.component.html',
     styleUrl: './settings-item.component.css'
 })

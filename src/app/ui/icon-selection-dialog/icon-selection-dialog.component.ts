@@ -1,7 +1,6 @@
-import {Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {messageIconBundles} from '../../res/icons';
-import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
 import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
@@ -11,7 +10,8 @@ import {MatButtonModule} from '@angular/material/button';
       templateUrl: './icon-selection-dialog.component.html',
       styleUrls: ['./icon-selection-dialog.component.css'],
       standalone: true,
-      imports: [CommonModule, MatDialogModule, MatGridListModule, MatIconModule, MatButtonModule]
+      imports: [CommonModule, MatDialogModule, MatIconModule, MatButtonModule],
+      changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IconSelectionDialogComponent {
       icons = messageIconBundles;

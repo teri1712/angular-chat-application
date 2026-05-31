@@ -44,7 +44,6 @@ import {MiddleMessageComponent} from "../middle-message/middle-message.component
         CdkVirtualForOf,
         CdkVirtualScrollViewport,
         MessageComponent,
-        MatProgressSpinner,
         ReactiveFormsModule,
         TypingMessageComponent,
         CdkFixedSizeVirtualScroll,

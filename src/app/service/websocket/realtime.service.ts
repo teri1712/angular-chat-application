@@ -1,17 +1,18 @@
 import {effect, inject, Injectable} from "@angular/core";
 import {Client, Frame, IMessage} from "@stomp/stompjs";
 import {environment} from "../../environments";
-import {BehaviorSubject, delay, filter, Observable, of, switchMap, tap} from "rxjs";
+import {BehaviorSubject, delay, Observable, of, switchMap, tap} from "rxjs";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {InboxLog} from "../../model/dto/inbox-log";
 import {LogStream} from "../repository/log-stream.service";
 import {TypeMessage} from "../../model/dto/type-message";
 import {PreferenceMessage} from "../../model/dto/preference-message";
 import {ITokenStore} from "../auth/token-store.interface";
+import {LiveChatService} from "../repository/live-chat.service";
 
 
 @Injectable()
-export class LogTrailerService extends LogStream {
+export class RealtimeService extends LogStream implements LiveChatService {
 
     private stage: ClientStage = ClientStage.DISCONNECTED;
     private currentSequence: number;
@@ -50,7 +51,7 @@ export class LogTrailerService extends LogStream {
         this.disconnect();
     }
 
-    send(chatId: string): void {
+    typeToRoom(chatId: string): void {
         if (this.client?.connected) {
             this.client.publish({
                 destination: '/room/' + chatId,

@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal, Signal} from '@angular/core';
 import {catchError, from, map, Observable, of, switchMap} from "rxjs";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../environments";
@@ -15,6 +15,11 @@ import {TokenStore} from "./token-store.service";
     providedIn: 'root',
 })
 export class AccountService extends TokenStore implements Authenticator {
+    private readonly _justLoggedIn = signal(false)
+
+    get justLoggedIn(): Signal<Boolean> {
+        return this._justLoggedIn.asReadonly()
+    }
 
     httpClient = inject(HttpClient)
 
@@ -81,18 +86,18 @@ export class AccountService extends TokenStore implements Authenticator {
         }, {
             observe: 'body',
         }).pipe(
+            switchMap(() => {
+                return this.signIn({
+                    username: username,
+                    password: password
+                })
+            }),
             switchMap((profile) => {
                 const avatar = request.avatar;
                 if (!avatar)
                     return of(profile);
                 const presignUrl = environment.API_URL + '/files/upload?filename=' + encodeURIComponent(avatar.name);
                 return this.createAvatar(username, password, presignUrl, avatar);
-            }),
-            switchMap(() => {
-                return this.signIn({
-                    username: username,
-                    password: password
-                })
             })
         )
     }
@@ -109,6 +114,7 @@ export class AccountService extends TokenStore implements Authenticator {
         }).pipe(
             map((account) => {
                 this.storeSession(account.profile, account.accessToken)
+                this._justLoggedIn.set(true)
                 return account.profile
             })
         )
@@ -123,11 +129,13 @@ export class AccountService extends TokenStore implements Authenticator {
                 }
             }).pipe(
             map((response: HttpResponse<any>) => {
+                this._justLoggedIn.set(false)
                 this.clearSession()
                 return true
             }),
             catchError((error: HttpErrorResponse) => {
                 if (error.status === 401 || error.status === 403) {
+                    this._justLoggedIn.set(false)
                     this.clearSession()
                     return of(true);
                 }

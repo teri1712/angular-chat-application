@@ -1,15 +1,56 @@
-@use '@angular/material' as mat;
-
-:host {
-  display: block;
-  @include mat.form-field-overrides((
-          outlined-container-shape: 50px,
-          container-height: 30px,
-          container-vertical-padding: 8px
-  ));
+.search-container {
+    width: 100%;
 }
 
-mat-form-field {
-  width: 100%;
-  font-size: 0.9rem;
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 10px 10px 44px;
+    background: var(--color-muted);
+    border: 2px solid transparent;
+    border-radius: var(--radius-full); /* Exaggerated roundness for search */
+    font-size: 0.9375rem;
+    color: var(--color-foreground);
+    transition: all 200ms ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-background);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.prefix {
+    position: absolute;
+    left: 14px;
+    color: var(--color-muted-foreground);
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--color-muted-foreground);
+    cursor: pointer;
+    display: flex;
+    padding: 4px;
+    border-radius: var(--radius-full);
+}
+
+.clear-btn:hover {
+    background: var(--color-border);
+    color: var(--color-foreground);
+}
+
+.clear-btn .material-icons {
+    font-size: 18px;
 }

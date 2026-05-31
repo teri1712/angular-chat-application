@@ -1,3 +1,10 @@
-mat-icon {
-      color: var(--mat-sys-primary);
-}
+.dialog-container { color: white; }
+.dialog-header { margin-bottom: 24px; }
+.dialog-title { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin: 0; text-transform: lowercase; color: white; }
+.icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.icon-item { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 12px; cursor: pointer; transition: all 200ms ease; background: #1e293b; border: 2px solid transparent; }
+.icon-item:hover { background: #334155; transform: scale(1.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); border-color: var(--color-primary); }
+.icon-item mat-icon { width: 28px; height: 28px; color: white; font-size: 28px; }
+.dialog-actions { display: flex; justify-content: flex-end; margin-top: 24px; padding: 0 !important; }
+.btn-cancel { color: white !important; font-weight: 600 !important; text-transform: none !important; font-size: 1rem !important; opacity: 0.6; padding: 0 16px !important; }
+.btn-cancel:hover { opacity: 1; }

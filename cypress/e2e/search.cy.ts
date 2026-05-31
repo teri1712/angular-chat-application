@@ -10,7 +10,7 @@ describe('Search', () => {
                 {fixture: 'get-people-success.json', delay: 2000})
                 .as('people')
 
-            cy.get('[placeholder = "Search someone"]').type("luffy")
+            cy.get('[placeholder = "Search people..."]').type("luffy")
             cy.url().should('include', 'search')
             cy.get('.user-search-loading').should('be.visible')
         })
@@ -18,7 +18,7 @@ describe('Search', () => {
             cy.intercept('GET', '**/people**',
                 {fixture: 'get-people-success.json'})
                 .as('people')
-            cy.get('[placeholder = "Search someone"]').type("luffy")
+            cy.get('[placeholder = "Search people..."]').type("luffy")
             cy.get('app-search-user').should('have.length', 3)
             cy.contains('Java Spring Enthusiast').should('be.visible')
         });
@@ -30,7 +30,7 @@ describe('Search', () => {
             cy.get('.search-message').click()
         })
         it('should be able to display search dialog when user click search button', () => {
-            cy.contains('Search Messages').should('be.visible')
+            cy.contains('search').should('be.visible')
         });
         it('should be able to display result panel and display spinner when user typing words on search bar', () => {
             cy.intercept('GET', '**/chat-histories/**',
@@ -45,8 +45,9 @@ describe('Search', () => {
                     return {statusCode: 200, body: []}
                 })
             cy.get('[placeholder="Type to search..."]').type('vclcvlcvlcl')
-            cy.contains('No messages found matching').should('be.visible')
+            cy.contains('no messages found matching').should('be.visible')
         });
+
         it('should display messages in result panel', () => {
             cy.intercept('GET', '**/chat-histories/**',
                 {fixture: 'get-chat-history-success.json'})

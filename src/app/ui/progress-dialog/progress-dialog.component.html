@@ -1,4 +1,6 @@
-<mat-dialog-content>
-    <h3 *ngIf="action_name">{{ action_name }}</h3>
-    <mat-spinner [diameter]="30"></mat-spinner>
-</mat-dialog-content>
+<div class="progress-container">
+    @if (action_name) {
+        <h3 class="action-name">{{ action_name }}</h3>
+    }
+    <div class="spinner"></div>
+</div>

@@ -1,10 +1,8 @@
-import {Component, inject, Injector, input} from '@angular/core';
+import {Component, computed, DestroyRef, inject, Injector, input, signal} from '@angular/core';
 import {ONE_HOUR_SECONDS, ONE_MINUTE_SECONDS} from "../../utils/time";
 import {CommonModule} from "@angular/common";
 import {AvatarContainerComponent} from "../avatar-container/avatar-container.component";
-import {MatIcon} from "@angular/material/icon";
 import {ChatSettingComponent} from '../chat-setting/chat-setting.component';
-import {MatIconButton} from "@angular/material/button";
 import {SearchDialogComponent} from "../search-dialog/search-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {switchMap} from "rxjs";
@@ -13,7 +11,7 @@ import {rxResource} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-chat-info-bar',
-    imports: [CommonModule, AvatarContainerComponent, MatIcon, ChatSettingComponent, MatIconButton],
+    imports: [CommonModule, AvatarContainerComponent, ChatSettingComponent],
     templateUrl: './chat-info-bar.component.html',
     styleUrl: './chat-info-bar.component.css',
     standalone: true
@@ -23,11 +21,15 @@ export class ChatInfoBarComponent {
     private readonly matDialog = inject(MatDialog);
     private readonly dialogService = inject(DialogService);
     private readonly injector = inject(Injector);
+    private readonly destroyRef = inject(DestroyRef);
 
     roomName = input.required<string>();
     presence = input<Date>();
     roomAvatar = input.required<string>();
     chatId = input.required<string>();
+
+    private readonly now = signal(Date.now());
+
     preference = rxResource({
         params: () => {
             return ({
@@ -43,23 +45,26 @@ export class ChatInfoBarComponent {
     });
 
     constructor() {
+        const interval = setInterval(() => {
+            this.now.set(Date.now());
+        }, 1000);
+        this.destroyRef.onDestroy(() => clearInterval(interval));
     }
 
-    protected get diffOnline(): number {
-        return Date.now() / 1000 - (this.presence()?.getTime() ?? 0) / 1000
-    }
+    protected diffOnline = computed(() => {
+        const presenceTime = this.presence()?.getTime();
+        if (!presenceTime) return Number.MAX_SAFE_INTEGER;
+        return (this.now() - presenceTime) / 1000;
+    });
 
     protected openSearchDialog() {
         this.matDialog.open(SearchDialogComponent, {
-            width: '600px',
-            maxWidth: '90vw',
-            height: 'auto',
-            maxHeight: '85vh',
+            panelClass: 'modern-dialog',
             injector: this.injector,
             data: {
                 chatId: this.chatId(),
             }
-        });
+        })
     }
 
     protected readonly ONE_HOUR_SECONDS = ONE_HOUR_SECONDS;

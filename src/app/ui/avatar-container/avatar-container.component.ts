@@ -9,7 +9,7 @@ import {interval} from "rxjs";
 
 @Component({
     selector: 'app-avatar-container',
-    imports: [CommonModule, MatBadgeModule, MatButtonModule, MatIconModule, NgOptimizedImage],
+    imports: [CommonModule, NgOptimizedImage],
     templateUrl: './avatar-container.component.html',
     styleUrl: './avatar-container.component.css'
 })

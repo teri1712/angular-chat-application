@@ -1,19 +1,43 @@
 :host {
       display: flex;
       flex-direction: row;
-      align-items: end;
-      gap: 0.5rem;
+      align-items: flex-end;
+      gap: var(--space-sm);
       margin-right: auto;
+      max-width: 85%;
+      font-family: var(--font-family);
 }
 
 .avatar-holder {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      margin-bottom: 5px;
 }
 
 .avatar-holder img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
       object-fit: cover;
+      box-shadow: var(--shadow-sm);
+}
+
+.message-bubble {
+      background: var(--color-muted);
+      color: var(--color-foreground);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      transition: all 200ms ease;
+      box-shadow: var(--shadow-sm);
+}
+
+.message-bubble.no-padding {
+      padding: 0;
+      overflow: hidden;
+}
+
+.message-bubble:hover {
+      box-shadow: var(--shadow-md);
 }

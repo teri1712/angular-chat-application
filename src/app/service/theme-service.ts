@@ -2,8 +2,8 @@ import {effect, Injectable, signal, WritableSignal} from "@angular/core";
 
 
 const THEME_KEY = "theme";
-const DARK_CLASS = "light-theme";
-const LIGHT_CLASS = "dark-theme";
+const DARK_CLASS = "dark-theme";
+const LIGHT_CLASS = "light-theme";
 
 export type theme = 'dark' | 'light'
 
@@ -34,7 +34,8 @@ export class ThemeService {
 
     private applyTheme(theme: theme): void {
         localStorage.setItem(THEME_KEY, JSON.stringify(theme))
-        document.body.classList.toggle(DARK_CLASS, theme === 'dark')
-        document.body.classList.toggle(LIGHT_CLASS, theme === 'light')
+        const root = document.documentElement;
+        root.classList.remove(DARK_CLASS, LIGHT_CLASS);
+        root.classList.add(theme === 'dark' ? DARK_CLASS : LIGHT_CLASS);
     }
 }

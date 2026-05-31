@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject, OnInit, signal} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {Theme} from '../../model/dto/theme';
 import {MatListModule} from '@angular/material/list';
@@ -21,10 +21,11 @@ import {ThemeNamePipe} from '../pipes/theme-name.pipe';
         MatProgressSpinnerModule,
         ThemeNamePipe,
     ],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ThemeSelectionDialogComponent implements OnInit {
-    themes: Theme[] = [];
-    isLoading = true;
+    themes = signal<Theme[]>([]);
+    isLoading = signal<boolean>(true);
 
     constructor(
         public dialogRef: MatDialogRef<ThemeSelectionDialogComponent>,
@@ -35,8 +36,8 @@ export class ThemeSelectionDialogComponent implements OnInit {
 
     ngOnInit(): void {
         this.preferenceService.getThemes().subscribe((themes) => {
-            this.themes = themes;
-            this.isLoading = false;
+            this.themes.set(themes);
+            this.isLoading.set(false);
         });
     }
 

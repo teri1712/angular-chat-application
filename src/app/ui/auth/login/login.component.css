@@ -1,57 +1,164 @@
 :host {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-background);
 }
 
-form {
-      width: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: var(--space-2xl) var(--space-xl);
+    display: flex;
+    flex-direction: column;
 }
 
-h1 {
-      font-size: 5rem;
+.auth-title {
+    font-size: 4rem; /* Oversized minimalism */
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    margin: 0 0 var(--space-xl) 0;
+    color: var(--color-foreground);
+    line-height: 0.9;
+    text-transform: lowercase;
 }
 
-.panel {
-      display: flex;
-
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--mat-sys-neutral-variant20);
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
 }
 
-
-a {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
 }
 
-a.sign-up {
-      color: var(--mat-sys-primary);
+.input-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted-foreground);
+    margin-left: 4px;
 }
 
-
-mat-error {
-      font-size: 0.8rem;
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.authentication-error {
-      display: flex;
-      gap: 0.5rem;
-      color: var(--mat-sys-error)
+.input-wrapper .prefix {
+    position: absolute;
+    left: 14px;
+    color: var(--color-muted-foreground);
+    font-size: 20px;
+    pointer-events: none;
 }
 
+.input-wrapper input {
+    width: 100%;
+    padding: 14px 14px 14px 44px;
+    background: var(--color-muted);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    color: var(--color-foreground);
+    transition: all 200ms ease;
+}
 
-#google-btn {
-      width: 400px;
-      display: flex;
-      justify-content: center;
+.input-wrapper input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-background);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.input-wrapper input.has-error {
+    border-color: var(--color-destructive);
+}
+
+.visibility-toggle {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--color-muted-foreground);
+    cursor: pointer;
+    display: flex;
+    padding: 4px;
+    border-radius: var(--radius-full);
+}
+
+.visibility-toggle:hover {
+    background: var(--color-border);
+    color: var(--color-foreground);
+}
+
+.field-error {
+    font-size: 0.75rem;
+    color: var(--color-destructive);
+    font-weight: 500;
+    margin-top: 2px;
+    margin-left: 4px;
+}
+
+.error-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: #fef2f2;
+    border-left: 4px solid var(--color-destructive);
+    color: #991b1b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-md);
+}
+
+.account-hint {
+    text-align: center;
+    color: var(--color-muted-foreground);
+    font-size: 0.75rem;
+}
+
+.auth-footer {
+    margin-top: var(--space-xl);
+    text-align: center;
+}
+
+.sign-up-link {
+    font-size: 0.9375rem;
+    color: var(--color-foreground);
+}
+
+.sign-up-link strong {
+    color: var(--color-primary);
+}
+
+.auth-loader {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-md);
+}
+
+.google-loading, .google-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+    font-size: 0.875rem;
+    color: var(--color-muted-foreground);
+}
+
+#google-signin-btn {
+    margin-top: var(--space-lg);
+    display: flex;
+    justify-content: center;
 }

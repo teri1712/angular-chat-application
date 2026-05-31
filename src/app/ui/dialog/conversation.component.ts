@@ -12,10 +12,11 @@ import {toObservable, toSignal} from "@angular/core/rxjs-interop";
 import {MessageState} from "../../model/dto/message-state";
 import {PREVIEWER} from "../../service/preview/previewer";
 import {providePreviewers} from "../../service/preview/provide-previewers";
+import {FormatTimePipe} from "../pipes/FormatTimePipe";
 
 @Component({
     selector: 'app-conversation',
-    imports: [CommonModule, AvatarContainerComponent, MatBadgeModule, MatButtonModule, MatIconModule],
+    imports: [CommonModule, AvatarContainerComponent, MatBadgeModule, MatButtonModule, MatIconModule, FormatTimePipe],
     providers: [providePreviewers()],
     templateUrl: './conversation.component.html',
     styleUrl: './conversation.component.css'
@@ -49,6 +50,8 @@ export class ConversationComponent {
     protected displaySeenBy = computed(() => this.seenBy().filter(user => !this.profileService.thatsMe(user)));
     protected nameWeight = computed(() => !this.seenByMe() && !this.mine() ? 'bold' : '500');
     protected contentWeight = computed(() => !this.seenByMe() && !this.mine() ? 'bold' : 'normal');
+
+    protected newestDate = computed(() => new Date(this.newest().createdAt));
 
     protected preview = computed(() => {
         const messageState = this.newest();

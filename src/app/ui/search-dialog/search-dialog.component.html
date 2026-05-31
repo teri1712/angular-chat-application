@@ -1,42 +1,37 @@
-<h2 mat-dialog-title class="dialog-title">Search Messages</h2>
-<mat-dialog-content>
-    <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
-        <mat-label>Search</mat-label>
-        <input matInput [(ngModel)]="query"
-               placeholder="Type to search..." autofocus>
-        <mat-icon matSuffix color="primary">search</mat-icon>
-    </mat-form-field>
-
-    @if (!results.isLoading() && results.value()?.length) {
-
-        <div class="results-container">
-
-            @for (result of results.value(); track result.sequenceNumber) {
-
-                <app-search-result-item
-                        [result]="result"
-                        (selected)="onClose()"
-                >
-                </app-search-result-item>
-            }
-        </div>
-    }
-
-
-    <div class="loading-container mat-body-2">
-        @if (results.isLoading()) {
-            <mat-progress-spinner mode="indeterminate"
-                                  class="search-dialog-loading"
-                                  diameter="30">
-            </mat-progress-spinner>
-
-        }
-
+<div class="dialog-container">
+    <div class="dialog-header">
+        <h2 class="dialog-title">search</h2>
     </div>
 
-    @if (query() && !results.isLoading() && !results.value()?.length) {
-        <div class="no-results mat-body-2">
-            No messages found matching "{{ query() }}"
+    <mat-dialog-content>
+        <div class="custom-input-wrapper">
+            <input class="custom-input" [(ngModel)]="query"
+                   placeholder="Type to search..." autofocus>
+            <mat-icon class="input-icon">search</mat-icon>
         </div>
-    }
-</mat-dialog-content>
+
+        <div class="results-container">
+            @if (!results.isLoading() && results.value()?.length) {
+                @for (result of results.value(); track result.sequenceNumber) {
+                    <app-search-result-item
+                            [result]="result"
+                            (selected)="onClose()"
+                    >
+                    </app-search-result-item>
+                }
+            }
+
+            @if (results.isLoading()) {
+                <div class="loading-container">
+                    <mat-progress-spinner mode="indeterminate" diameter="48" class="search-dialog-loading"></mat-progress-spinner>
+                </div>
+            }
+
+            @if (query() && !results.isLoading() && !results.value()?.length) {
+                <div class="no-results">
+                    no messages found matching "{{ query() }}"
+                </div>
+            }
+        </div>
+    </mat-dialog-content>
+</div>

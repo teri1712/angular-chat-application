@@ -2,8 +2,15 @@
 @use "./_light-theme-colors" as light-colors;
 @use "./_dark-theme-colors" as dark-colors;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @include mat.elevation-classes();
 @include mat.app-background();
+
+:root {
+  --mat-sys-background: var(--color-background);
+  --mat-sys-on-background: var(--color-foreground);
+}
 
 .light-theme {
   --mat-sys-neutral-variant60: rgba(0, 0, 0, 0.05);
@@ -14,11 +21,13 @@
                   primary: light-colors.$primary-palette,
                   tertiary: light-colors.$tertiary-palette,
           ),
+          typography: (
+            brand-family: 'Inter',
+            plain-family: 'Inter',
+          ),
           density: 0,
           theme-type: light
   ));
-
-
 }
 
 .dark-theme {
@@ -32,29 +41,44 @@
                   tertiary: dark-colors.$tertiary-palette,
                   theme-type: dark
           ),
+          typography: (
+            brand-family: 'Inter',
+            plain-family: 'Inter',
+          ),
           density: 0,
   ));
-
 }
 
-
 body {
-  background: var(--mat-sys-background);
-  color: var(--mat-sys-on-background);
+  font-family: 'Inter', sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
+  box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: transparent;
+    background-color: var(--color-border);
+    border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: transparent;
+    background-color: var(--color-muted-foreground);
   }
 
-  scrollbar-color: #888 transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }

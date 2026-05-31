@@ -1,16 +1,7 @@
 <div class="avatar-holder">
-    <img [src]="message().avatar">
+    <img [src]="message().avatar" alt="sender avatar">
 </div>
 
-<div
-        [ngStyle]="{
-                  'overflow': 'hidden',
-                  'border-top-left-radius':   '20px',
-                  'border-top-right-radius': '20px',
-                  'border-bottom-right-radius': '20px',
-                  'border-bottom-left-radius':   '20px',
-                }"
-        class="mt-4"
->
+<div class="typing-bubble">
     <app-typing/>
 </div>

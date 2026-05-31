@@ -1,9 +1,21 @@
-img {
-      min-width: 200px;
-      max-width: 250px;
+:host {
+    display: block;
+    line-height: 0;
+    width: 100%;
+}
 
-      min-height: 200px;
-      max-height: 250px;
-      object-fit: cover;
-      cursor: pointer;
+img {
+    display: block;
+    width: 100%;
+    min-width: 200px;
+    max-width: 100%;
+    min-height: 200px;
+    max-height: 400px;
+    object-fit: cover;
+    cursor: zoom-in;
+    transition: transform 200ms ease;
+}
+
+img:hover {
+    transform: scale(1.02);
 }

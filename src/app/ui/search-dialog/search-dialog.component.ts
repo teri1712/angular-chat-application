@@ -1,10 +1,7 @@
-import {Component, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, model} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
-import {MatListModule} from '@angular/material/list';
 import {FormsModule} from '@angular/forms';
 import {SearchRepository} from '../../service/repository/search-repository';
 import {catchError, of} from 'rxjs';
@@ -19,16 +16,14 @@ import {rxResource, toObservable, toSignal} from "@angular/core/rxjs-interop";
     imports: [
         CommonModule,
         MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
         MatIconModule,
-        MatListModule,
         FormsModule,
         SearchResultItemComponent,
         MatProgressSpinner
     ],
     templateUrl: './search-dialog.component.html',
-    styleUrl: './search-dialog.component.css'
+    styleUrl: './search-dialog.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchDialogComponent {
     private searchRepository = inject(SearchRepository)

@@ -38,6 +38,7 @@ export class SignUpComponent {
 
     private submit() {
         const ref = this.matDialog.open(ProgressDialogComponent, {
+            panelClass: 'modern-dialog',
             disableClose: true,
             data: {
                 action_name: "Signing Up",
@@ -59,7 +60,6 @@ export class SignUpComponent {
         ).subscribe(
             {
                 next: () => {
-
                     this.router.navigate(['/home'])
                 },
                 error: err => {

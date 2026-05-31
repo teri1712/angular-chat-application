@@ -23,7 +23,7 @@ export class SignUpInfoComponent {
         fullname: new FormControl('', [Validators.required, Validators.minLength(4)]),
         password: new FormControl('', [Validators.required, Validators.minLength(4)]),
         gender: new FormControl(1),
-        dob: new FormControl(new Date()),
+        dob: new FormControl(new Date().toISOString().split('T')[0]),
     })
 
     next = output<InfoForm>()
@@ -43,12 +43,17 @@ export class SignUpInfoComponent {
     }
 
     protected onSubmit() {
+        const dobValue = this.formGroup.get("dob")?.value;
+        const dob = (dobValue as any) instanceof Date 
+            ? (dobValue as any).toISOString().split('T')[0] 
+            : dobValue;
+
         this.next.emit({
             username: this.formGroup.get("username")?.value!,
             password: this.formGroup.get("password")?.value!,
             fullname: this.formGroup.get("fullname")?.value!,
             gender: Number(this.formGroup.get("gender")?.value!),
-            dob: this.formGroup.get("dob")?.value?.toISOString().split('T')[0]!,
+            dob: dob!,
         })
     }
 

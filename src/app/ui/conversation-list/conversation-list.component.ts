@@ -18,7 +18,6 @@ import {PresenceMap, PresenceRepository} from "../../service/repository/presence
         ScrollingModule,
         CommonModule,
         ConversationComponent,
-        MatProgressSpinner,
     ],
     templateUrl: './conversation-list.component.html',
     styleUrl: './conversation-list.component.css'

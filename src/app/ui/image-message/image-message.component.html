@@ -1,8 +1,7 @@
 <img [src]="image().uri"
      [attr.alt]="image().filename || 'image'"
      [ngStyle]="{
-    'width': image().width ? image().width + 'px' : 'auto',
-    'height': image().height ? image().height + 'px' : 'auto'
-}"
-     (click)="openImage()"
-     style="cursor: zoom-in; border-radius: 6px;">
+        'width': image().width ? image().width + 'px' : 'auto',
+        'height': image().height ? image().height + 'px' : 'auto'
+     }"
+     (click)="openImage()">
