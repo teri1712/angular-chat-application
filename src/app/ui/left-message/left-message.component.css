@@ -1,42 +1,43 @@
 :host {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    gap: var(--space-sm);
-    margin-right: auto;
-    max-width: 85%;
-    font-family: var(--font-family);
+      display: flex;
+      flex-direction: row;
+      /*align-items: flex-end;*/
+      gap: var(--space-sm);
+      margin-right: auto;
+      max-width: 85%;
+      align-items: center;
+      font-family: var(--font-family);
 }
 
 .avatar-holder {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
 }
 
 .avatar-holder img {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-full);
-    object-fit: cover;
-    box-shadow: var(--shadow-sm);
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      object-fit: cover;
+      box-shadow: var(--shadow-sm);
 }
 
 .message-bubble {
-    background: var(--color-muted);
-    color: var(--color-foreground);
-    padding: var(--space-sm) var(--space-md);
-    font-size: 0.9375rem;
-    line-height: 1.5;
-    transition: all 200ms ease;
-    box-shadow: var(--shadow-sm);
+      background: var(--color-muted);
+      color: var(--color-foreground);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      transition: all 200ms ease;
+      box-shadow: var(--shadow-sm);
 }
 
 .message-bubble.no-padding {
-    padding: 0;
-    overflow: hidden;
+      padding: 0;
+      overflow: hidden;
 }
 
 .message-bubble:hover {
-    box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-md);
 }

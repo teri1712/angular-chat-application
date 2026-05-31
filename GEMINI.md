@@ -23,8 +23,7 @@ For all feature and feedback cycles, I follow the **`-nexa-way-of-working`** ski
   structural directives (`*ngIf`, `*ngFor`).
 - **Approvals & Commits**:
     - I do not commit until the user sends the message "approved".
-    - Every commit must include a detailed message about which backend change is being updated and the corresponding
-      backend commit hash.
+    - Every commit must include a detailed message about which change is being updated.
     - Commits are made only to the local branch of the frontend workspace.
 - **Incrementalism**: I prefer minimal and incremental changes (Agile mentality).
 

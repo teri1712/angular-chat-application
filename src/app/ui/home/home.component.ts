@@ -13,7 +13,7 @@ import CacheService from "../../service/cache/data/cache-service";
 import {DialogService} from "../../service/repository/dialog.service";
 import {MessageRepository} from "../../service/repository/message-repository.service";
 import {PresenceRepository} from "../../service/repository/presence-repository.service";
-import {LogTrailerService} from "../../service/websocket/log-trailer.service";
+import {RealtimeService} from "../../service/websocket/realtime.service";
 import {MessageService} from "../../service/message-service";
 import {HANDLERS} from "../../service/event-handler";
 import {TextHandler} from "../../service/text-handler";
@@ -22,6 +22,7 @@ import {SeenHandler} from "../../service/seen-handler";
 import {FileHandler} from "../../service/file-handler";
 import {ImageHandler} from "../../service/image-handler";
 import {ITokenStore} from "../../service/auth/token-store.interface";
+import {LIVE_CHAT_SERVICE} from "../../service/repository/live-chat.service";
 
 @Component({
     selector: 'app-home',
@@ -40,12 +41,16 @@ import {ITokenStore} from "../../service/auth/token-store.interface";
         MessageRepository,
         UserRepository,
         PresenceRepository,
-        LogTrailerService,
+        RealtimeService,
         MessageService,
         SearchRepository,
         {
             provide: LogStream,
-            useExisting: LogTrailerService
+            useExisting: RealtimeService
+        },
+        {
+            provide: LIVE_CHAT_SERVICE,
+            useExisting: RealtimeService
         },
         {
             provide: HANDLERS,
@@ -78,7 +83,7 @@ export class HomeComponent {
 
     private readonly tokenStore = inject(ITokenStore)
     private profileService = inject(ProfileService)
-    private stompClient = inject(LogTrailerService)
+    private stompClient = inject(RealtimeService)
     private readonly router = inject(Router)
     private readonly snackBar = inject(MatSnackBar)
 
