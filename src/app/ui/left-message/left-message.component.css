@@ -1,11 +1,10 @@
 :host {
       display: flex;
       flex-direction: row;
-      /*align-items: flex-end;*/
+      align-items: flex-end;
       gap: var(--space-sm);
       margin-right: auto;
       max-width: 85%;
-      align-items: center;
       font-family: var(--font-family);
 }
 
@@ -13,6 +12,7 @@
       width: 28px;
       height: 28px;
       flex-shrink: 0;
+      margin-bottom: 5px;
 }
 
 .avatar-holder img {

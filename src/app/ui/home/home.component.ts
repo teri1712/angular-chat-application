@@ -21,8 +21,9 @@ import {IconHandler} from "../../service/icon-handler";
 import {SeenHandler} from "../../service/seen-handler";
 import {FileHandler} from "../../service/file-handler";
 import {ImageHandler} from "../../service/image-handler";
-import {ITokenStore} from "../../service/auth/token-store.interface";
 import {LIVE_CHAT_SERVICE} from "../../service/repository/live-chat.service";
+import {Authenticator} from "../../service/auth/authenticator";
+import {Observable, timer} from "rxjs";
 
 @Component({
     selector: 'app-home',
@@ -81,7 +82,7 @@ import {LIVE_CHAT_SERVICE} from "../../service/repository/live-chat.service";
 })
 export class HomeComponent {
 
-    private readonly tokenStore = inject(ITokenStore)
+    protected readonly authenticator = inject(Authenticator)
     private profileService = inject(ProfileService)
     private stompClient = inject(RealtimeService)
     private readonly router = inject(Router)
@@ -90,10 +91,14 @@ export class HomeComponent {
     splashing = signal(true)
 
     constructor() {
-        effect(() => {
-            this.profileService.refresh().subscribe({
+        const ref = effect(() => {
+            const justLoggedin = this.authenticator.justLoggedIn()
+            const splashTimeout: Observable<any> = justLoggedin ? timer(2000) :
+                this.profileService.refresh()
+            splashTimeout.subscribe({
                 next: value => {
                     this.splashing.set(false)
+                    ref.destroy()
                 }
             })
         });

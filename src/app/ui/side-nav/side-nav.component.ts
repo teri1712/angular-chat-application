@@ -1,4 +1,4 @@
-import {Component, effect, inject, Injector, OnDestroy, OnInit, signal, HostListener} from '@angular/core';
+import {Component, effect, HostListener, inject, Injector, OnDestroy, OnInit, signal} from '@angular/core';
 import {ActivationEnd, Router} from "@angular/router";
 import {ProgressDialogComponent} from "../progress-dialog/progress-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
@@ -74,6 +74,10 @@ export class SideNavComponent implements OnInit, OnDestroy {
                     }
                 }
             });
+        this.activateDefaultRoute()
+    }
+
+    activateDefaultRoute() {
         this.navigateToThreads()
     }
 

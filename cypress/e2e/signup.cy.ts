@@ -21,6 +21,9 @@ describe('Signup', () => {
         cy.get('input[formControlName="fullname"]')
             .type('John Fitzgerald Doe');
 
+        cy.get('input[formControlName="dob"]')
+            .type('1990-01-01');
+
         cy.get('select[formControlName="gender"]').select('Male');
 
         cy.contains('Continue').click();
@@ -46,6 +49,9 @@ describe('Signup', () => {
 
         cy.get('input[formControlName="fullname"]')
             .type('John Fitzgerald Doe');
+
+        cy.get('input[formControlName="dob"]')
+            .type('1990-01-01');
 
         cy.get('select[formControlName="gender"]').select('Male');
 

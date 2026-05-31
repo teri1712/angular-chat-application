@@ -1,9 +1,9 @@
 ---
-name: /nexa-way-of-working
-description: Executes the standard Nexa development lifecycle through incremental builds to regression-tested completion. Use when starting any code change, feature implementation, or bug fix for the Nexa Client.
+name: /t1ichat-way-of-working
+description: Executes the standard T1ichat development lifecycle through incremental builds to regression-tested completion. Use when starting any code change, feature implementation, or bug fix for the T1ichat Client.
 ---
 
-# Nexa Way of Working
+# T1ichat Way of Working
 
 ### 1. Incremental Implementation (the "Agile Mental")
 

@@ -60,7 +60,6 @@ export class SignUpComponent {
         ).subscribe(
             {
                 next: () => {
-
                     this.router.navigate(['/home'])
                 },
                 error: err => {

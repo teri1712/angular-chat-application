@@ -5,11 +5,11 @@
                           [size]="38"/>
     <div class="partner-info">
         <span class="room-name">{{ roomName() }}</span>
-        @if (diffOnline < ONE_HOUR_SECONDS) {
+        @if (diffOnline() < ONE_HOUR_SECONDS) {
             <span class="room-presence">
                 {{
-                    diffOnline >= ONE_MINUTE_SECONDS ?
-                        'Active ' + Math.floor((diffOnline + ONE_MINUTE_SECONDS - 1) / ONE_MINUTE_SECONDS).toString() + 'm ago'
+                    diffOnline() >= ONE_MINUTE_SECONDS ?
+                        'Active ' + Math.floor((diffOnline() + ONE_MINUTE_SECONDS - 1) / ONE_MINUTE_SECONDS).toString() + 'm ago'
                         : 'Active now'
                 }}
             </span>
