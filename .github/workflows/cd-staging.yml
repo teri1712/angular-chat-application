@@ -1,0 +1,22 @@
+name: CD Staging
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/cd-template.yml
+    with:
+      env: staging
+      image_tag: ${{ github.sha }}
+      api_url: ${{ secrets.STAGING_API_URL }}
+      websocket_host: ${{ secrets.STAGING_WEBSOCKET_HOST }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+      SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      API_URL: ${{ secrets.STAGING_API_URL }}
+      WEBSOCKET_HOST: ${{ secrets.STAGING_WEBSOCKET_HOST }}

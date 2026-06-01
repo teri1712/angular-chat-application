@@ -1,0 +1,80 @@
+name: CD Template
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      image_tag:
+        required: true
+        type: string
+      api_url:
+        required: true
+        type: string
+      websocket_host:
+        required: true
+        type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
+      WORKLOAD_IDENTITY_PROVIDER:
+        required: true
+      SERVICE_ACCOUNT:
+        required: true
+      GOOGLE_CLIENT_ID:
+        required: true
+      API_URL:
+        required: true
+      WEBSOCKET_HOST:
+        required: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set Environment Variables
+        run: |
+          echo "API_URL=${{ inputs.api_url }}" >> $GITHUB_ENV
+          echo "WEBSOCKET_HOST=${{ inputs.websocket_host }}" >> $GITHUB_ENV
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build image
+        run: |
+          docker build \
+          -t teri1712/t1ichat-client-${{ inputs.env }}:${{ inputs.image_tag }} \
+          .
+
+      - name: Push image
+        run: docker push teri1712/t1ichat-client-${{ inputs.env }}:${{ inputs.image_tag }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy t1ichat-frontend-${{ inputs.env }} \
+            --project side-projects-deployment \
+            --image docker.io/teri1712/t1ichat-client-${{ inputs.env }}:${{ inputs.image_tag }} \
+            --region asia-southeast1 \
+            --set-env-vars API_URL=${{ env.API_URL }},WEBSOCKET_HOST=${{ env.WEBSOCKET_HOST }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+            --allow-unauthenticated \
+            --port 80

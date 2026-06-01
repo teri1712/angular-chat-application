@@ -1,0 +1,22 @@
+name: CD Production
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/cd-template.yml
+    with:
+      env: prod
+      image_tag: ${{ github.sha }}
+      api_url: ${{ secrets.PROD_API_URL }}
+      websocket_host: ${{ secrets.PROD_WEBSOCKET_HOST }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+      SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      API_URL: ${{ secrets.PROD_API_URL }}
+      WEBSOCKET_HOST: ${{ secrets.PROD_WEBSOCKET_HOST }}
