@@ -27,8 +27,6 @@ jobs:
         run: |
           docker build \
           -t teri1712/t1ichat-production:${{ github.sha }} \
-          --build-arg API_URL=${{ secrets.API_URL }} \
-          --build-arg WEBSOCKET_HOST=${{ secrets.WEBSOCKET_HOST }} \
           .
 
       - name: Push production image
@@ -54,4 +52,5 @@ jobs:
             --project side-projects-deployment \
             --image docker.io/teri1712/t1ichat-production:${{ github.sha }} \
             --region asia-southeast1 \
+            --set-env-vars API_URL=${{ secrets.API_URL }},WEBSOCKET_HOST=${{ secrets.WEBSOCKET_HOST }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
             --allow-unauthenticated

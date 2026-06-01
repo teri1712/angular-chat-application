@@ -1,4 +1,4 @@
-import {ApplicationConfig, provideZonelessChangeDetection} from '@angular/core';
+import {APP_INITIALIZER, ApplicationConfig, provideZonelessChangeDetection} from '@angular/core';
 import {provideRouter, Routes} from '@angular/router';
 import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
@@ -9,6 +9,7 @@ import {TokenStore} from "./service/auth/token-store.service";
 import {IProfileStore, ITokenStore} from "./service/auth/token-store.interface";
 import {Authenticator} from "./service/auth/authenticator";
 import {UploadService} from "./service/upload-service";
+import {AppConfigService} from "./service/app-config.service";
 
 const routes: Routes = [
     {
@@ -27,10 +28,21 @@ const routes: Routes = [
     },
 ];
 
+function initializeApp(appConfigService: AppConfigService) {
+    return () => appConfigService.loadConfig();
+}
+
 export const appConfig: ApplicationConfig = {
     providers: [
         provideAnimationsAsync(),
         UploadService, provideHttpClient(withInterceptorsFromDi()),
+
+        {
+            provide: APP_INITIALIZER,
+            useFactory: initializeApp,
+            deps: [AppConfigService],
+            multi: true
+        },
 
         {
             provide: HTTP_INTERCEPTORS,
