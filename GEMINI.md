@@ -1,11 +1,13 @@
-# Nexa Client Context
+# t1ichat Client Context
 
-Welcome to the Nexa Client project. This document serves as the primary source of truth for the project's domain, tech
+Welcome to the t1ichat Client project. This document serves as the primary source of truth for the project's domain,
+tech
 stack, and agent guidelines.
 
 ## MANDATORY SESSION STARTUP
 
-- **First Action**: You MUST call `activate_skill(name="-nexa-way-of-working")` before performing any code modifications
+- **First Action**: You MUST call `activate_skill(name="-t1ichat-way-of-working")` before performing any code
+  modifications
   or investigations.
 
 ## Guidelines & Persona
@@ -15,7 +17,7 @@ on backend contracts.
 
 ### Core Workflow
 
-For all feature and feedback cycles, I follow the **`-nexa-way-of-working`** skill.
+For all feature and feedback cycles, I follow the **`-t1ichat-way-of-working`** skill.
 
 ### Core Rules
 
