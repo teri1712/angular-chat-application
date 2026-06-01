@@ -3,6 +3,7 @@ name: CD Staging
 on:
   push:
     branches: [ develop ]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -10,8 +11,6 @@ jobs:
     with:
       env: staging
       image_tag: ${{ github.sha }}
-      api_url: ${{ secrets.STAGING_API_URL }}
-      websocket_host: ${{ secrets.STAGING_WEBSOCKET_HOST }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
