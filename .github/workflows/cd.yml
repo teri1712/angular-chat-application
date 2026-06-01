@@ -26,11 +26,11 @@ jobs:
       - name: Build production image
         run: |
           docker build \
-          -t teri1712/t1ichat-production:${{ github.sha }} \
+          -t teri1712/t1ichat-client:${{ github.sha }} \
           .
 
       - name: Push production image
-        run: docker push teri1712/t1ichat-production:${{ github.sha }}
+        run: docker push teri1712/t1ichat-client:${{ github.sha }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -50,7 +50,7 @@ jobs:
         run: |
           gcloud run deploy t1ichat-frontend-${{ github.ref_name}} \
             --project side-projects-deployment \
-            --image docker.io/teri1712/t1ichat-production:${{ github.sha }} \
+            --image docker.io/teri1712/t1ichat-client:${{ github.sha }} \
             --region asia-southeast1 \
             --set-env-vars API_URL=${{ secrets.API_URL }},WEBSOCKET_HOST=${{ secrets.WEBSOCKET_HOST }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
             --allow-unauthenticated \
