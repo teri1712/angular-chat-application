@@ -72,6 +72,7 @@ jobs:
             --port 80 \
             --cpu=0.5 \
             --memory=256Mi \
+            --concurrency=1 \
             --max-instances=2 \
             --min-instances=0 \
             --timeout=30
