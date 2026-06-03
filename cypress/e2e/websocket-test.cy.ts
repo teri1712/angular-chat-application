@@ -62,7 +62,7 @@ describe('WebSocket Log Events', () => {
         });
     });
 
-    describe('message list react to log events', () => {
+    describe('message panel real-time', () => {
         beforeEach(() => {
             cy.fixture('get-chat-success').then(data => {
                 cy.intercept('GET', '**/chats/*', {statusCode: 200, body: data}).as('chat-detail')
@@ -78,42 +78,46 @@ describe('WebSocket Log Events', () => {
             cy.wait(['@chat-detail', '@messages-request'])
         })
 
-        it('should prepend message to the list when inbox log addition is emitted', () => {
-            // Initial state: Chopper is 1st (Msg 1, oldest), Stay calm and work together is last (Msg 10, newest)
-            cy.get('app-message').last().should('contain', 'Hey everyone!');
-            cy.get('app-message').first().should('contain', 'Stay calm and work together');
+        describe('message list react to log events', () => {
 
-            // Emit ADDITION via fixture
-            cy.fixture('stomp-add-message-chat1').then((log) => {
-                cy.get<StompMock>('@stomp').then((stomp) => {
-                    stomp.emitInboxLog(log);
+            it('should prepend message to the list when inbox log addition is emitted', () => {
+                // Initial state: Chopper is 1st (Msg 1, oldest), Stay calm and work together is last (Msg 10, newest)
+                cy.get('app-message').last().should('contain', 'Hey everyone!');
+                cy.get('app-message').first().should('contain', 'Stay calm and work together');
+
+                // Emit ADDITION via fixture
+                cy.fixture('stomp-add-message-chat1').then((log) => {
+                    cy.get<StompMock>('@stomp').then((stomp) => {
+                        stomp.emitInboxLog(log);
+                    });
                 });
+
+                // Assert: New message should be at the bottom (newest)
+                cy.get('app-message').last().should('contain', 'Where is the meat?!');
             });
 
-            // Assert: New message should be at the bottom (newest)
-            cy.get('app-message').last().should('contain', 'Where is the meat?!');
-        });
+            it('should update seenBy list for target message when update is emitted and maintain order', () => {
+                // Initial state: Chopper is 1st, Stay calm and work together is last
+                cy.get('app-message').first().find('.seen-div img').should('not.exist');
 
-        it('should update seenBy list for target message when update is emitted and maintain order', () => {
-            // Initial state: Chopper is 1st, Stay calm and work together is last
-            cy.get('app-message').first().find('.seen-div img').should('not.exist');
-
-            // Emit UPDATE via fixture (seenBy Luffy for the first message)
-            cy.fixture('stomp-update-seen-msg1').then((log) => {
-                cy.get<StompMock>('@stomp').then((stomp) => {
-                    stomp.emitInboxLog(log);
+                // Emit UPDATE via fixture (seenBy Luffy for the first message)
+                cy.fixture('stomp-update-seen-msg1').then((log) => {
+                    cy.get<StompMock>('@stomp').then((stomp) => {
+                        stomp.emitInboxLog(log);
+                    });
                 });
+
+                // Assert: seenBy updated
+                cy.get('app-message').first()
+                    .find('.seen-div img')
+                    .should('have.attr', 'alt', 'Avatar of Monkey D. Luffy')
+                    .should('have.attr', 'src', 'https://i.pravatar.cc/150?img=2');
+
+                // Assert: Order remains the same
+                cy.get('app-message').last().should('contain', 'Hey everyone!');
+                cy.get('app-message').first().should('contain', 'Vcl!');
             });
 
-            // Assert: seenBy updated
-            cy.get('app-message').first()
-                .find('.seen-div img')
-                .should('have.attr', 'alt', 'Avatar of Monkey D. Luffy')
-                .should('have.attr', 'src', 'https://i.pravatar.cc/150?img=2');
-
-            // Assert: Order remains the same
-            cy.get('app-message').last().should('contain', 'Hey everyone!');
-            cy.get('app-message').first().should('contain', 'Vcl!');
         });
 
         it('should update theme and background when preference event is emitted', () => {
@@ -135,5 +139,25 @@ describe('WebSocket Log Events', () => {
                 .should('have.attr', 'style')
                 .and('include', 'background-image: url("https://example.com/meadow.jpg")');
         });
-    });
+
+        it('should display type message when type event is emited', () => {
+            // Initial state from fixture: themeName: "Ocean Blue"
+            // Wait, fixture says "Ocean Blue", but CSS says "ocean-breeze" etc.
+            // Let's just verify that it changes TO what we emit.
+            cy.get('app-message-list').should('not.have.class', 'chat-theme-meadow');
+
+            // Emit PREFERENCE update
+            cy.fixture('stomp-type-event').then((type) => {
+                cy.get<StompMock>('@stomp').then((stomp) => {
+                    type.time = new Date().toISOString();
+                    stomp.emitRoomEvent('chat-001', type);
+                });
+            });
+
+            cy.get('app-typing-message')
+                .should('be.visible')
+        });
+
+    })
+
 });
