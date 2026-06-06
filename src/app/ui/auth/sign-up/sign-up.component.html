@@ -6,10 +6,10 @@
         <h2 class="auth-p2" [ngClass]="{'auth-p-reached': progress() == 'avatar'}">2</h2>
     </div>
     @if (error()) {
-        <div class="alert mt-4" role="alert">
+        <div class="error-banner" role="alert">
+            <span class="material-icons">error_outline</span>
             {{ error() }}
         </div>
-
     }
     @switch (progress()) {
         @case ('info') {

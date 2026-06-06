@@ -196,6 +196,7 @@ class Dialog implements IDialog {
     leave(): void {
         if (--this.countTenant == 0) {
             this.syncSub?.unsubscribe();
+            this.syncSub = undefined;
             this._typings.next([]);
         }
     }

@@ -47,6 +47,7 @@
   --color-muted: var(--primitive-color-slate-50);
   --color-border: var(--primitive-color-slate-100);
   --color-destructive: var(--primitive-color-red-600);
+  --color-destructive-muted: rgba(220, 38, 38, 0.1);
   --color-ring: var(--primitive-color-blue-600);
 
   /* Typography Spec from MASTER.md */
