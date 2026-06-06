@@ -19,9 +19,9 @@ export type InfoForm = {
 export class SignUpInfoComponent {
 
     formGroup = new FormGroup({
-        username: new FormControl('', [Validators.required, Validators.minLength(4)]),
+        username: new FormControl('', [Validators.required, Validators.minLength(5)]),
         fullname: new FormControl('', [Validators.required, Validators.minLength(4)]),
-        password: new FormControl('', [Validators.required, Validators.minLength(4)]),
+        password: new FormControl('', [Validators.required, Validators.minLength(8)]),
         gender: new FormControl(1),
         dob: new FormControl(new Date().toISOString().split('T')[0]),
     })
@@ -44,8 +44,8 @@ export class SignUpInfoComponent {
 
     protected onSubmit() {
         const dobValue = this.formGroup.get("dob")?.value;
-        const dob = (dobValue as any) instanceof Date 
-            ? (dobValue as any).toISOString().split('T')[0] 
+        const dob = (dobValue as any) instanceof Date
+            ? (dobValue as any).toISOString().split('T')[0]
             : dobValue;
 
         this.next.emit({

@@ -1,5 +1,5 @@
 import {inject, Injectable, signal, Signal} from '@angular/core';
-import {catchError, from, map, Observable, of, switchMap} from "rxjs";
+import {catchError, from, map, Observable, of, switchMap, tap} from "rxjs";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 import {environment} from "../../environments";
 import {Authenticator} from "./authenticator";
@@ -40,11 +40,8 @@ export class AccountService extends TokenStore implements Authenticator {
         );
     }
 
-    private createAvatar(username: string, password: string, presignUrl: string, avatar: File): Observable<Profile> {
-        const headers = new HttpHeaders({
-            Authorization: 'Basic ' + btoa(`${username}:${password}`)
-        });
-        return this.httpClient.post<PresignedUpload>(presignUrl, {}, {observe: 'body', headers: headers}).pipe(
+    private uploadAvatar(presignUrl: string, avatar: File): Observable<Profile> {
+        return this.httpClient.post<PresignedUpload>(presignUrl, {}, {observe: 'body'}).pipe(
             switchMap((presigned: PresignedUpload) => {
                     return from(fetch(presigned.presignedUploadUrl, {
                         method: 'PUT',
@@ -62,11 +59,9 @@ export class AccountService extends TokenStore implements Authenticator {
                 }
             ),
             switchMap((file) => {
-
                 return this.httpClient.patch<Profile>(environment.API_URL + "/profiles/me", {
                     avatar: file,
                 }, {
-                    headers: headers,
                     observe: 'body'
                 })
             })
@@ -86,18 +81,18 @@ export class AccountService extends TokenStore implements Authenticator {
         }, {
             observe: 'body',
         }).pipe(
-            switchMap(() => {
-                return this.signIn({
-                    username: username,
-                    password: password
-                })
+            switchMap((profile) => {
+                return this.signIn({username: username, password: password})
             }),
             switchMap((profile) => {
                 const avatar = request.avatar;
                 if (!avatar)
                     return of(profile);
                 const presignUrl = environment.API_URL + '/files/upload?filename=' + encodeURIComponent(avatar.name);
-                return this.createAvatar(username, password, presignUrl, avatar);
+                return this.uploadAvatar(presignUrl, avatar);
+            }),
+            tap((profile) => {
+                this.updateProfile(profile)
             })
         )
     }

@@ -30,6 +30,7 @@ export class TokenStore implements ITokenStore, IProfileStore {
         this._sessionExpired.set(false);
     }
 
+
     /** Only update the access token (used after token refresh — profile stays the same). */
     updateAccessToken(accessToken: string): void {
         localStorage.setItem(KEYS.ACCESS, accessToken);
