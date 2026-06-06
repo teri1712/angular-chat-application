@@ -1,0 +1,78 @@
+/* Design Tokens - Updated for Exaggerated Minimalism */
+
+/* === PRIMITIVES === */
+:root {
+  /* Colors */
+  --primitive-color-blue-600: #2563EB;
+  --primitive-color-indigo-500: #6366F1;
+  --primitive-color-emerald-600: #059669;
+  --primitive-color-slate-900: #0F172A;
+  --primitive-color-slate-50: #F1F5FD;
+  --primitive-color-slate-100: #E4ECFC;
+  --primitive-color-red-600: #DC2626;
+  --primitive-color-white: #FFFFFF;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
+
+  /* Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+/* === SEMANTIC === */
+:root {
+  --color-primary: var(--primitive-color-blue-600);
+  --color-on-primary: var(--primitive-color-white);
+  --color-secondary: var(--primitive-color-indigo-500);
+  --color-accent: var(--primitive-color-emerald-600);
+  --color-background: var(--primitive-color-white);
+  --color-foreground: var(--primitive-color-slate-900);
+  --color-muted: var(--primitive-color-slate-50);
+  --color-border: var(--primitive-color-slate-100);
+  --color-destructive: var(--primitive-color-red-600);
+  --color-destructive-muted: rgba(220, 38, 38, 0.1);
+  --color-ring: var(--primitive-color-blue-600);
+
+  /* Typography Spec from MASTER.md */
+  --font-family: 'Inter', sans-serif;
+}
+
+/* === LIGHT MODE === */
+.light-theme {
+  --color-background: var(--primitive-color-white);
+  --color-foreground: var(--primitive-color-slate-900);
+  --color-muted: var(--primitive-color-slate-50);
+  --color-border: var(--primitive-color-slate-100);
+}
+
+/* === DARK MODE === */
+.dark-theme {
+  --color-background: #020617; /* Deeper slate for exaggerated minimalism */
+  --color-foreground: #F8FAFC;
+  --color-muted: #1E293B;
+  --color-border: #1E293B;
+}
+
+/* === COMPONENT SPECIFIC (Initial Mappings) === */
+:root {
+  --btn-radius: var(--radius-md);
+  --card-radius: var(--radius-lg);
+  --input-radius: var(--radius-md);
+}

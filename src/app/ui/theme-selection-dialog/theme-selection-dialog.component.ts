@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject, OnInit, signal} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {Theme} from '../../model/dto/theme';
 import {MatListModule} from '@angular/material/list';
@@ -9,43 +9,43 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {ThemeNamePipe} from '../pipes/theme-name.pipe';
 
 @Component({
-      selector: 'app-theme-selection-dialog',
-      templateUrl: './theme-selection-dialog.component.html',
-      styleUrls: ['./theme-selection-dialog.component.css'],
-      standalone: true,
-      imports: [
-            CommonModule,
-            MatDialogModule,
-            MatListModule,
-            MatButtonModule,
-            MatProgressSpinnerModule,
-            ThemeNamePipe,
-      ],
+    selector: 'app-theme-selection-dialog',
+    templateUrl: './theme-selection-dialog.component.html',
+    styleUrls: ['./theme-selection-dialog.component.css'],
+    standalone: true,
+    imports: [
+        CommonModule,
+        MatDialogModule,
+        MatListModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+        ThemeNamePipe,
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ThemeSelectionDialogComponent implements OnInit {
-      themes: Theme[] = [];
-      isLoading = true;
+    themes = signal<Theme[]>([]);
+    isLoading = signal<boolean>(true);
 
-      constructor(
-              public dialogRef: MatDialogRef<ThemeSelectionDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: any,
-              private preferenceService: PreferenceService
-      ) {
-      }
+    constructor(
+        public dialogRef: MatDialogRef<ThemeSelectionDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) public data: any,
+        private preferenceService: PreferenceService
+    ) {
+    }
 
-      ngOnInit(): void {
-            this.preferenceService.getThemes().subscribe((themes) => {
-                  this.themes = themes;
-                  console.log(themes)
-                  this.isLoading = false;
-            });
-      }
+    ngOnInit(): void {
+        this.preferenceService.getThemes().subscribe((themes) => {
+            this.themes.set(themes);
+            this.isLoading.set(false);
+        });
+    }
 
-      onNoClick(): void {
-            this.dialogRef.close();
-      }
+    onNoClick(): void {
+        this.dialogRef.close();
+    }
 
-      selectTheme(theme: Theme): void {
-            this.dialogRef.close(theme.id);
-      }
+    selectTheme(theme: Theme): void {
+        this.dialogRef.close(theme.id);
+    }
 }

@@ -1,20 +1,21 @@
 import {MessageState} from "./message-state";
+import {User} from "./user";
 
 export interface InboxLog {
-      postingId: string,
-      sequenceNumber: number
-      chatId: string,
-      roomName: string,
-      roomAvatar: string,
-      revisionNumber: number,
-      senderId: string,
-      action: LogAction,
-      messageState: MessageState
+    postingId: string,
+    sequenceNumber: number
+    chatId: string,
+    roomName: string,
+    roomAvatar: string,
+    revisionNumber: number,
+    sender: User,
+    action: LogAction,
+    messageState: MessageState
 }
 
 
 export enum LogAction {
-      ADDITION = "ADDITION",
-      UPDATE = "UPDATE",
-      DELETE = "DELETE",
+    ADDITION = "ADDITION",
+    UPDATE = "UPDATE",
+    DELETE = "DELETE",
 }

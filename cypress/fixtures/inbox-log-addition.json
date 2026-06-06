@@ -1,0 +1,31 @@
+{
+  "postingId": "msg-123",
+  "sequenceNumber": 1,
+  "chatId": "chat-456",
+  "roomName": "General",
+  "roomAvatar": "avatar.png",
+  "revisionNumber": 1,
+  "sender": {
+    "id": "user-789",
+    "username": "jdoe",
+    "name": "John Doe",
+    "avatar": "avatar.png"
+  },
+  "action": "ADDITION",
+  "messageState": {
+    "chatId": "chat-456",
+    "postingId": "msg-123",
+    "sender": {
+      "id": "user-789",
+      "username": "jdoe",
+      "name": "John Doe",
+      "avatar": "avatar.png"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 1,
+    "createdAt": "2026-05-19T10:00:00.000Z",
+    "updatedAt": "2026-05-19T10:00:00.000Z",
+    "content": "This is a new message via fixture!"
+  }
+}

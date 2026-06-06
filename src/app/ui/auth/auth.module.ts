@@ -38,18 +38,7 @@ const routes: Routes = [
             CommonModule,
             RouterModule.forChild(routes),
             ReactiveFormsModule,
-            MatFormFieldModule,
-            MatInputModule,
-            MatButtonModule,
-            MatIconModule,
-            MatCardModule,
-            MatDatepickerModule,
-            MatSelectModule,
-            MatProgressSpinnerModule,
             ProgressDialogComponent
-      ],
-      providers: [
-            {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}}
       ],
 })
 export class AuthModule {

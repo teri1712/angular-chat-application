@@ -1,0 +1,44 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Premium Gradient: Messenger Blue to Indigo -->
+    <linearGradient id="bg_grad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+    
+    <!-- Subtle drop shadow for the text for depth -->
+    <filter id="shadow" x="0" y="0" width="200%" height="200%">
+      <feOffset dx="2" dy="4" result="offsetblur"/>
+      <feFlood flood-color="black" flood-opacity="0.2"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- High-radius rounded square (iOS style) -->
+  <rect width="512" height="512" rx="140" fill="url(#bg_grad)"/>
+  
+  <!-- Subtle Gloss Overlay -->
+  <path d="M140 0H372C449.32 0 512 62.6801 512 140V220C240 220 0 100 0 0H140Z" fill="white" fill-opacity="0.05"/>
+
+  <!-- Centered T1i Monogram -->
+  <g transform="translate(138, 160)" filter="url(#shadow)">
+    <!-- T: Shared horizontal bar and vertical stem -->
+    <rect x="0" y="0" width="90" height="32" rx="6" fill="white"/>
+    <rect x="29" y="0" width="32" height="190" rx="6" fill="white"/>
+    
+    <!-- 1: Clean vertical with hook -->
+    <path d="M125 32L95 48V16L125 0V32Z" fill="white"/>
+    <rect x="125" y="0" width="32" height="190" rx="6" fill="white"/>
+    
+    <!-- i: Modern stem and the "Pulse" dot -->
+    <rect x="188" y="65" width="32" height="125" rx="6" fill="white"/>
+    
+    <!-- The "Online" Indicator: Green dot with white border -->
+    <circle cx="204" cy="20" r="30" fill="#10B981"/> <!-- Emerald Green -->
+    <circle cx="204" cy="20" r="14" fill="white" fill-opacity="0.4"/> <!-- Highlight -->
+  </g>
+</svg>

@@ -1,6 +1,5 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Profile} from '../../model/dto/profile';
 import {CommonModule} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -14,157 +13,188 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import ProfileService from "../../service/profile-service";
 import {Authenticator} from "../../service/auth/authenticator";
+import {rxResource} from "@angular/core/rxjs-interop";
+import {MatProgressSpinner} from "@angular/material/progress-spinner";
 
 @Component({
-      selector: 'app-profile-management',
-      standalone: true,
-      providers: [provideNativeDateAdapter()],
-      imports: [
-            CommonModule,
-            ReactiveFormsModule,
-            MatFormFieldModule,
-            MatInputModule,
-            MatButtonModule,
-            MatSelectModule,
-            MatIconModule,
-            MatCardModule,
-            MatSnackBarModule,
-            MatDialogModule,
-            MatDatepickerModule
-      ],
-      templateUrl: './profile-management.component.html',
-      styleUrls: ['./profile-management.component.css']
+    selector: 'app-profile-management',
+    standalone: true,
+    providers: [provideNativeDateAdapter()],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatIconModule,
+        MatCardModule,
+        MatSnackBarModule,
+        MatDialogModule,
+        MatDatepickerModule,
+        MatProgressSpinner
+    ],
+    templateUrl: './profile-management.component.html',
+    styleUrls: ['./profile-management.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProfileManagementComponent implements OnInit {
-      profileForm!: FormGroup;
-      passwordForm!: FormGroup;
-      profile!: Profile;
-      avatarPreview: string | null = null;
-      private initialProfileValues: any = {};
+export class ProfileManagementComponent {
+    profileForm!: FormGroup;
+    passwordForm!: FormGroup;
+    private initialProfileValues: any = {};
 
-      constructor(
-              private fb: FormBuilder,
-              private profileService: ProfileService,
-              private authenticator: Authenticator,
-              private snackBar: MatSnackBar,
-              public dialogRef: MatDialogRef<ProfileManagementComponent>
-      ) {
-      }
+    private readonly fb = inject(FormBuilder)
+    private readonly profileService = inject(ProfileService)
+    private readonly authenticator = inject(Authenticator)
+    private readonly snackBar = inject(MatSnackBar)
+    public dialogRef = inject(MatDialogRef<ProfileManagementComponent>)
 
-      ngOnInit(): void {
-            this.profile = this.profileService.getProfile();
-            this.initForms();
-            if (this.profile.avatar) {
-                  this.avatarPreview = this.profile.avatar;
+    formReady = signal(false);
+
+    profile = rxResource({
+        params: () => {
+            return ({})
+        },
+        stream: (request) => {
+            this.formReady.set(false);
+            return this.profileService.refresh()
+        },
+    });
+
+    customAvatarPreview = signal<string | null>(null);
+    avatarPreview = computed(() => {
+        return this.customAvatarPreview() ?? this.profile.value()?.avatar;
+    });
+
+    constructor() {
+        this.profileForm = this.fb.group({
+            username: ['', [Validators.required]],
+            name: ['', [Validators.required]],
+            gender: ['Male', [Validators.required]],
+            dob: [new Date()]
+        });
+        this.passwordForm = this.fb.group({
+            oldPassword: ['', [Validators.required]],
+            newPassword: ['', [Validators.required, Validators.minLength(6)]],
+            confirmPassword: ['', [Validators.required]]
+        }, {validator: this.passwordMatchValidator});
+
+        effect(() => {
+            const profile = this.profile.value()
+            if (profile) {
+                untracked(() => {
+                    this.profileForm.patchValue({
+                        username: profile.username || '',
+                        name: profile.name || '',
+                        gender: profile.gender || 'Male',
+                        dob: profile.dob ? new Date(profile.dob) : new Date()
+                    });
+
+                    this.initialProfileValues = this.profileForm.getRawValue();
+                    this.formReady.set(true);
+                })
             }
-      }
+        });
+    }
 
-      initForms(): void {
-            this.profileForm = this.fb.group({
-                  username: [this.profile.username || '', [Validators.required]],
-                  name: [this.profile.name || '', [Validators.required]],
-                  gender: [this.profile.gender || 'Male', [Validators.required]],
-                  dob: [this.profile.dob ? new Date(this.profile.dob) : new Date()]
+
+    passwordMatchValidator(g: FormGroup) {
+        const confirmCtrl = g.get('confirmPassword');
+        if (g.get('newPassword')?.value !== confirmCtrl?.value) {
+            confirmCtrl?.setErrors({...(confirmCtrl?.errors || {}), mismatch: true});
+            return {mismatch: true};
+        }
+        if (confirmCtrl?.hasError('mismatch')) {
+            const errors = {...confirmCtrl.errors};
+            delete errors['mismatch'];
+            confirmCtrl.setErrors(Object.keys(errors).length ? errors : null);
+        }
+        return null;
+    }
+
+    onProfileSubmit(): void {
+        this.profileForm.markAllAsTouched();
+        if (this.profileForm.valid) {
+            const formValue = {...this.profileForm.value};
+            const changedFields: any = {};
+
+            for (const key of Object.keys(formValue)) {
+                const current = formValue[key];
+                const initial = this.initialProfileValues[key];
+                const currentStr = current instanceof Date ? current.toISOString().split('T')[0] : current;
+                const initialStr = initial instanceof Date ? initial.toISOString().split('T')[0] : initial;
+                if (currentStr !== initialStr) {
+                    changedFields[key] = current;
+                }
+            }
+
+            if (Object.keys(changedFields).length === 0) {
+                this.snackBar.open('No changes to save', 'Close', {duration: 3000});
+                return;
+            }
+
+            if (changedFields.dob instanceof Date) {
+                changedFields.dob = changedFields.dob.toISOString().split('T')[0];
+            }
+            if (changedFields.gender) {
+                let gender = 0;
+                switch (changedFields.gender.toLowerCase()) {
+                    case "male":
+                        gender = 1;
+                        break;
+                    case "female":
+                        gender = 2;
+                        break;
+                    default:
+                        gender = 3;
+                        break;
+                }
+                changedFields.gender = gender;
+            }
+            this.profileService.updateProfile(changedFields).subscribe({
+                next: (updatedUser) => {
+                    this.snackBar.open('Profile updated successfully', 'Close', {duration: 3000});
+                },
+                error: (err) => {
+                    this.snackBar.open('Failed to update profile', 'Close', {duration: 3000});
+                }
             });
+        }
+    }
 
-            this.initialProfileValues = this.profileForm.getRawValue();
+    onPasswordSubmit(): void {
+        this.passwordForm.markAllAsTouched();
+        if (this.passwordForm.valid) {
+            const {oldPassword, newPassword} = this.passwordForm.value;
+            this.authenticator.changePassword(oldPassword, newPassword).subscribe({
+                next: () => {
+                    this.snackBar.open('Password changed successfully', 'Close', {duration: 3000});
+                    this.passwordForm.reset();
+                },
+                error: (err) => {
+                    this.snackBar.open('Failed to change password', 'Close', {duration: 3000});
+                }
+            });
+        }
+    }
 
-            this.passwordForm = this.fb.group({
-                  oldPassword: ['', [Validators.required]],
-                  newPassword: ['', [Validators.required, Validators.minLength(6)]],
-                  confirmPassword: ['', [Validators.required]]
-            }, {validator: this.passwordMatchValidator});
-      }
+    onFileSelected(event: any): void {
+        const file: File = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e: any) => {
+                this.customAvatarPreview.set(e.target.result);
+            };
+            reader.readAsDataURL(file);
 
-      passwordMatchValidator(g: FormGroup) {
-            return g.get('newPassword')?.value === g.get('confirmPassword')?.value
-                    ? null : {'mismatch': true};
-      }
-
-      onProfileSubmit(): void {
-            if (this.profileForm.valid) {
-                  const formValue = {...this.profileForm.value};
-                  const changedFields: any = {};
-
-                  for (const key of Object.keys(formValue)) {
-                        const current = formValue[key];
-                        const initial = this.initialProfileValues[key];
-                        const currentStr = current instanceof Date ? current.toISOString().split('T')[0] : current;
-                        const initialStr = initial instanceof Date ? initial.toISOString().split('T')[0] : initial;
-                        if (currentStr !== initialStr) {
-                              changedFields[key] = current;
-                        }
-                  }
-
-                  if (Object.keys(changedFields).length === 0) {
-                        this.snackBar.open('No changes to save', 'Close', {duration: 3000});
-                        return;
-                  }
-
-                  if (changedFields.dob instanceof Date) {
-                        changedFields.dob = changedFields.dob.toISOString().split('T')[0];
-                  }
-                  if (changedFields.gender) {
-                        let gender = 0;
-                        switch (changedFields.gender.toLowerCase()) {
-                              case "male":
-                                    gender = 1;
-                                    break;
-                              case "female":
-                                    gender = 2;
-                                    break;
-                              default:
-                                    gender = 3;
-                                    break;
-                        }
-                        changedFields.gender = gender;
-                  }
-                  this.profileService.updateProfile(changedFields).subscribe({
-                        next: (updatedUser) => {
-                              this.profile = updatedUser;
-                              this.initialProfileValues = this.profileForm.getRawValue();
-                              this.snackBar.open('Profile updated successfully', 'Close', {duration: 3000});
-                        },
-                        error: (err) => {
-                              this.snackBar.open('Failed to update profile', 'Close', {duration: 3000});
-                        }
-                  });
-            }
-      }
-
-      onPasswordSubmit(): void {
-            if (this.passwordForm.valid) {
-                  const {oldPassword, newPassword} = this.passwordForm.value;
-                  this.authenticator.changePassword(oldPassword, newPassword).subscribe({
-                        next: () => {
-                              this.snackBar.open('Password changed successfully', 'Close', {duration: 3000});
-                              this.passwordForm.reset();
-                        },
-                        error: (err) => {
-                              this.snackBar.open('Failed to change password', 'Close', {duration: 3000});
-                        }
-                  });
-            }
-      }
-
-      onFileSelected(event: any): void {
-            const file: File = event.target.files[0];
-            if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (e: any) => {
-                        this.avatarPreview = e.target.result;
-                  };
-                  reader.readAsDataURL(file);
-
-                  this.profileService.updateAvatar(file).subscribe({
-                        next: (updatedUser) => {
-                              this.profile = updatedUser;
-                              this.snackBar.open('Avatar updated successfully', 'Close', {duration: 3000});
-                        },
-                        error: (err) => {
-                              this.snackBar.open('Failed to update avatar', 'Close', {duration: 3000});
-                        }
-                  });
-            }
-      }
+            this.profileService.updateAvatar(file).subscribe({
+                next: (updatedUser) => {
+                    this.snackBar.open('Avatar updated successfully', 'Close', {duration: 3000});
+                },
+                error: (err) => {
+                    this.snackBar.open('Failed to update avatar', 'Close', {duration: 3000});
+                }
+            });
+        }
+    }
 }

@@ -1,16 +1,18 @@
-<app-avatar-container [presence]="(presence | async)" [avatar]="roomAvatar" [chatId]="identifier"
-                      size="45"/>
+<app-avatar-container [presence]="displayPresence()" [avatar]="roomAvatar()" [chatId]="identifier()"
+                      [size]="40"/>
 <div class="middle">
-    <span class="room-name" [style.font-weight]="nameWeight">{{ roomName }}</span>
-    <span class="message"
-          [style.font-weight]="contentWeight">{{ getPreview(newest) }}</span>
-</div>
-<ng-container *ngIf="mine()">
-    <div class="seen-div">
-        <ng-container *ngFor="let seen of displaySeenBy">
-            <img class="seen mt-2" [src]="seen.avatar"
-                 alt="">
-
-        </ng-container>
+    <div class="header">
+        <span class="room-name" [style.font-weight]="nameWeight()">{{ roomName() }}</span>
+        <span class="time">{{ newestDate() | formatTime }}</span>
     </div>
-</ng-container>
+    <div class="bottom-row">
+        <span class="message" [style.font-weight]="contentWeight()">{{ preview() }}</span>
+        @if (mine()) {
+            <div class="seen-div">
+                @for (seen of displaySeenBy(); track seen.id) {
+                    <img class="seen" [src]="seen.avatar" [alt]="'Avatar of ' + seen.name">
+                }
+            </div>
+        }
+    </div>
+</div>

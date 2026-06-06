@@ -1,16 +1,42 @@
 :host {
-      cursor: pointer;
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
 }
 
-.avatar img {
-      border-radius: 50%;
-      object-fit: cover;
-      flex: 0 0 0;
+.avatar-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.avatar .mat-badge-content {
-      color: black;
-      background-color: #70c1b3;
-      animation: none;
-      transition: none;
+.avatar-img {
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    background: var(--color-muted);
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: var(--color-accent); /* Online green from MASTER.md */
+    color: var(--color-on-primary);
+    min-width: 14px;
+    height: 14px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--color-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    line-height: 1;
+    z-index: 1;
+}
+
+.status-indicator.online {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
 }

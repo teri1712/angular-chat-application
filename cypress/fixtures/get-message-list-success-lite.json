@@ -1,0 +1,47 @@
+[
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-001",
+    "sender": {
+      "id": "user-1",
+      "name": "Tony Tony Chopper",
+      "avatar": "https://i.pravatar.cc/150?img=1"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 10,
+    "createdAt": "2026-05-10T08:00:00Z",
+    "updatedAt": "2026-05-10T08:00:00Z",
+    "content": "Hey everyone!"
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-002",
+    "sender": {
+      "id": "user-002",
+      "name": "Monkey D. Luffy",
+      "avatar": "https://i.pravatar.cc/150?img=2"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 2,
+    "createdAt": "2026-05-10T08:01:00Z",
+    "updatedAt": "2026-05-10T08:01:00Z",
+    "content": "I'm hungry again."
+  },
+  {
+    "chatId": "chat-001",
+    "postingId": "msg-010",
+    "sender": {
+      "id": "user-010",
+      "name": "Jinbe",
+      "avatar": "https://i.pravatar.cc/150?img=10"
+    },
+    "messageType": "TEXT",
+    "seenBy": [],
+    "sequenceNumber": 1,
+    "createdAt": "2026-05-10T08:09:00Z",
+    "updatedAt": "2026-05-10T08:09:00Z",
+    "content": "Stay calm and work together."
+  }
+]

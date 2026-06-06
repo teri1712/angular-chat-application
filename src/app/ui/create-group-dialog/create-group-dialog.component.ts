@@ -1,130 +1,108 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
-import {MatListModule} from '@angular/material/list';
-import {MatChipsModule} from '@angular/material/chips';
 import {MatButtonModule} from '@angular/material/button';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {FormsModule} from '@angular/forms';
-import {catchError, of, Subject, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs/operators';
+import {catchError, of} from 'rxjs';
+import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {User} from '../../model/dto/user';
 import {UserRepository} from '../../service/repository/user-repository';
 import GroupService from '../../service/group-service';
 import ProfileService from "../../service/profile-service";
+import {rxResource, toObservable, toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
-      selector: 'app-create-group-dialog',
-      standalone: true,
-      imports: [
-            CommonModule,
-            MatDialogModule,
-            MatFormFieldModule,
-            MatInputModule,
-            MatIconModule,
-            MatListModule,
-            MatChipsModule,
-            MatButtonModule,
-            MatProgressSpinnerModule,
-            FormsModule,
-      ],
-      templateUrl: './create-group-dialog.component.html',
-      styleUrl: './create-group-dialog.component.css'
+    selector: 'app-create-group-dialog',
+    standalone: true,
+    imports: [
+        MatDialogModule,
+        MatIconModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+        FormsModule,
+    ],
+    templateUrl: './create-group-dialog.component.html',
+    styleUrl: './create-group-dialog.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateGroupDialogComponent implements OnInit, OnDestroy {
+export class CreateGroupDialogComponent {
+    private userRepository = inject(UserRepository);
+    private groupService = inject(GroupService);
+    private profileService = inject(ProfileService);
+    public dialogRef = inject(MatDialogRef<CreateGroupDialogComponent>);
 
-      protected searchQuery: string = '';
-      protected groupName: string = '';
-      protected recommendations: User[] = [];
-      protected selectedUsers: User[] = [];
-      protected isLoading: boolean = false;
-      protected isCreating: boolean = false;
-      protected errorMessage: string = '';
+    protected searchQuery = signal('');
+    protected groupName = signal('');
+    protected selectedUsers = signal<User[]>([]);
+    protected isCreating = signal(false);
+    protected errorMessage = signal('');
 
-      private searchSubject = new Subject<string>();
-      private searchSubscription?: Subscription;
+    private debouncedSearchQuery = toSignal(
+        toObservable(this.searchQuery).pipe(
+            debounceTime(300),
+            distinctUntilChanged()
+        ),
+        { initialValue: '' }
+    );
 
-      constructor(
-              private userRepository: UserRepository,
-              private groupService: GroupService,
-              private profileService: ProfileService,
-              public dialogRef: MatDialogRef<CreateGroupDialogComponent>
-      ) {
-      }
+    protected recommendationsResource = rxResource({
+        params: () => this.debouncedSearchQuery(),
+        stream: ({params: query}) => {
+            if (!query?.trim()) return of([]);
+            return this.userRepository.list(query).pipe(
+                catchError(() => of([]))
+            );
+        }
+    });
 
-      ngOnInit(): void {
-            this.searchSubscription = this.searchSubject.pipe(
-                    tap(() => {
-                          this.isLoading = true;
-                          this.recommendations = [];
-                    }),
-                    debounceTime(300),
-                    distinctUntilChanged(),
-                    switchMap(query => {
-                          if (!query.trim()) {
-                                this.isLoading = false;
-                                return of([]);
-                          }
-                          return this.userRepository.list(query).pipe(
-                                  catchError(() => of([]))
-                          );
-                    })
-            ).subscribe({
-                  next: (users) => {
-                        this.recommendations = users.filter(
-                                u => !this.selectedUsers.some(s => s.id === u.id) &&
-                                        !this.profileService.thatsMe(u)
-                        );
-                        this.isLoading = false;
-                  }
-            });
-      }
+    protected recommendations = computed(() => {
+        const users = this.recommendationsResource.value() ?? [];
+        return users.filter(
+            u => !this.selectedUsers().some(s => s.id === u.id) &&
+                !this.profileService.thatsMe(u)
+        );
+    });
 
-      ngOnDestroy(): void {
-            this.searchSubscription?.unsubscribe();
-      }
+    protected isLoading = computed(() => this.recommendationsResource.isLoading());
 
-      onSearchChange(query: string): void {
-            this.searchSubject.next(query);
-      }
+    protected canCreate = computed(() =>
+        this.groupName().trim().length > 0 &&
+        this.selectedUsers().length >= 1 &&
+        !this.isCreating()
+    );
 
-      selectUser(user: User): void {
-            if (!this.selectedUsers.some(u => u.id === user.id)) {
-                  this.selectedUsers = [...this.selectedUsers, user];
+    selectUser(user: User): void {
+        this.selectedUsers.update(users => {
+            if (!users.some(u => u.id === user.id)) {
+                return [...users, user];
             }
-            this.recommendations = this.recommendations.filter(u => u.id !== user.id);
-            this.searchQuery = '';
-            this.searchSubject.next('');
-      }
+            return users;
+        });
+    }
 
-      removeUser(user: User): void {
-            this.selectedUsers = this.selectedUsers.filter(u => u.id !== user.id);
-      }
+    removeUser(user: User): void {
+        this.selectedUsers.update(users => users.filter(u => u.id !== user.id));
+    }
 
-      get canCreate(): boolean {
-            return this.groupName.trim().length > 0 && this.selectedUsers.length >= 1 && !this.isCreating;
-      }
+    createGroup(): void {
+        if (!this.canCreate()) return;
+        this.isCreating.set(true);
+        this.errorMessage.set('');
 
-      createGroup(): void {
-            if (!this.canCreate) return;
-            this.isCreating = true;
-            this.errorMessage = '';
-
-            this.groupService.create({
-                  name: this.groupName.trim(),
-                  members: this.selectedUsers.map(u => u.id)
-            }).subscribe({
-                  next: () => {
-                        this.dialogRef.close(true);
-                  },
-                  error: () => {
-                        this.errorMessage = 'Failed to create group. Please try again.';
-                        this.isCreating = false;
-                  }
-            });
-      }
+        this.groupService.create({
+            name: this.groupName().trim(),
+            members: this.selectedUsers().map(u => u.id)
+        }).subscribe({
+            next: () => {
+                this.dialogRef.close(true);
+            },
+            error: () => {
+                this.errorMessage.set('Failed to create group. Please try again.');
+                this.isCreating.set(false);
+            }
+        });
+    }
 }
+
 

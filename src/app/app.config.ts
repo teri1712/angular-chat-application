@@ -1,0 +1,72 @@
+import {APP_INITIALIZER, ApplicationConfig, provideZonelessChangeDetection} from '@angular/core';
+import {provideRouter, Routes} from '@angular/router';
+import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
+import {authGuard} from './auth.guard';
+import {CredentialInterceptor} from "./service/auth/credential.interceptor";
+import {AccountService} from "./service/auth/account.service";
+import {TokenStore} from "./service/auth/token-store.service";
+import {IProfileStore, ITokenStore} from "./service/auth/token-store.interface";
+import {Authenticator} from "./service/auth/authenticator";
+import {UploadService} from "./service/upload-service";
+import {AppConfigService} from "./service/app-config.service";
+
+const routes: Routes = [
+    {
+        path: '',
+        redirectTo: '/home',
+        pathMatch: "full"
+    },
+    {
+        path: 'auth',
+        loadChildren: () => import('./ui/auth/auth.module').then((m) => m.AuthModule),
+    },
+    {
+        path: 'home',
+        canActivate: [authGuard],
+        loadChildren: () => import('./home.module').then((m) => m.HomeModule),
+    },
+];
+
+function initializeApp(appConfigService: AppConfigService) {
+    return () => appConfigService.loadConfig();
+}
+
+export const appConfig: ApplicationConfig = {
+    providers: [
+        provideAnimationsAsync(),
+        UploadService, provideHttpClient(withInterceptorsFromDi()),
+
+        {
+            provide: APP_INITIALIZER,
+            useFactory: initializeApp,
+            deps: [AppConfigService],
+            multi: true
+        },
+
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: CredentialInterceptor,
+            multi: true,
+        },
+
+        {
+            provide: TokenStore,
+            useExisting: AccountService
+        },
+        {
+            provide: ITokenStore,
+            useExisting: TokenStore
+        },
+        {
+            provide: IProfileStore,
+            useExisting: TokenStore
+        },
+        {
+            provide: Authenticator,
+            useExisting: AccountService
+        },
+        provideZonelessChangeDetection(),
+        provideRouter(routes),
+    ],
+};

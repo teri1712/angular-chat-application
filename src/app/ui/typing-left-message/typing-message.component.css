@@ -1,18 +1,30 @@
 :host {
       display: flex;
       flex-direction: row;
-      align-items: end;
-      gap: 0.5rem;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-family);
 }
 
 .avatar-holder {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
 }
 
 .avatar-holder img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
       object-fit: cover;
+      box-shadow: var(--shadow-sm);
+}
+
+.typing-bubble {
+      background: var(--color-muted);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
 }

@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "username": "superadmin",
+  "name": "Super Admin",
+  "dob": "1990-01-01",
+  "gender": "MALE",
+  "role": "ADMIN"
+}

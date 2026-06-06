@@ -1,3 +1,5 @@
-<mat-icon>{{ icon }}</mat-icon>
-<span class="flex-grow-1">{{ info }}</span>
-<ng-content select="[setting-action]"/>
+<span class="material-icons item-icon">{{ icon() }}</span>
+<span class="item-info">{{ info() }}</span>
+<div class="action-container">
+    <ng-content select="[setting-action]"/>
+</div>

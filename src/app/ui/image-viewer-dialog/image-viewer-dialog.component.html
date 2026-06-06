@@ -1,4 +1,6 @@
-<div class="viewer-container" (click)="close()" mat-dialog-content>
+<div class="viewer-container" (click)="close()">
     <img class="viewer-image" [src]="data.uri" [attr.alt]="data.filename || 'image'" (click)="$event.stopPropagation()">
-    <button mat-button class="close-btn" type="button" (click)="close()">Close</button>
+    <button mat-icon-button class="close-btn" type="button" (click)="close()">
+        <mat-icon>close</mat-icon>
+    </button>
 </div>

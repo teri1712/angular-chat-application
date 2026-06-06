@@ -16,11 +16,11 @@ app-input-bar {
       flex: 0 0 0
 }
 
-.list {
+.message-list {
       flex: 1 0 0;
 }
 
-.loading {
+.message-loading {
       display: flex;
       width: 100%;
       flex-direction: row;

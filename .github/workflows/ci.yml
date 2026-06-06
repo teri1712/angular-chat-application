@@ -1,8 +1,8 @@
-name: Angular Chat Application CD
+name: Angular Chat Application CI
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 jobs:
   check-build-artifacts:
@@ -22,3 +22,9 @@ jobs:
 
       - name: build
         run: npm run build
+      - name: e2e test
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm start
+          wait-on: 'http://localhost:4200'
+          command: npm run cypress:run

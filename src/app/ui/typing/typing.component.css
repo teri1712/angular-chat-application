@@ -1,17 +1,36 @@
 :host {
-      height: 35px;
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 3px;
-      padding: 0.3rem 1rem;
-      background-color: var(--mat-sys-neutral-variant60)
+      justify-content: center;
+      gap: var(--space-xs);
+      padding: var(--space-sm) 0;
 }
 
 .dot {
       width: 6px;
       height: 6px;
-      transition: transform 0.25s ease;
-      background: var(--mat-sys-neutral-variant60);
-      border-radius: 50%;
+      background: var(--color-foreground);
+      opacity: 0.3;
+      border-radius: var(--radius-full);
+      animation: typing 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(2) {
+      animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+      animation-delay: 0.4s;
+}
+
+@keyframes typing {
+      0%, 80%, 100% {
+            transform: scale(0.6);
+            opacity: 0.3;
+      }
+      40% {
+            transform: scale(1);
+            opacity: 1;
+      }
 }

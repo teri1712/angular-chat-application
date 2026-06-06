@@ -1,10 +1,8 @@
-import {ChangeDetectorRef, Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {IconSelectionDialogComponent} from '../icon-selection-dialog/icon-selection-dialog.component';
 import {ThemeSelectionDialogComponent} from '../theme-selection-dialog/theme-selection-dialog.component';
 import {getIcon} from '../../res/icons';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -20,13 +18,12 @@ import {PreferenceRequest} from "../../service/preference.service";
       imports: [
             CommonModule,
             MatDialogModule,
-            MatFormFieldModule,
-            MatInputModule,
             ReactiveFormsModule,
             MatButtonModule,
             MatIconModule,
             ScrollingModule,
       ],
+      changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatSettingsDialogComponent {
       form: FormGroup;
@@ -52,7 +49,8 @@ export class ChatSettingsDialogComponent {
 
       openIconSelectionDialog(): void {
             const dialogRef = this.dialog.open(IconSelectionDialogComponent, {
-                  width: '250px'
+                  width: '320px',
+                  panelClass: 'modern-dialog'
             });
 
             dialogRef.afterClosed().subscribe(result => {
@@ -66,7 +64,8 @@ export class ChatSettingsDialogComponent {
 
       openThemeSelectionDialog(): void {
             const dialogRef = this.dialog.open(ThemeSelectionDialogComponent, {
-                  width: '500px'
+                  width: '600px',
+                  panelClass: 'modern-dialog'
             });
 
             dialogRef.afterClosed().subscribe(result => {

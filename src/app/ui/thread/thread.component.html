@@ -1,4 +1,12 @@
-<h3 class="pb-3 px-2">threads</h3>
-<app-search-bar class="px-2"/>
-<app-buddy-list/>
-<router-outlet/>
+<div class="thread-container">
+    <h1 class="thread-title">Messages</h1>
+    <div class="thread-actions">
+        <app-search-bar/>
+    </div>
+    <div class="buddy-section">
+        <app-buddy-list/>
+    </div>
+    <div class="list-section">
+        <router-outlet/>
+    </div>
+</div>

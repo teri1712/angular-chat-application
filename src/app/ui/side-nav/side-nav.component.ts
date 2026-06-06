@@ -1,131 +1,133 @@
-import {Component, DestroyRef, inject, Injector, OnDestroy, OnInit} from '@angular/core';
-import {Profile} from "../../model/dto/profile";
+import {Component, effect, HostListener, inject, Injector, OnDestroy, OnInit, signal} from '@angular/core';
 import {ActivationEnd, Router} from "@angular/router";
 import {ProgressDialogComponent} from "../progress-dialog/progress-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
-import {filter, Observable, Subscription} from "rxjs";
+import {filter, Subscription} from "rxjs";
 import {Authenticator} from "../../service/auth/authenticator";
 import {settingRoute, threadsRoute} from "../../home-route.module";
-import {environment} from "../../environments";
 import ProfileService from "../../service/profile-service";
 import {CreateGroupDialogComponent} from "../create-group-dialog/create-group-dialog.component";
-import {AccountRepository} from "../../service/auth/account-repository";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ITokenStore} from "../../service/auth/token-store.interface";
 
 enum Routes {
-      THREAD, SETTINGS, SEARCH
+    THREAD, SETTINGS, SEARCH
 }
 
 @Component({
-      selector: 'app-side-nav',
-      standalone: false,
+    selector: 'app-side-nav',
+    standalone: false,
 
-      templateUrl: './side-nav.component.html',
-      styleUrl: './side-nav.component.css'
+    templateUrl: './side-nav.component.html',
+    styleUrl: './side-nav.component.css'
 })
 export class SideNavComponent implements OnInit, OnDestroy {
 
 
-      protected profile!: Observable<Profile>;
-      protected currentRoute?: Routes;
-      private routeSub!: Subscription;
-      private logoutRequest = false;
+    private authenticator = inject(Authenticator)
+    private profileService = inject(ProfileService)
+    private router = inject(Router)
+    private snackBar = inject(MatSnackBar)
+    private injector = inject(Injector)
+    private matDialog = inject(MatDialog)
+    protected profile = this.profileService.profile
+    protected currentRoute = signal<Routes>(Routes.THREAD);
+    protected menuOpen = signal(false);
+    private tokenStore = inject(ITokenStore)
+    private routeSub!: Subscription;
 
-      constructor(
-              private accountRepository: AccountRepository,
-              private authenticator: Authenticator,
-              private profileService: ProfileService,
-              private router: Router, private readonly snackBar: MatSnackBar,
-              private injector: Injector,
-              private matDialog: MatDialog) {
-            this.profile = this.profileService.getProfileObservable()
-
-      }
-
-      private destroyRef = inject(DestroyRef);
-
-      ngOnInit(): void {
-            this.routeSub = this.router.events
-                    .pipe(filter(e => e instanceof ActivationEnd))
-                    .subscribe((e) => {
-                          const outlet = e.snapshot.outlet;
-                          const routeConfig = e.snapshot.routeConfig;
-                          const path = routeConfig?.path;
-
-                          if (outlet === 'side-bar') {
-                                if (path === 'thread') {
-                                      this.currentRoute = Routes.THREAD
-                                } else if (path === 'settings') {
-                                      this.currentRoute = Routes.SETTINGS
-                                } else if (path === 'search') {
-                                      this.currentRoute = Routes.SEARCH
-                                }
-                          }
-                    });
-            this.navigateToThreads()
-            this.accountRepository.accountObservable
-                    .pipe(takeUntilDestroyed(this.destroyRef))
-                    .subscribe(account => {
-                          if (account)
-                                return
-                          if (this.logoutRequest) {
-                                this.router.navigate(["/auth/login"], {replaceUrl: true});
-                          } else {
-                                const ref = this.snackBar.open("Account Session has expired!", "Logout");
-                                ref.onAction().subscribe(() => {
-                                      this.router.navigate(["/auth/login"], {replaceUrl: true});
-                                });
-                          }
+    constructor() {
+        effect(() => {
+            if (this.tokenStore.sessionExpired()) {
+                const ref = this.snackBar.open("Account Session has expired!", "Logout");
+                ref.onAction().subscribe(() => {
+                    this.authenticator.logout().subscribe({
+                        next: () => {
+                            this.router.navigate(["/auth/login"], {replaceUrl: true});
+                        },
+                        error: () => {
+                            this.router.navigate(["/auth/login"], {replaceUrl: true});
+                        }
                     })
-      }
-
-      ngOnDestroy(): void {
-            this.routeSub.unsubscribe();
-      }
-
-      protected navigateToSettings() {
-            if (this.currentRoute === Routes.SETTINGS) {
-                  return
+                });
             }
-            this.currentRoute = Routes.SETTINGS;
-            this.router.navigate(settingRoute);
-      }
-
-      protected navigateToThreads() {
-            if (this.currentRoute === Routes.THREAD) {
-                  return;
-            }
-            this.currentRoute = Routes.THREAD;
-            this.router.navigate(threadsRoute);
-      }
+        });
 
 
-      protected openCreateGroupDialog(): void {
-            this.matDialog.open(CreateGroupDialogComponent, {
-                  width: '420px',
-                  maxWidth: '95vw',
-                  injector: this.injector,
-            });
-      }
+    }
 
-      protected logout() {
-            const ref = this.matDialog.open(ProgressDialogComponent, {
-                  disableClose: true,
-                  data: {
-                        action_name: "Logging Out",
-                  }
-            })
-            this.logoutRequest = true;
-            this.authenticator.logout().subscribe(
-                    (success) => {
-                          if (success) {
-                          }
-                          ref.close();
+    ngOnInit(): void {
+        this.routeSub = this.router.events
+            .pipe(filter(e => e instanceof ActivationEnd))
+            .subscribe((e) => {
+                const outlet = e.snapshot.outlet;
+                const routeConfig = e.snapshot.routeConfig;
+                const path = routeConfig?.path;
+
+                if (outlet === 'side-bar') {
+                    if (path === 'thread') {
+                        this.currentRoute.set(Routes.THREAD)
+                    } else if (path === 'settings') {
+                        this.currentRoute.set(Routes.SETTINGS)
+                    } else if (path === 'search') {
+                        this.currentRoute.set(Routes.SEARCH)
                     }
-            );
-      }
+                }
+            });
+        this.activateDefaultRoute()
+    }
 
-      protected readonly Routes = Routes;
-      protected readonly environment = environment;
+    activateDefaultRoute() {
+        this.navigateToThreads()
+    }
+
+    ngOnDestroy(): void {
+        this.routeSub.unsubscribe();
+    }
+
+    protected navigateToSettings() {
+        this.router.navigate(settingRoute);
+    }
+
+    protected navigateToThreads() {
+        this.router.navigate(threadsRoute);
+    }
+
+
+    protected openCreateGroupDialog(): void {
+        this.matDialog.open(CreateGroupDialogComponent, {
+            panelClass: 'modern-dialog',
+            injector: this.injector,
+        });
+    }
+
+    protected toggleMenu(event: Event) {
+        event.stopPropagation();
+        this.menuOpen.update(v => !v);
+    }
+
+    @HostListener('document:click')
+    protected closeMenu() {
+        this.menuOpen.set(false);
+    }
+
+    protected logout() {
+        const ref = this.matDialog.open(ProgressDialogComponent, {
+            panelClass: 'modern-dialog',
+            disableClose: true,
+            data: {
+                action_name: "Logging Out",
+            }
+        })
+        this.authenticator.logout().subscribe(
+            (success) => {
+                if (success) {
+                    this.router.navigate(["/auth/login"], {replaceUrl: true});
+                }
+                ref.close();
+            }
+        );
+    }
+
+    protected readonly Routes = Routes;
 }

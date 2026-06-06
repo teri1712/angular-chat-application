@@ -1,159 +1,173 @@
-import {Component, DestroyRef, HostListener, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, computed, effect, HostListener, inject, signal, untracked, ViewChild} from '@angular/core';
 import {CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
 import {CommonModule} from "@angular/common";
 import {ReactiveFormsModule} from "@angular/forms";
 import {ActivatedRoute} from "@angular/router";
 import {DialogService} from "../../service/repository/dialog.service";
-import {BehaviorSubject, combineLatest, filter, map, Observable, pairwise, startWith, switchMap} from "rxjs";
 import {MessageListComponent} from "../message-list/message-list.component";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {IDialog} from "../../service/repository/IDialog";
-import {Preference} from "../../model/dto/preference";
+import {rxResource} from "@angular/core/rxjs-interop";
 import {MessageService} from "../../service/message-service";
 import {SeenPosting} from "../../service/seen-handler";
-import {debounceTime} from "rxjs/operators";
+import ProfileService from "../../service/profile-service";
+import {LogStream} from "../../service/repository/log-stream.service";
 
 @Component({
-      selector: 'app-message-panel',
-      imports: [
-            CommonModule,
-            ReactiveFormsModule,
-            MessageListComponent,
+    selector: 'app-message-panel',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MessageListComponent,
 
-            // CdkAutoSizeVirtualScroll
-      ],
-      providers: [
-            // {
-            //       provide: VIRTUAL_SCROLL_STRATEGY,
-            //       useFactory: autoSizeStrategyFactory
-            // }
-      ],
-      templateUrl: './message-panel.component.html',
-      styleUrl: './message-panel.component.css'
+        // CdkAutoSizeVirtualScroll
+    ],
+    providers: [
+        // {
+        //       provide: VIRTUAL_SCROLL_STRATEGY,
+        //       useFactory: autoSizeStrategyFactory
+        // }
+    ],
+    templateUrl: './message-panel.component.html',
+    styleUrl: './message-panel.component.css'
 })
-export class MessagePanelComponent implements OnInit, OnDestroy {
+export class MessagePanelComponent {
 
-      @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
+    @ViewChild('viewport') viewport!: CdkVirtualScrollViewport;
 
-      protected initialRoomName = new BehaviorSubject<string | null>(null);
-      protected initialRoomAvatar = new BehaviorSubject<string | null>(null);
-      protected initialPresence = new BehaviorSubject<Date | null>(null);
+    protected routeRoomName = signal('');
+    protected routeRoomAvatar = signal('');
+    protected routePresence = signal(new Date(0));
 
-      protected chatId = new BehaviorSubject<string | null>(null);
-      protected roomName = new Observable<string>();
-      protected roomAvatar = new Observable<string>();
-      protected presence: Observable<Date> = new Observable();
-      protected preference: Observable<Preference> = new Observable();
+    protected chatId = signal('');
 
+    private readonly logStream = inject(LogStream)
+    private readonly profileService = inject(ProfileService)
+    private readonly dialogService = inject(DialogService)
+    private readonly activatedRoute = inject(ActivatedRoute)
+    private readonly messageService = inject(MessageService)
 
-      private destroyRef = inject(DestroyRef);
+    private readonly dialog = rxResource({
+        params: () => {
+            const chatId = this.chatId();
+            if (chatId)
+                return ({
+                    chatId: chatId,
+                })
+            return undefined
+        },
+        stream: (request) => {
+            const params = request.params
+            const chatId = params.chatId
+            return this.dialogService.findByChatId(chatId)
+        },
+    });
 
-      constructor(
-              private readonly dialogService: DialogService,
-              private readonly activatedRoute: ActivatedRoute,
-              private readonly messageService: MessageService
-      ) {
-      }
+    roomName = computed(() => {
+        return this.dialog.value()?.roomName() || this.routeRoomName()
+    })
+    roomAvatar = computed(() => {
+        return this.dialog.value()?.roomAvatar() || this.routeRoomAvatar()
+    })
 
-      ngOnInit(): void {
-            const dialog = this.chatId.pipe(
-                    filter(chatId => chatId != null),
-                    switchMap(chatId =>
-                            this.dialogService.findByChatId(chatId))
-            );
-            this.roomName = combineLatest(
-                    [this.initialRoomName,
-                          dialog.pipe(switchMap((dialog) => dialog.roomName), startWith(undefined))])
-                    .pipe(map(([initialOne, newOne]) => {
-                          return newOne ?? initialOne ?? '';
-                    }));
-            this.roomAvatar = combineLatest(
-                    [this.initialRoomAvatar,
-                          dialog.pipe(switchMap((dialog) => dialog.roomAvatar), startWith(undefined))])
+    protected readonly presence = rxResource({
+        params: () => {
+            const dialog = this.dialog.value();
+            if (dialog)
+                return ({
+                    dialog: dialog,
+                })
+            return undefined
+        },
+        stream: (request) => {
+            const params = request.params
+            const dialog = params.dialog
+            return dialog.presence
+        },
+    });
+    protected readonly preference = rxResource({
+        params: () => {
+            const dialog = this.dialog.value();
+            if (dialog)
+                return {
+                    dialog,
+                }
+            return undefined
+        },
+        stream: (request) => {
+            const params = request.params
+            const dialog = params.dialog
+            return dialog.preference
+        },
+    });
 
-                    .pipe(map(([initialOne, newOne]) => {
-                          return newOne ?? initialOne ?? '';
-                    }));
-            this.presence = combineLatest(
-                    [this.initialPresence,
-                          dialog.pipe(switchMap((dialog) => dialog.presence))])
-                    .pipe(map(([initialOne, newOne]) => {
-                          return newOne ?? initialOne ?? new Date(0);
-                    }));
-            this.preference = dialog.pipe(switchMap((dialog) => dialog.preference),);
+    constructor() {
+        effect((onCleanup) => {
+            const dialog = this.dialog.value()
+            if (dialog) {
+                dialog.join();
+                onCleanup(() => dialog.leave())
+            }
+        });
 
-            dialog.pipe(
-                    startWith(null),
-                    pairwise(),
-                    takeUntilDestroyed(this.destroyRef))
-                    .subscribe(([prev, curr]) => {
-                          if (prev) {
-                                prev.leave()
-                          }
-                          if (curr) {
-                                this.curr = curr;
-                                curr.join();
-                          }
-                    })
-            combineLatest([
-                  this.seen,
-                  this.chatId.pipe(filter(chatId => chatId != null))
-            ])
-                    .pipe(takeUntilDestroyed(this.destroyRef),
-                            debounceTime(500)
-                    )
-                    .subscribe(([at, chatId]) => {
-                          this.seenCheck(at, chatId);
-                    })
+        effect(() => {
+            const at = this.seenAt()
+            const chatId = untracked(() => this.chatId())
+            if (chatId && at) {
+                this.onSeen(at, chatId)
+            }
+        });
 
-            this.observeRoutes()
-      }
-
-      observeRoutes() {
-            combineLatest([
-                  this.activatedRoute.paramMap,
-                  this.activatedRoute.queryParamMap
-            ])
-                    .pipe(takeUntilDestroyed(this.destroyRef))
-                    .subscribe(([params, query]) => {
-                          const id = params.get('id')!;
-                          const roomName = query.get('roomName');
-                          const roomAvatar = query.get('roomAvatar');
-                          const presence = query.get('presence');
-                          this.refresh(id, roomName, roomAvatar, presence);
-                    })
-      }
-
-      private curr?: IDialog
-
-      ngOnDestroy(): void {
-            this.curr?.leave()
-            this.curr = undefined;
-      }
-
-      private refresh(chatId: string, roomName: string | null, roomAvatar: string | null, presence: string | null) {
+        this.activatedRoute.paramMap.subscribe(params => {
+            const id = params.get('id')!;
+            this.chatId.set(id)
+        })
+        this.activatedRoute.queryParamMap.subscribe(query => {
+            const roomName = query.get('roomName');
+            const roomAvatar = query.get('roomAvatar');
+            const presence = query.get('presence');
+            console.log(roomName)
             if (roomName)
-                  this.initialRoomName.next(roomName);
+                this.routeRoomName.set(roomName);
             if (roomAvatar)
-                  this.initialRoomAvatar.next(roomAvatar);
+                this.routeRoomAvatar.set(roomAvatar);
             if (presence)
-                  this.initialPresence.next(new Date(presence));
-            this.chatId.next(chatId);
-      }
+                this.routePresence.set(new Date(presence));
+        })
+
+        effect((onCleanup) => {
+            const chatId = this.chatId();
+            if (chatId) {
+                this.readyToBeSeen = true;
+                const sub = this.logStream.getChatChannel(chatId)
+                    .subscribe({
+                        next: (log) => {
+                            if (!this.profileService.thatsMe(log.sender))
+                                this.readyToBeSeen = true;
+                        },
+                        error: err => {
+                            console.error(err)
+                        }
+                    })
+                onCleanup(() => sub.unsubscribe())
+            }
+        });
+    }
+
+    private readonly seenAt = signal<Date | undefined>(undefined)
+    private readyToBeSeen: boolean = false
+
+    @HostListener('focusin')
+    onFocus() {
+        if (this.readyToBeSeen) {
+            this.seenAt.set(new Date());
+            this.readyToBeSeen = false;
+        }
+    }
 
 
-      private seen = new BehaviorSubject<Date>(new Date())
-
-      @HostListener('focusin')
-      onFocus() {
-            this.seen.next(new Date());
-      }
-
-
-      seenCheck(at: Date, chatId: string) {
-            const seenPosting = new SeenPosting(at, chatId);
-            this.messageService.send(seenPosting);
-      }
+    onSeen(at: Date, chatId: string) {
+        const seenPosting = new SeenPosting(at, chatId);
+        this.messageService.send(seenPosting);
+    }
 }
 
 

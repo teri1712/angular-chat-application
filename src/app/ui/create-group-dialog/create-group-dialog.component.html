@@ -1,76 +1,94 @@
-<h2 mat-dialog-title class="dialog-title">Create Group</h2>
-
-<mat-dialog-content>
-
-    <!-- Group Name -->
-    <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-        <mat-label>Group Name</mat-label>
-        <input matInput [(ngModel)]="groupName" placeholder="Enter group name" autofocus>
-        <mat-icon matSuffix>group</mat-icon>
-    </mat-form-field>
-
-    <!-- Selected members chip list -->
-    <div class="selected-members" *ngIf="selectedUsers.length > 0">
-        <mat-chip-set aria-label="Selected members">
-            <mat-chip
-                    *ngFor="let user of selectedUsers"
-                    [removable]="true"
-                    (removed)="removeUser(user)">
-                <img matChipAvatar [src]="user.avatar" [alt]="user.name" class="chip-avatar"/>
-                {{ user.name }}
-                <mat-icon matChipRemove>cancel</mat-icon>
-            </mat-chip>
-        </mat-chip-set>
+<div class="dialog-container">
+    <div class="dialog-header">
+        <h2 class="dialog-title">create group</h2>
     </div>
 
-    <!-- Search partners -->
-    <mat-form-field appearance="outline" class="full-width search-field" subscriptSizing="dynamic">
-        <mat-label>Add Members</mat-label>
-        <input matInput
-               [(ngModel)]="searchQuery"
-               (ngModelChange)="onSearchChange($event)"
-               placeholder="Search by name...">
-        <mat-icon matSuffix color="primary">search</mat-icon>
-    </mat-form-field>
+    <mat-dialog-content>
+        <!-- Group Name -->
+        <div class="field-group">
+            <label class="field-label">General</label>
+            <div class="custom-input-wrapper">
+                <input class="custom-input" [ngModel]="groupName()" (ngModelChange)="groupName.set($event)" placeholder="Enter group name">
+                <mat-icon class="input-icon">group</mat-icon>
+            </div>
+        </div>
 
-    <!-- Loading spinner -->
-    <div class="loading-container" *ngIf="isLoading">
-        <mat-progress-spinner mode="indeterminate" diameter="30"></mat-progress-spinner>
+        <!-- Selected members chip list -->
+        @if (selectedUsers().length > 0) {
+            <div class="field-group">
+                <label class="field-label">Members ({{selectedUsers().length}})</label>
+                <div class="selected-members">
+                    @for (user of selectedUsers(); track user.id) {
+                        <div class="custom-chip">
+                            <img [src]="user.avatar" [alt]="user.name" class="chip-avatar"/>
+                            <span>{{ user.name }}</span>
+                            <mat-icon class="chip-remove" (click)="removeUser(user)">close</mat-icon>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Search partners -->
+        <div class="field-group">
+            <label class="field-label">Add People</label>
+            <div class="custom-input-wrapper">
+                <input class="custom-input"
+                       [ngModel]="searchQuery()"
+                       (ngModelChange)="searchQuery.set($event)"
+                       placeholder="Search by name...">
+                <mat-icon class="input-icon">search</mat-icon>
+            </div>
+        </div>
+
+        <!-- Loading spinner -->
+        @if (isLoading()) {
+            <div class="loading-container">
+                <mat-progress-spinner mode="indeterminate" diameter="48" color="accent"></mat-progress-spinner>
+            </div>
+        }
+
+        <!-- Recommendations list -->
+        @if (!isLoading() && recommendations().length > 0) {
+            <div class="recommendations-list">
+                @for (user of recommendations(); track user.id) {
+                    <div class="recommendation-item d-flex align-items-center" (click)="selectUser(user)">
+                        <img [src]="user.avatar" [alt]="user.name" class="list-avatar"/>
+                        <div class="list-item-text">
+                            <span class="list-item-title">{{ user.name }}</span>
+                            <span class="username">&#64;{{ user.username }}</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- No results -->
+        @if (!isLoading() && searchQuery() && recommendations().length === 0) {
+            <div class="no-results">
+                no users found matching "{{ searchQuery() }}"
+            </div>
+        }
+
+        <!-- Error message -->
+        @if (errorMessage()) {
+            <div class="error-message">
+                {{ errorMessage() }}
+            </div>
+        }
+    </mat-dialog-content>
+
+    <div class="dialog-actions">
+        <button mat-button class="btn-cancel" (click)="dialogRef.close()">Cancel</button>
+        <button mat-button class="btn-submit"
+                [disabled]="!canCreate()"
+                (click)="createGroup()">
+            @if (isCreating()) {
+                <mat-progress-spinner mode="indeterminate" diameter="32" class="btn-spinner">
+                </mat-progress-spinner>
+            } @else {
+                <span>Create</span>
+            }
+        </button>
     </div>
-
-    <!-- Recommendations list -->
-    <mat-list class="recommendations-list" *ngIf="!isLoading && recommendations.length > 0">
-        <mat-list-item
-                *ngFor="let user of recommendations"
-                class="recommendation-item"
-                (click)="selectUser(user)">
-            <img matListItemAvatar [src]="user.avatar" [alt]="user.name" class="list-avatar"/>
-            <span matListItemTitle>{{ user.name }}</span>
-            <span matListItemLine class="username">&#64;{{ user.username }}</span>
-        </mat-list-item>
-    </mat-list>
-
-    <!-- No results -->
-    <div *ngIf="!isLoading && searchQuery && recommendations.length === 0" class="no-results mat-body-2">
-        No users found matching "{{ searchQuery }}"
-    </div>
-
-    <!-- Error message -->
-    <div *ngIf="errorMessage" class="error-message mat-body-2">
-        {{ errorMessage }}
-    </div>
-
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-flat-button color="primary"
-            [disabled]="!canCreate"
-            (click)="createGroup()">
-        <mat-progress-spinner *ngIf="isCreating" mode="indeterminate" diameter="18" class="btn-spinner">
-        </mat-progress-spinner>
-        <span *ngIf="!isCreating">Create</span>
-    </button>
-</mat-dialog-actions>
-
-
+</div>

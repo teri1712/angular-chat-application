@@ -1,0 +1,38 @@
+{
+  "postingId": "msg-001",
+  "sequenceNumber": 1,
+  "chatId": "chat-001",
+  "roomName": "Straw Hat Pirates",
+  "roomAvatar": "https://i.pravatar.cc/300?img=12",
+  "revisionNumber": 2,
+  "sender": {
+    "id": "user-1",
+    "username": "me",
+    "name": "Me",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"
+  },
+  "action": "UPDATE",
+  "messageState": {
+    "chatId": "chat-001",
+    "postingId": "msg-001",
+    "sender": {
+      "id": "user-1",
+      "username": "me",
+      "name": "Me",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"
+    },
+    "messageType": "TEXT",
+    "seenBy": [
+      {
+        "id": "user-002",
+        "username": "luffy",
+        "name": "Monkey D. Luffy",
+        "avatar": "https://i.pravatar.cc/150?img=2"
+      }
+    ],
+    "sequenceNumber": 1,
+    "createdAt": "2026-05-10T08:00:00Z",
+    "updatedAt": "2026-05-19T12:05:00.000Z",
+    "content": "Vcl!"
+  }
+}

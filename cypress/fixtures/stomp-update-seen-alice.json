@@ -1,0 +1,38 @@
+{
+  "postingId": "post-1",
+  "sequenceNumber": 1000,
+  "chatId": "chat-1",
+  "roomName": "Alice Wonderland",
+  "roomAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
+  "revisionNumber": 5,
+  "sender": {
+    "id": "user-1",
+    "username": "me",
+    "name": "Me",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"
+  },
+  "action": "UPDATE",
+  "messageState": {
+    "chatId": "chat-1",
+    "postingId": "post-1",
+    "sender": {
+      "id": "user-1",
+      "username": "me",
+      "name": "Me",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"
+    },
+    "messageType": "TEXT",
+    "seenBy": [
+      {
+        "id": "user-2",
+        "username": "alice",
+        "name": "Alice Wonderland",
+        "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice"
+      }
+    ],
+    "sequenceNumber": 1000,
+    "createdAt": "2026-05-15T08:00:00Z",
+    "updatedAt": "2026-05-19T11:05:00.000Z",
+    "content": "Hello Alice!"
+  }
+}

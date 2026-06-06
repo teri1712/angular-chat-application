@@ -1,0 +1,52 @@
+[
+  {
+    "identifier": "chat-1",
+    "roomName": "Alice Wonderland",
+    "roomAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
+    "revisionNumber": 1,
+    "recents": [
+      {
+        "chatId": "chat-1",
+        "postingId": "post-1",
+        "sender": {
+          "id": "user-2",
+          "username": "alice",
+          "name": "Alice",
+          "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice"
+        },
+        "messageType": "text",
+        "content": "Hello Alice!",
+        "seenBy": [],
+        "sequenceNumber": 100,
+        "createdAt": "2026-05-15T08:00:00Z",
+        "updatedAt": "2026-05-15T08:00:00Z"
+      }
+    ],
+    "modifiedAt": "2026-05-15T08:00:00Z"
+  },
+  {
+    "identifier": "chat-2",
+    "roomName": "Bob Builder",
+    "roomAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
+    "revisionNumber": 2,
+    "recents": [
+      {
+        "chatId": "chat-2",
+        "postingId": "post-2",
+        "sender": {
+          "id": "user-1",
+          "username": "me",
+          "name": "Me",
+          "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"
+        },
+        "messageType": "text",
+        "content": "Hello Bob!",
+        "seenBy": [],
+        "sequenceNumber": 50,
+        "createdAt": "2026-05-15T07:30:00Z",
+        "updatedAt": "2026-05-15T07:30:00Z"
+      }
+    ],
+    "modifiedAt": "2026-05-15T07:30:00Z"
+  }
+]

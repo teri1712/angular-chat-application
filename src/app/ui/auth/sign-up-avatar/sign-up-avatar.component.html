@@ -1,14 +1,17 @@
-<h1 class="pb-2">SETTING AVATAR</h1>
+<h1 class="auth-title">set avatar</h1>
 
-<div class="image-container">
-
-    <div class="mask">
-        <img [src]="uri" alt="">
+<div class="avatar-setup">
+    <div class="avatar-preview-container">
+        <div class="avatar-mask">
+            <img [src]="preview()" alt="Avatar preview">
+        </div>
+        <button class="add-photo-btn" (click)="fileInput.click()" aria-label="Add photo">
+            <span class="material-icons">add_a_photo</span>
+        </button>
+        <input #fileInput type="file" hidden (change)="onAvatarSelected($event)"/>
     </div>
-    <button mat-mini-fab (click)="fileInput.click()">
-        <mat-icon>add_a_photo</mat-icon>
-    </button>
-    <input #fileInput type="file" hidden (change)="onAvatarSelected($event)"/>
-
 </div>
-<button class="w-100 mt-5" type="submit" mat-flat-button (click)="onSubmit()">Finish</button>
+
+<button class="btn-primary mt-lg" type="submit" (click)="onSubmit()">
+    Finish Registration
+</button>

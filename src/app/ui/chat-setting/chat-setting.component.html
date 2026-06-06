@@ -1,4 +1,4 @@
-<button mat-icon-button color="primary" [disabled]="!preference || !chatId"
-        (click)="openSettingsDialog(chatId!, preference!)">
+<button mat-icon-button class="setting-btn" [disabled]="!preference() || !chatId()"
+        (click)="openSettingsDialog(chatId()!, preference()!)">
     <mat-icon>settings</mat-icon>
 </button>
