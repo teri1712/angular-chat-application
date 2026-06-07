@@ -12,6 +12,7 @@ const DEFAULT_AVATAR = "/avatar-default.svg";
 export class SignUpAvatarComponent {
 
     next = output<File | undefined>();
+    back = output<void>();
 
     private file?: File;
     readonly preview = signal(DEFAULT_AVATAR);
@@ -26,5 +27,9 @@ export class SignUpAvatarComponent {
 
     protected onSubmit() {
         this.next.emit(this.file);
+    }
+
+    protected onBack() {
+        this.back.emit();
     }
 }

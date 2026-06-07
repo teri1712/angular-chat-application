@@ -1,13 +1,6 @@
-import {Component, output, signal} from '@angular/core';
+import {Component, inject, input, output, signal} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-
-export type InfoForm = {
-    username: string,
-    password: string,
-    fullname: string,
-    gender: number,
-    dob: string,
-}
+import {InfoForm} from "../sign-up.types";
 
 @Component({
     selector: 'app-sign-up-info',
@@ -17,6 +10,7 @@ export type InfoForm = {
     styleUrl: './sign-up-info.component.css'
 })
 export class SignUpInfoComponent {
+    initialData = input<InfoForm | undefined>();
 
     formGroup = new FormGroup({
         username: new FormControl('', [Validators.required, Validators.minLength(5)]),
@@ -29,6 +23,19 @@ export class SignUpInfoComponent {
     next = output<InfoForm>()
 
     constructor() {
+    }
+
+    ngOnInit() {
+        const data = this.initialData();
+        if (data) {
+            this.formGroup.patchValue({
+                username: data.username,
+                fullname: data.fullname,
+                password: data.password,
+                gender: data.gender,
+                dob: data.dob
+            })
+        }
     }
 
     readonly genderOptions = [
@@ -48,13 +55,15 @@ export class SignUpInfoComponent {
             ? (dobValue as any).toISOString().split('T')[0]
             : dobValue;
 
-        this.next.emit({
+        const info: InfoForm = {
             username: this.formGroup.get("username")?.value!,
             password: this.formGroup.get("password")?.value!,
             fullname: this.formGroup.get("fullname")?.value!,
             gender: Number(this.formGroup.get("gender")?.value!),
             dob: dob!,
-        })
+        };
+
+        this.next.emit(info);
     }
 
 }

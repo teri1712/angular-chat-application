@@ -1,9 +1,16 @@
 <div class="panel rounded py-5 px-5">
     <div class="auth-progress" [ngStyle]="{
-        '--before-width': progress() == 'info'? '0%' : '100%'
+        '--before-width': ((progress() - 1) / (totalSteps - 1) * 100) + '%'
     }">
-        <h2 class="auth-p1 auth-p-reached">1</h2>
-        <h2 class="auth-p2" [ngClass]="{'auth-p-reached': progress() == 'avatar'}">2</h2>
+        @for (step of steps(); track step) {
+            <h2 [ngClass]="{
+                'auth-p1': step == 1,
+                'auth-p2': step == totalSteps,
+                'auth-p-reached': progress() >= step
+            }" [style.left]="(step - 1) * (100 / (totalSteps - 1)) + '%'">
+                {{ step }}
+            </h2>
+        }
     </div>
     @if (error()) {
         <div class="error-banner" role="alert">
@@ -11,15 +18,13 @@
             {{ error() }}
         </div>
     }
+    
     @switch (progress()) {
-        @case ('info') {
-            <app-sign-up-info (next)="onCompleteInfo($event)"/>
+        @case (1) {
+            <app-sign-up-info [initialData]="info" (next)="onCompleteInfo($event)"/>
         }
-        @case ('avatar') {
-            <app-sign-up-avatar (next)="onCompleteAvatar($event)"/>
+        @case (2) {
+            <app-sign-up-avatar (back)="onBack()" (next)="onCompleteAvatar($event)"/>
         }
     }
 </div>
-
-
-

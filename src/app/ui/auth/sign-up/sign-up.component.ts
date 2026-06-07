@@ -1,11 +1,11 @@
 import {Component, inject, signal} from '@angular/core';
 import {provideNativeDateAdapter} from "@angular/material/core";
+import {InfoForm} from "./sign-up.types";
+import {Authenticator} from "../../../service/auth/authenticator";
 import {Router} from "@angular/router";
 import {MatDialog} from "@angular/material/dialog";
 import {ProgressDialogComponent} from "../../progress-dialog/progress-dialog.component";
 import {finalize} from "rxjs";
-import {Authenticator} from "../../../service/auth/authenticator";
-import {InfoForm} from "./sign-up-info/sign-up-info.component";
 
 
 @Component({
@@ -20,15 +20,20 @@ export class SignUpComponent {
     private readonly router = inject(Router)
     private readonly matDialog = inject(MatDialog)
 
-    private info!: InfoForm
-    private avatar?: File
+    info?: InfoForm
+    avatar?: File
 
+    readonly totalSteps = 2;
+    readonly steps = signal(Array.from({length: this.totalSteps}, (_, i) => i + 1));
+    readonly progress = signal<number>(1)
     readonly error = signal('')
-    readonly progress = signal<'info' | 'avatar'>('info')
+
+    constructor() {
+    }
 
     protected onCompleteInfo(info: InfoForm) {
-        this.progress.set('avatar')
         this.info = info
+        this.progress.set(2)
     }
 
     protected onCompleteAvatar(avatar?: File) {
@@ -36,7 +41,13 @@ export class SignUpComponent {
         this.submit()
     }
 
+    protected onBack() {
+        this.progress.set(this.progress() - 1)
+    }
+
     private submit() {
+        if (!this.info) return;
+
         const ref = this.matDialog.open(ProgressDialogComponent, {
             panelClass: 'modern-dialog',
             disableClose: true,
@@ -44,7 +55,6 @@ export class SignUpComponent {
                 action_name: "Signing Up",
             }
         })
-
 
         this.authenticator.signUp({
             username: this.info.username,
@@ -57,16 +67,14 @@ export class SignUpComponent {
             finalize(() => {
                 ref.close()
             })
-        ).subscribe(
-            {
-                next: () => {
-                    this.router.navigate(['/home'])
-                },
-                error: err => {
-                    console.error(err)
-                    this.error.set(err.error?.detail)
-                }
+        ).subscribe({
+            next: () => {
+                this.router.navigate(['/home'])
+            },
+            error: err => {
+                console.error(err)
+                this.error.set(err.error?.detail)
             }
-        )
+        })
     }
 }
