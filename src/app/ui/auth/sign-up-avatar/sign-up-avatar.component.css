@@ -62,3 +62,37 @@
 .mt-lg {
     margin-top: var(--space-lg);
 }
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    width: 100%;
+}
+
+.actions .btn-primary {
+    width: 100%;
+}
+
+.btn-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    background: transparent;
+    border: none;
+    color: var(--color-foreground);
+    opacity: 0.7;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 200ms ease;
+    padding: var(--space-sm);
+}
+
+.btn-back:hover {
+    opacity: 1;
+}
+
+.btn-back .material-icons {
+    font-size: 18px;
+}

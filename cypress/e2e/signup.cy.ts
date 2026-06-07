@@ -60,4 +60,32 @@ describe('Signup', () => {
 
         cy.get('button[type="submit"]').click();
     });
+
+    it('should be able to navigate back from avatar form and preserve info', () => {
+        cy.get('input[formControlName="username"]')
+            .type('john_doe_back');
+
+        cy.get('input[formControlName="password"]')
+            .type('Secret123!');
+        cy.get('input[formControlName="fullname"]')
+            .type('John Fitzgerald Doe');
+
+        cy.get('input[formControlName="dob"]')
+            .type('1990-01-01');
+
+        cy.get('select[formControlName="gender"]').select('Male');
+
+        cy.contains('Continue').click();
+
+        cy.contains('set avatar').should('be.visible');
+
+        // Click back button
+        cy.contains('Back to Info').click();
+
+        // Verify info is preserved
+        cy.get('input[formControlName="username"]').should('have.value', 'john_doe_back');
+        cy.get('input[formControlName="fullname"]').should('have.value', 'John Fitzgerald Doe');
+        cy.get('input[formControlName="dob"]').should('have.value', '1990-01-01');
+        cy.get('select[formControlName="gender"]').should('have.value', '1');
+    });
 })
